@@ -86,8 +86,8 @@ gem5_tool_list = [
 def generate(env):
     common_config(env)
     SCons.Tool.default.generate(env)
-    for tool in gem5_tool_list:
-        SCons.Tool.Tool(tool)(env)
+    # for tool in gem5_tool_list:
+    #     SCons.Tool.Tool(tool)(env)
 
 def exists(env):
     return 1
