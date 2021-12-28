@@ -197,6 +197,14 @@ def template VectorToScalarConstructor {{
     }
 }};
 
+def template VectorRegisterMoveConstructor {{
+    %(class_name)s::%(class_name)s(MachInst machInst)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorRegisterMoveOp)
+    {
+        flags[IsVector] = true;
+    }
+}};
+
 // Basic instruction class execute method template.
 def template VectorExecute {{
     Fault
@@ -374,6 +382,14 @@ def format VectorToScalarOp() {{
     iop = InstObjParams(name, Name, 'RiscvVectorToScalarOp')
     header_output = BasicDeclare.subst(iop)
     decoder_output = VectorToScalarConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = VectorExecute.subst(iop)
+}};
+
+def format VectorRegisterMoveOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorRegisterMoveOp')
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = VectorRegisterMoveConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};

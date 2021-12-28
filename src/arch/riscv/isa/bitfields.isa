@@ -133,6 +133,7 @@ def bitfield VFUNC_2       <26:25>;
 def bitfield VS3           <31:27>;
 def bitfield VS2           <24:20>;
 def bitfield VS1           <19:15>;
+def bitfield VIMM5         <19:15>;
 def bitfield VD            <11:7>;
 
 def bitfield MOP           <28:26>;

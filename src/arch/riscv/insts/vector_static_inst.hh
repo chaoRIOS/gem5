@@ -107,6 +107,8 @@ public:
       virtual bool VectorMaskLogical() const = 0;
       /* Vector instructions that writes back the result to the scalar rf */
       virtual bool VectorToScalar() const = 0;
+      /* Vector instructions that moves whole vector registers */
+      virtual bool VectorRegisterMove() const = 0;
       /* Vector instructions  that have src2 as vector source*/
       virtual bool arith1Src() const = 0;
       /* Vector instructions  that have src1 and src2 as vector sources*/
@@ -131,6 +133,8 @@ public:
       virtual uint32_t func5() const = 0;
       /* func6 field*/
       virtual uint32_t func6() const = 0;
+      /* OPIVI imm5 field*/
+      virtual uint32_t imm5() const = 0;
       /* vm field - indicates if the operations is masked or not*/
       virtual bool vm() const = 0;
       /* mop field - indicates the memory addressing mode*/
@@ -177,6 +181,7 @@ class RiscvVectorInsn : public VectorStaticInst
   uint32_t func3()           const override { return x(12, 3); }
   uint32_t func5()           const override { return x(27, 5); }
   uint32_t func6()           const override { return x(26, 6); }
+  uint32_t imm5()            const override { return x(15, 5); }
 
   bool vm()                  const  override   { return x(25, 1); }
 
@@ -193,6 +198,7 @@ class RiscvVectorInsn : public VectorStaticInst
   bool is_slide()            const override { return is_slideup() || is_slidedown() ; }
 
   bool VectorToScalar()      const override { return opClass() == VectorToScalarOp; }
+  bool VectorRegisterMove()      const override { return opClass() == VectorRegisterMoveOp; }
 
   bool VectorMaskLogical()   const override { return opClass() == VectorMaskLogicalOp; }
 

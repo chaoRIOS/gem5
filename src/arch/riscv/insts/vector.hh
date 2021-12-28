@@ -53,7 +53,7 @@ class RiscvVectorDataOp : public RiscvVectorInsn
           /*
            * Here is defined the scalar source registers and
            * destination registers for those vector
-           * instructions that make us of it.
+           * instructions that make use of it.
            */
             if ((func3()==4) || (func3()==6)) {
                 _numSrcRegs = 1;
@@ -86,7 +86,7 @@ class RiscvVectorCfgOp : public RiscvVectorInsn
           /*
            * Here is defined the scalar source registers and
            * destination registers for those vector
-           * instructions that make us of it.
+           * instructions that make use of it.
            */
             if (getName() == "vsetvli") {
              _numSrcRegs =  1;
@@ -118,7 +118,7 @@ class RiscvVectorMemOp : public RiscvVectorInsn
           /*
            * Here is defined the scalar source registers and
            * destination registers for those vector
-           * instructions that make us of it.
+           * instructions that make use of it.
            * TODO: is still pending strided which uses rs2 as
            * second operand.
            */
@@ -149,7 +149,7 @@ class RiscvVectorToScalarOp : public RiscvVectorInsn
         {
           /*
            * Here is defined the destination registers for those vector
-           * instructions that make us of it. These instructions writes
+           * instructions that make use of it. These instructions writes
            * in the integer or floating point register.
            */
             if ((func3()==1)) {
@@ -170,5 +170,70 @@ class RiscvVectorToScalarOp : public RiscvVectorInsn
         std::string generateDisassembly(Addr pc,
             const Loader::SymbolTable *symtab) const;
     };
+
+/*
+ * Whole Vector Register Move instructions
+ */
+class RiscvVectorRegisterMoveOp : public RiscvVectorInsn
+    {
+      public:
+        RiscvVectorRegisterMoveOp(const char *mnem, ExtMachInst _machInst,
+            OpClass __opClass) :
+            RiscvVectorInsn(mnem, _machInst, __opClass)
+        {
+          /*
+           * Here is defined the destination registers for those vector
+           * instructions that make use of it. These instructions writes
+           * in the integer or floating point register.
+           */
+            if ((imm5()==0)) {
+                _numSrcRegs = 1;
+                _numDestRegs = 1;
+                _srcRegIdx[0] = RegId(IntRegClass, vs1());
+                _destRegIdx[0] = RegId(FloatRegClass, vd());
+            } else if ((imm5()==1)) {
+                _numSrcRegs = 2;
+                _numDestRegs = 2;
+                _srcRegIdx[0] = RegId(IntRegClass, vs1());
+                // _srcRegIdx[1] = RegId(IntRegClass, vs1()+(RegIndex)1);
+                _destRegIdx[0] = RegId(FloatRegClass, vd());
+                // _destRegIdx[1] = RegId(FloatRegClass, vd()+(RegIndex)1);
+            } else if ((imm5()==3)) {
+                _numSrcRegs = 4;
+                _numDestRegs = 4;
+                _srcRegIdx[0] = RegId(IntRegClass, vs1());
+                // _srcRegIdx[1] = RegId(IntRegClass, vs1()+(RegIndex)1);
+                // _srcRegIdx[2] = RegId(IntRegClass, vs1()+(RegIndex)2);
+                // _srcRegIdx[3] = RegId(IntRegClass, vs1()+(RegIndex)3);
+                _destRegIdx[0] = RegId(FloatRegClass, vd());
+                // _destRegIdx[1] = RegId(FloatRegClass, vd()+(RegIndex)1);
+                // _destRegIdx[2] = RegId(FloatRegClass, vd()+(RegIndex)2);
+                // _destRegIdx[3] = RegId(FloatRegClass, vd()+(RegIndex)3);
+            } else if ((imm5()==7)) {
+                _numSrcRegs = 8;
+                _numDestRegs = 8;
+                _srcRegIdx[0] = RegId(IntRegClass, vs1());
+                // _srcRegIdx[1] = RegId(IntRegClass, vs1()+(RegIndex)1);
+                // _srcRegIdx[2] = RegId(IntRegClass, vs1()+(RegIndex)2);
+                // _srcRegIdx[3] = RegId(IntRegClass, vs1()+(RegIndex)3);
+                // _srcRegIdx[4] = RegId(IntRegClass, vs1()+(RegIndex)4);
+                // _srcRegIdx[5] = RegId(IntRegClass, vs1()+(RegIndex)5);
+                // _srcRegIdx[6] = RegId(IntRegClass, vs1()+(RegIndex)6);
+                // _srcRegIdx[7] = RegId(IntRegClass, vs1()+(RegIndex)7);
+                _destRegIdx[0] = RegId(FloatRegClass, vd());
+                // _destRegIdx[1] = RegId(FloatRegClass, vd()+(RegIndex)1);
+                // _destRegIdx[2] = RegId(FloatRegClass, vd()+(RegIndex)2);
+                // _destRegIdx[3] = RegId(FloatRegClass, vd()+(RegIndex)3);
+                // _destRegIdx[4] = RegId(FloatRegClass, vd()+(RegIndex)4);
+                // _destRegIdx[5] = RegId(FloatRegClass, vd()+(RegIndex)5);
+                // _destRegIdx[6] = RegId(FloatRegClass, vd()+(RegIndex)6);
+                // _destRegIdx[7] = RegId(FloatRegClass, vd()+(RegIndex)7);
+            }
+        }
+
+        std::string generateDisassembly(Addr pc,
+            const Loader::SymbolTable *symtab) const;
+    };
+
 }
 #endif // __ARCH_RISCV_VECTOR_INSTS_HH__
