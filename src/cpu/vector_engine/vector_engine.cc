@@ -135,7 +135,7 @@ VectorEngine::requestGrant(RiscvISA::VectorStaticInst *insn)
     bool queue_slots_available = ((insn->isVectorInstArith()
         || insn->isVecConfig()) && !vector_inst_queue->arith_queue_full())
         || (insn->isVectorInstMem()
-        && !vector_inst_queue->mem_queue_full());
+        && !vector_inst_queue->mem_queue_full()) || insn->isVectorRegisterMove();
 
     /* Usually, the Vector engine must ensure to have at least 1 physical register to accept an instruction.
      * However, for widening operations this is different. When Widening operation with LMUL=2 means that 
@@ -150,8 +150,8 @@ VectorEngine::requestGrant(RiscvISA::VectorStaticInst *insn)
                                 (last_lmul == 2) ? vector_rename->frl_elements() >= 2 :
                                 (last_lmul == 4) ? vector_rename->frl_elements() >= 4 :
                                 (last_lmul == 8) ? vector_rename->frl_elements() >= 8 : 0;
-    //DPRINTF(VectorInst,"rob_entry_available %d, queue_slots_available %d, enough_physical_regs %d\n",
-    //                            rob_entry_available,queue_slots_available,enough_physical_regs);
+    DPRINTF(VectorInst,"rob_entry_available %d, queue_slots_available %d, enough_physical_regs %d\n",
+                               rob_entry_available,queue_slots_available,enough_physical_regs);
     return  enough_physical_regs && queue_slots_available
         && rob_entry_available;
     //return  !vector_rename->frl_empty() && queue_slots_available
@@ -394,6 +394,26 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
             /* Setting to 0 the new physical destinatio valid bit*/
             vector_reg_validbit->set_preg_valid_bit(PDst,0);
         }
+    }
+    else if (insn.isVectorRegisterMove()){
+        /* Physical Destination */
+        PDst = vector_rename->get_frl();
+        vector_dyn_insn->set_renamed_dst(PDst);
+        /* Physical Old Destination */
+        POldDst = vector_rename->get_preg_rat(vd);
+        vector_dyn_insn->set_renamed_old_dst(POldDst);
+        /* When the instruction use an scalar value as source 1, the physical source 1 is disable
+         * When the instruction uses only 1 source (insn.arith1Src()), the  source 1 is disable
+         */
+        /* Physical source 2 */
+        Pvs2 = vector_rename->get_preg_rat(vs2);
+        vector_dyn_insn->set_renamed_src1(Pvs2);
+        /* dst_write_ena is set when the instruction has a vector destination register */
+        /* Setting the New Destination in the RAT structure */
+        vector_rename->set_preg_rat(vd,PDst);
+        /* Setting to 0 the new physical destinatio valid bit*/
+        vector_reg_validbit->set_preg_valid_bit(PDst,0);
+        
     } else {
             panic("Invalid Vector Instruction insn=%#h\n", insn.machInst);
     }
@@ -475,6 +495,15 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
                 dependencie_callback,src1,src2,last_vtype,last_vl));
         }
         printArithInst(insn,vector_dyn_insn);
+    }
+    else if (insn.isVectorRegisterMove()){
+        dependencie_callback();
+        uint32_t rob_entry = vector_rob->set_rob_entry(
+            vector_dyn_insn->get_renamed_old_dst() , 1);
+        vector_dyn_insn->set_rob_entry(rob_entry);
+        vector_inst_queue->Instruction_Queue.push_back(
+            new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
+            NULL,src1,src2,last_vtype,last_vl));
     } else {
         panic("Invalid Vector Instruction, insn=%X\n", insn.machInst);
     }
@@ -497,16 +526,17 @@ VectorEngine::issue(RiscvISA::VectorStaticInst& insn,VectorDynInst *dyn_insn,
 
         SumVL = SumVL.value() + vector_config->vector_length_in_bits(vl,vtype);
     }
-    else if (insn.isVectorInstArith()) {
+    else if (insn.isVectorInstArith() || insn.isVectorRegisterMove()) {
 
         SumVL = SumVL.value() + vector_config->vector_length_in_bits(vl,vtype);
+        // @TODO: Determine this type of Whole Vector Register Move instructions
         VectorArithmeticIns++;
         uint8_t lane_id_available = 0;
         for (int i=0 ; i< num_clusters ; i++) {
             if (!vector_lane[i]->isOccupied()) { lane_id_available = i; }
         }
-        DPRINTF(VectorEngine,"Sending instruction %s to Lanes, pc 0x%lx\n",
-            insn.getName(), *(uint64_t*)&pc);
+        DPRINTF(VectorEngine,"Sending instruction %s to Lane[%d], pc 0x%lx\n",
+            insn.getName(), lane_id_available, *(uint64_t*)&pc);
         vector_lane[lane_id_available]->issue(*this,insn,dyn_insn, xc, src1,
             vtype, vl,done_callback);
     } else {

@@ -72,6 +72,8 @@ public:
       virtual bool isVectorInst() const = 0;
       /* riscv vector configuration instruction */
       virtual bool isVecConfig() const = 0;
+      /* Vector instructions that moves whole vector registers */
+      virtual bool isVectorRegisterMove() const = 0;
       /* general riscv vector memory instruction */
       virtual bool isVectorInstMem() const = 0;
       /* vector load */
@@ -244,10 +246,11 @@ class RiscvVectorInsn : public VectorStaticInst
 
   bool isVectorInstMem()     const override { return isLoad() || isStore(); }
 
-  //bool isVecConfigOp()          const { return vecflags[IsVecConfigOp]; }
+  bool isVectorRegisterMove() const { return VectorRegisterMove(); }
+
   bool isVecConfig()         const override { return opClass() == VectorConfigOp; }
 
-  bool isVectorInst()        const { return isVectorInstArith() || isVectorInstMem() || isVecConfig(); }
+  bool isVectorInst()        const { return isVectorInstArith() || isVectorInstMem() || isVecConfig() || isVectorRegisterMove(); }
 
   uint32_t width()           const override { return x(12, 3); }
 
