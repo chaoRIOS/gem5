@@ -111,16 +111,16 @@ Datapath::compute_float_fp_op(float Aitem, float Bitem, uint8_t Mitem,
      * 
      *************************************************************************/
 
-    if ((operation == "vfmerge_vf")) {
-        Ditem = (vm==0) ? ((Mitem==1) ? Aitem:Bitem) : Aitem;
-        if(vm==0) {
-            DPRINTF(Datapath,"WB Instruction = %f : %f  = %f\n",
-            Aitem,Bitem,Ditem);
-        } else {
-            DPRINTF(Datapath,"WB Instruction = %f = %f\n",
-            Aitem,Ditem);
-        }
-        
+    if ((operation == "vfmerge_vf") && (vm == 0)) {
+        Ditem = (Mitem==1) ? Aitem:Bitem;
+        DPRINTF(Datapath,"WB Instruction = %f : %f  = %f\n",
+        Aitem,Bitem,Ditem);  
+    }
+
+    if ((operation == "vfmv_vf") && (vm == 1)) {
+        Ditem = Aitem;
+        DPRINTF(Datapath,"WB Instruction = %f  = %f\n",
+        Aitem,Ditem);  
     }
 
     if ((operation == "vfmacc_vv") || (operation == "vfmacc_vf")) {
@@ -226,15 +226,16 @@ Datapath::compute_double_fp_op(double Aitem, double Bitem,
      * 
      *************************************************************************/
 
-    if ((operation == "vfmerge_vf")) {
-        Ditem = (vm==0) ? ((Mitem==1) ? Aitem:Bitem) : Aitem;
-        if(vm==0) {
-            DPRINTF(Datapath,"WB Instruction = %lf : %lf  = %f\n",
-            Aitem,Bitem,Ditem);
-        } else {
-            DPRINTF(Datapath,"WB Instruction = %lf = %lf\n",
-            Aitem,Ditem);
-        }
+    if ((operation == "vfmerge_vf") && (vm == 0)) {
+        Ditem = (Mitem==1) ? Aitem:Bitem;
+        DPRINTF(Datapath,"WB Instruction = %f : %f  = %f\n",
+        Aitem,Bitem,Ditem);  
+    }
+
+    if ((operation == "vfmv_vf") && (vm == 1)) {
+        Ditem = Aitem;
+        DPRINTF(Datapath,"WB Instruction = %f  = %f\n",
+        Aitem,Ditem);  
     }
 
     if ((operation == "vfmacc_vv") || (operation == "vfmacc_vf")) {
@@ -477,15 +478,22 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
             Bitem,Aitem, Ditem);
     }
 
-    if ((operation == "vmerge_vv")  | (operation == "vmerge_vx")  | (operation == "vmerge_vi")) {
-        Ditem = (vm==0) ? ((Mitem==1) ? Aitem:Bitem) : Aitem;
-        if(vm==0) {
-            DPRINTF(Datapath,"WB Instruction = %d : %d  = %d\n",
-            Aitem,Bitem,Ditem);
-        } else {
-            DPRINTF(Datapath,"WB Instruction = %d = %d\n",
-            Aitem,Ditem);
-        }
+    if (((operation == "vmerge_vv") || (operation == "vmerge_vx") || (operation == "vmerge_vi")) && (vm == 0)) {
+        Ditem = (Mitem == 0) ? Aitem : Bitem;
+        DPRINTF(Datapath, "WB Instruction = %d : %d  = %d\n",
+                Aitem, Bitem, Ditem);
+    }
+
+    if (((operation == "vmv_vv") || (operation == "vmv_vx") || (operation == "vmv_vi")) && (vm == 1)) {
+        Ditem = Aitem;
+        DPRINTF(Datapath, "WB Instruction = %d  = %d\n",
+                Aitem, Ditem);
+    }
+
+    if ((operation == "vmv1r_v") || (operation == "vmv2r_v") || (operation == "vmv4r_v") || (operation == "vmv8r_v")){
+        Ditem = Aitem;
+        DPRINTF(Datapath,"WB Instruction = %d  = %d\n",
+        Aitem,Ditem);
     }
 
     /**************************************************************************
@@ -645,15 +653,22 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
             Bitem,Aitem, Ditem);
     }
 
-    if ((operation == "vmerge_vv")  | (operation == "vmerge_vx")  | (operation == "vmerge_vi")) {
-        Ditem = (vm==0) ? ((Mitem==1) ? Aitem:Bitem) : Aitem;
-        if(vm==0) {
-            DPRINTF(Datapath,"WB Instruction = %d : %d  = %d\n",
-            Aitem,Bitem,Ditem);
-        } else {
-            DPRINTF(Datapath,"WB Instruction = %d = %d\n",
-            Aitem,Ditem);
-        }
+    if (((operation == "vmerge_vv") || (operation == "vmerge_vx") || (operation == "vmerge_vi")) && (vm == 0)) {
+        Ditem = (Mitem == 0) ? Aitem : Bitem;
+        DPRINTF(Datapath, "WB Instruction = %d : %d  = %d\n",
+                Aitem, Bitem, Ditem);
+    }
+
+    if (((operation == "vmv_vv") || (operation == "vmv_vx") || (operation == "vmv_vi")) && (vm == 1)) {
+        Ditem = Aitem;
+        DPRINTF(Datapath, "WB Instruction = %d  = %d\n",
+                Aitem, Ditem);
+    }
+
+    if ((operation == "vmv1r_v") || (operation == "vmv2r_v") || (operation == "vmv4r_v") || (operation == "vmv8r_v")){
+        Ditem = Aitem;
+        DPRINTF(Datapath,"WB Instruction = %d  = %d\n",
+        Aitem,Ditem);
     }
 
     /**************************************************************************
@@ -812,16 +827,22 @@ Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
             Bitem, Aitem, Ditem);
     }
 
-    if ((operation == "vmerge_vv") | (operation == "vmerge_vx") | (operation == "vmerge_vi")) {
-        Ditem = (vm == 0) ? ((Mitem == 1) ? Aitem : Bitem) : Aitem;
-        if (vm == 0) {
-            DPRINTF(Datapath, "WB Instruction = %d : %d  = %d\n",
+    if (((operation == "vmerge_vv") || (operation == "vmerge_vx") || (operation == "vmerge_vi")) && (vm == 0)) {
+        Ditem = (Mitem == 0) ? Aitem : Bitem;
+        DPRINTF(Datapath, "WB Instruction = %d : %d  = %d\n",
                 Aitem, Bitem, Ditem);
-        }
-        else {
-            DPRINTF(Datapath, "WB Instruction = %d = %d\n",
+    }
+
+    if (((operation == "vmv_vv") || (operation == "vmv_vx") || (operation == "vmv_vi")) && (vm == 1)) {
+        Ditem = Aitem;
+        DPRINTF(Datapath, "WB Instruction = %d  = %d\n",
                 Aitem, Ditem);
-        }
+    }
+
+    if ((operation == "vmv1r_v") || (operation == "vmv2r_v") || (operation == "vmv4r_v") || (operation == "vmv8r_v")){
+        Ditem = Aitem;
+        DPRINTF(Datapath,"WB Instruction = %d  = %d\n",
+        Aitem,Ditem);
     }
 
     /**************************************************************************
@@ -980,16 +1001,22 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
             Bitem, Aitem, Ditem);
     }
 
-    if ((operation == "vmerge_vv") | (operation == "vmerge_vx") | (operation == "vmerge_vi")) {
-        Ditem = (vm == 0) ? ((Mitem == 1) ? Aitem : Bitem) : Aitem;
-        if (vm == 0) {
-            DPRINTF(Datapath, "WB Instruction = %d : %d  = %d\n",
+    if (((operation == "vmerge_vv") || (operation == "vmerge_vx") || (operation == "vmerge_vi")) && (vm == 0)) {
+        Ditem = (Mitem == 0) ? Aitem : Bitem;
+        DPRINTF(Datapath, "WB Instruction = %d : %d  = %d\n",
                 Aitem, Bitem, Ditem);
-        }
-        else {
-            DPRINTF(Datapath, "WB Instruction = %d = %d\n",
+    }
+
+    if (((operation == "vmv_vv") || (operation == "vmv_vx") || (operation == "vmv_vi")) && (vm == 1)) {
+        Ditem = Aitem;
+        DPRINTF(Datapath, "WB Instruction = %d  = %d\n",
                 Aitem, Ditem);
-        }
+    }
+
+    if ((operation == "vmv1r_v") || (operation == "vmv2r_v") || (operation == "vmv4r_v") || (operation == "vmv8r_v")){
+        Ditem = Aitem;
+        DPRINTF(Datapath,"WB Instruction = %d  = %d\n",
+        Aitem,Ditem);
     }
 
     /**************************************************************************

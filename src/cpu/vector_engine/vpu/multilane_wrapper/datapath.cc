@@ -152,7 +152,7 @@ Datapath::startTicking(
     vmfirst = (operation == "vmfirst_m");
     is_mask_logical = this->insn->VectorMaskLogical();
 
-    vector_set = ((operation == "vmerge_vx") || (operation == "vmerge_vi") || (operation == "vfmerge_vf")) && (vm==1);
+    vector_set =  ((operation == "vmv_vx") || (operation == "vmv_vi") || (operation == "vfmv_vf"));
 
     DATA_SIZE = vsew/8; // Esto cambiará para widening y narrowing
     DST_SIZE = (isWidening && (vsew == 32)) ? vsew/4 :vsew/8;  // Esto cambiará para widening y narrowing

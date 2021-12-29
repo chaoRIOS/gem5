@@ -173,7 +173,7 @@ Datapath::get_instruction_latency()
         Oplatency           = 1;
     }
 
-    if ((operation == "vmerge_vv") | (operation == "vmerge_vx") | (operation == "vmerge_vi")) {
+    if ((operation == "vmerge_vv") || (operation == "vmerge_vx") || (operation == "vmerge_vi")) {
         Oplatency           = 1;
     }
     */
