@@ -308,6 +308,42 @@ VectorEngine::printArithInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vec
     }
 }
 
+void
+VectorEngine::printVectorRegisterMoveInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn)
+{
+    uint64_t pc = insn.getPC();
+    std::string masked;
+    if(masked_op) {masked = "v0.m";} else {masked = "   ";}
+    std::string reg_type;
+    if(insn.VectorToScalar()==1) {reg_type = "x";} else {reg_type = "v";}
+
+    std::string scr1_type;
+    scr1_type = (vx_op) ? "x" :
+                (vf_op) ? "f" :
+                (vi_op) ? " " : "v";
+
+    uint32_t PDst = (insn.VectorToScalar()==1) ? insn.vd() :
+                    vector_dyn_insn->get_renamed_dst();
+    uint32_t POldDst = vector_dyn_insn->get_renamed_old_dst();
+    // uint32_t Pvs1 = (vx_op || vf_op || vi_op) ? insn.vs1() :
+    //                 vector_dyn_insn->get_renamed_src1();
+    uint32_t Pvs2 = vector_dyn_insn->get_renamed_src2();
+    uint32_t PMask = vector_dyn_insn->get_renamed_mask();
+
+    std::stringstream mask_ren;
+    if (masked_op) {
+        mask_ren << "v" << PMask << ".m";
+    } else {
+        mask_ren << "";
+    }
+
+    DPRINTF(VectorInst,"inst: %s %s%d v%d %s           PC 0x%X\n",
+        insn.getName(),reg_type,insn.vd(),insn.vs2(),masked,*(uint64_t*)&pc );
+    DPRINTF(VectorRename,"renamed inst: %s %s%d v%d %s  old_dst v%d     "
+        "    PC 0x%X\n",insn.getName(),reg_type,PDst,Pvs2,mask_ren.str(),
+        POldDst,*(uint64_t*)&pc);
+    
+}
 
 void
 VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *vector_dyn_insn)
@@ -504,6 +540,7 @@ VectorEngine::dispatch(RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
         vector_inst_queue->Instruction_Queue.push_back(
             new InstQueue::QueueEntry(insn,vector_dyn_insn,xc,
             NULL,src1,src2,last_vtype,last_vl));
+        printVectorRegisterMoveInst(insn,vector_dyn_insn);
     } else {
         panic("Invalid Vector Instruction, insn=%X\n", insn.machInst);
     }

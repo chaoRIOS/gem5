@@ -90,6 +90,7 @@ Datapath::startTicking(
     is_INT          =0;
     is_convert      =0;
     is_slide        =0;
+    isVectorRegisterMove =0;
 
     vector_set      =0;
 
@@ -131,6 +132,7 @@ Datapath::startTicking(
     isNarrowing   = this->insn->isNarrowing(); // Limited Widening support only for conversions
     is_INT_to_FP    = this->insn->isConvertIntToFP();
     is_FP_to_INT    = this->insn->isConvertFPToInt();
+    isVectorRegisterMove = this->insn->isVectorRegisterMove();
 
     /* isFPCompare is a FP subset */
     is_FP_Comp  = this->insn->isFPCompare();
@@ -230,6 +232,9 @@ Datapath::evaluate()
       }
     }
 
+    /*
+        Checking operand queue length >= length of required operands 
+    */
     uint64_t max_simd_items = VectorLanes*(sizeof(double)/DST_SIZE);
     uint64_t simd_size = std::min(max_simd_items, srcCount-curSrcCount);
 
@@ -303,6 +308,9 @@ Datapath::evaluate()
     uint8_t * Mdata = (uint8_t *)malloc(simd_size);
     uint8_t * Dstdata = (uint8_t *)malloc(simd_size*DATA_SIZE);
 
+    /*
+        Filling operands from Vector Lane's operand queues
+    */
     for (uint64_t i=0; i<simd_size; ++i) {
 
         /*
@@ -352,7 +360,7 @@ Datapath::evaluate()
         /*
          * If aritmetic instruction with only 1 source means that src1 is not used
          */
-        } else if (!arith1Src)
+        } else if (!arith1Src && !isVectorRegisterMove)
         {
             uint8_t *Aitem = vector_lane->AdataQ.front();
             memcpy(Adata+(i*DATA_SIZE), Aitem, DATA_SIZE);
@@ -361,7 +369,7 @@ Datapath::evaluate()
         }
 
         /*
-         * Src2 is always ised by the arithmetic instructions
+         * Src2 is always used by the arithmetic instructions
          */
         if(!vector_set)
         {

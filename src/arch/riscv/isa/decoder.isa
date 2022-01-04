@@ -1870,10 +1870,10 @@ decode QUADRANT default Unknown::unknown() {
                     }
                 0x1: decode VS2{
                     0x0: decode FUNCT3 {
-                        0x0: VectorData1SrcOp::vmv_vv();
-                        0x3: VectorData1SrcOp::vmv_vi();
-                        0x4: VectorData1SrcOp::vmv_vx();
-                        0x5: VectorData1SrcOp::vfmv_vf();
+                        0x0: VectorData2SrcOp::vmv_vv();
+                        0x3: VectorData2SrcOp::vmv_vi();
+                        0x4: VectorData2SrcOp::vmv_vx();
+                        0x5: VectorData2SrcOp::vfmv_vf();
                         }
                     }
                 }

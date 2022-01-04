@@ -491,7 +491,7 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
     }
 
     if ((operation == "vmv1r_v") || (operation == "vmv2r_v") || (operation == "vmv4r_v") || (operation == "vmv8r_v")){
-        Ditem = Aitem;
+        Ditem = Bitem;
         DPRINTF(Datapath,"WB Instruction = %d  = %d\n",
         Aitem,Ditem);
     }
@@ -666,7 +666,7 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
     }
 
     if ((operation == "vmv1r_v") || (operation == "vmv2r_v") || (operation == "vmv4r_v") || (operation == "vmv8r_v")){
-        Ditem = Aitem;
+        Ditem = Bitem;
         DPRINTF(Datapath,"WB Instruction = %d  = %d\n",
         Aitem,Ditem);
     }
@@ -840,7 +840,7 @@ Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
     }
 
     if ((operation == "vmv1r_v") || (operation == "vmv2r_v") || (operation == "vmv4r_v") || (operation == "vmv8r_v")){
-        Ditem = Aitem;
+        Ditem = Bitem;
         DPRINTF(Datapath,"WB Instruction = %d  = %d\n",
         Aitem,Ditem);
     }
@@ -1014,7 +1014,7 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
     }
 
     if ((operation == "vmv1r_v") || (operation == "vmv2r_v") || (operation == "vmv4r_v") || (operation == "vmv8r_v")){
-        Ditem = Aitem;
+        Ditem = Bitem;
         DPRINTF(Datapath,"WB Instruction = %d  = %d\n",
         Aitem,Ditem);
     }

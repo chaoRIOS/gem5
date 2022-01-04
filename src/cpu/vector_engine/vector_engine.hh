@@ -201,6 +201,7 @@ public:
     void printConfigInst(RiscvISA::VectorStaticInst& insn,uint64_t src1,uint64_t src2);
     void printMemInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn);
     void printArithInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn);
+    void printVectorRegisterMoveInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn);
 
 public:
     bool masked_op;

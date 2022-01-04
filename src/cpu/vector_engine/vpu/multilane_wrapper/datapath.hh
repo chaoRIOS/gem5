@@ -163,6 +163,7 @@ private:
     bool is_FP_Comp;
     bool isWidening;
     bool isNarrowing;
+    bool isVectorRegisterMove;
     /*********************************
      * Sources used  by the operation
      */

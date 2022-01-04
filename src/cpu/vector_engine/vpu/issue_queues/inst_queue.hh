@@ -90,8 +90,10 @@ public:
     void regStats() override;
     void evaluate() override;
 
+    void printInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn);
     void printMemInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn);
     void printArithInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn);
+    void printVectorRegisterMoveInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn);
 
 protected:
     bool occupied;

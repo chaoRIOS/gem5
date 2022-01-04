@@ -200,7 +200,8 @@ InstQueue::evaluate()
         if (srcs_ready)
         {
             /*printing the issued instruction*/
-            printArithInst(Instruction->insn,Instruction->dyn_insn);
+            /*@TODO: ArithInst shares issue queue with vector register move instructions, currently */
+            printInst(Instruction->insn,Instruction->dyn_insn);
             /*removing the instruction from the queue*/
             Instruction_Queue.erase(Instruction_Queue.begin()+queue_slot);
             /*Issuing the instruction*/
@@ -407,7 +408,7 @@ InstQueue::printMemInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_d
         }
         
     } else {
-        panic("Invalid Vector Instruction insn=%#h\n", insn.machInst);
+        panic("Issuing Invalid Vector Memory Instruction insn=%#h\n", insn.machInst);
     }
 }
 
@@ -468,7 +469,41 @@ InstQueue::printArithInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector
             "old_dst v%d         PC 0x%X\n",insn.getName(),reg_type,PDst,Pvs2,scr1_type,
             Pvs1,POldDst,mask_ren.str(),POldDst,*(uint64_t*)&pc);
     } else {
-        panic("Invalid Vector Instruction insn=%#h\n", insn.machInst);
+        panic("Issuing Invalid Vector Arithmetic Instruction insn=%#h\n", insn.machInst);
+    }
+}
+
+void
+InstQueue::printVectorRegisterMoveInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn)
+{
+    uint64_t pc = insn.getPC();
+
+    uint32_t PDst = (insn.VectorToScalar()==1) ? insn.vd() :
+                    vector_dyn_insn->get_renamed_dst();
+    uint32_t POldDst = vector_dyn_insn->get_renamed_old_dst();
+    uint32_t Pvs2 = vector_dyn_insn->get_renamed_src2();
+
+    if (insn.VectorRegisterMove()) {
+        DPRINTF(InstQueueInst,"issuing inst: %s v%d v%d           PC 0x%X\n",
+            insn.getName(),insn.vd(),insn.vs2(),*(uint64_t*)&pc );
+        DPRINTF(InstQueueRenInst,"issuing renamed inst: %s v%d v%d  old_dst v%d     "
+            "    PC 0x%X\n",insn.getName(),PDst,Pvs2,POldDst,*(uint64_t*)&pc);
+    } else {
+        panic("Issuing Invalid Vector Register Move Instruction insn=%#h\n", insn.machInst);
+    }
+}
+
+void
+InstQueue::printInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn)
+{
+    if (insn.isVectorInstMem()) {
+        printMemInst(insn, vector_dyn_insn);
+    } else if (insn.isVectorInstArith()) {
+        printArithInst(insn, vector_dyn_insn);
+    } else if (insn.isVectorRegisterMove()) {
+        printVectorRegisterMoveInst(insn, vector_dyn_insn);
+    } else {
+        panic("Issuing Invalid Vector Instruction non of Arith, Mem and VectorRegisterMove\n");
     }
 }
 
