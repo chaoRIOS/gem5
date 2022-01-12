@@ -1521,6 +1521,12 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
 #if THE_ISA == RISCV_ISA
             scoreboard[thread_id].clearInstDests(inst, inst->isMemRef()
                 | inst->staticInst->isVector());
+            // ExecContextPtr xc = std::make_shared<ExecContext>(cpu,
+            //             *cpu.threads[thread_id],*this, inst);
+            // uint64_t vlenb = cpu.ve_interface->getVectorEngine()->vector_config->get_vlenb();
+            
+            // xc->setMiscReg(RiscvISA::MISCREG_VLENB,vlenb);
+            
 #else // !THE_ISA == RISCV_ISA
             scoreboard[thread_id].clearInstDests(inst, inst->isMemRef());
 #endif // THE_ISA == RISCV_ISA

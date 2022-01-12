@@ -86,6 +86,15 @@ public:
     */
     bool bussy();
 
+    /**
+     * @brief Get the Vector Engine object
+     * 
+     * @return VectorEngine* 
+     */
+    VectorEngine * getVectorEngine(){
+        return vector_engine;
+    };
+
 private:
     /**
     The vector Engine

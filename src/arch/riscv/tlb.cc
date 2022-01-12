@@ -328,6 +328,8 @@ Fault
 TLB::translate(const RequestPtr &req, ThreadContext *tc,
                Translation *translation, Mode mode, bool &delayed)
 {
+    DPRINTF(TLBVerbose, "TLB hosting %x with size %d @PC: %x\n",req->getVaddr(),req->getSize(),req->getPC());
+    
     delayed = false;
 
     if (FullSystem) {

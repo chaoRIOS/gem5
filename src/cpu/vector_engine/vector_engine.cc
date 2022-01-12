@@ -671,6 +671,8 @@ VectorEngine::VectorMemPort::startTranslation(Addr addr, uint8_t *data,
     }
     MemCmd cmd = (mode==BaseTLB::Write) ? MemCmd::WriteReq :
         MemCmd::ReadReq;
+    
+    DPRINTF(VectorInst, "Query TLB for vaddr 0x%x size %d TLBMode %d\n", addr, size, mode);
 
     //virtual address request constructor (copied the data port request)
     //const int asid = 0;

@@ -300,18 +300,18 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
         {
             uint8_t *ndata = new uint8_t[DST_SIZE];
             memcpy(ndata, data, DST_SIZE);
-            if (DST_SIZE==8) {
-                DPRINTF(VectorMemUnit,"queue Data %X \n",*(uint64_t *)ndata);
-            }
-            if (DST_SIZE==4) {
-                DPRINTF(VectorMemUnit,"queue Data %X \n",*(uint32_t *)ndata);
-            }
-            if (DST_SIZE==2) {
-                DPRINTF(VectorMemUnit,"queue Data %X \n",*(uint16_t *)ndata);
-            }
-            if (DST_SIZE==1) {
-                DPRINTF(VectorMemUnit,"queue Data %X \n",*(uint8_t *)ndata);
-            }
+            // if (DST_SIZE==8) {
+            //     DPRINTF(VectorMemUnit,"queue Data %X \n",*(uint64_t *)ndata);
+            // }
+            // if (DST_SIZE==4) {
+            //     DPRINTF(VectorMemUnit,"queue Data %X \n",*(uint32_t *)ndata);
+            // }
+            // if (DST_SIZE==2) {
+            //     DPRINTF(VectorMemUnit,"queue Data %X \n",*(uint16_t *)ndata);
+            // }
+            // if (DST_SIZE==1) {
+            //     DPRINTF(VectorMemUnit,"queue Data %X \n",*(uint8_t *)ndata);
+            // }
 
             this->memWriter->queueData(ndata);
             delete[] data;

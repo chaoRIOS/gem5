@@ -187,6 +187,8 @@ const std::array<const char *, NumMiscRegs> M5_VAR_USED MiscRegNames = {{
 ISA::ISA(Params *p) : BaseISA(p)
 {
     miscRegFile.resize(NumMiscRegs);
+    // @TODO: Temp setting for vlenb
+    setMiscRegNoEffect(MISCREG_VLENB, 0x10);
     clear();
 }
 

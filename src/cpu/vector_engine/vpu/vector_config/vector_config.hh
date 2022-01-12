@@ -61,6 +61,9 @@ public:
     uint64_t get_max_vector_length_elem(uint64_t vtype);
     uint64_t get_max_vector_length_bits(uint64_t vtype);
     uint64_t get_mvl_lmul1_bits();
+    uint64_t get_vlenb(){
+      return max_vector_length/8;
+    }
 
     uint64_t get_vtype_lmul(uint64_t vtype);
     uint64_t get_vtype_sew(uint64_t vtype);
@@ -68,6 +71,7 @@ public:
 
 private:
     /* The maximum vector length in bits of one vector register (LMUL=1)*/
+    // VLEN_MAX = VLEN * LMUL
     uint64_t max_vector_length;
 
     uint64_t vt(uint64_t val, int lo, int len) const {
