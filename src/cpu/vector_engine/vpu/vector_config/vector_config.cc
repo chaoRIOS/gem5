@@ -116,7 +116,7 @@ VectorConfig::get_vtype_lmul(uint64_t vtype) {
 
 uint64_t
 VectorConfig::get_vtype_sew(uint64_t vtype) {
-    uint8_t vsew = vt(vtype,2,3);
+    uint8_t vsew = vt(vtype,3,3);
     uint64_t SEW;
     switch (vsew){
         case 0:
@@ -127,7 +127,7 @@ VectorConfig::get_vtype_sew(uint64_t vtype) {
             SEW = 32; break;
         case 3:
             SEW = 64; break;
-        default:  panic("SEW not supported\n"); SEW = 0;
+        default:  panic("SEW not supported vtype: %d vsew: %d \n", vtype, vsew); SEW = 0;
     }
     return SEW;
 }

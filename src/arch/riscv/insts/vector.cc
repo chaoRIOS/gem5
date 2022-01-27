@@ -64,8 +64,10 @@ RiscvVectorCfgOp::generateDisassembly(Addr pc,
     ss << IntRegNames[vs1()] << ", ";
     if (getName() == "vsetvl") {
         ss << IntRegNames[vs2()] ;
-    } else {
-        ss << vtype() ;
+    } else if (getName() == "vsetvli"){
+        ss << vtype11() ;
+    } else if (getName() == "vsetivli"){
+        ss << vtype10() ;
     }
     return ss.str();
 }

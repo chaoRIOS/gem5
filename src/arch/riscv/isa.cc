@@ -189,6 +189,8 @@ ISA::ISA(Params *p) : BaseISA(p)
     miscRegFile.resize(NumMiscRegs);
     // @TODO: Temp setting for vlenb
     setMiscRegNoEffect(MISCREG_VLENB, 0x10);
+    // @TODO: Temp M-mode
+    setMiscRegNoEffect(MISCREG_PRV, 0x3);
     clear();
 }
 

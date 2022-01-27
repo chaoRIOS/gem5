@@ -1244,10 +1244,15 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                     if (vector_insn->isVecConfig())
                     {
                         bool vsetvl = (vector_insn->getName() =="vsetvl");
-                        uint64_t rvl = xc->readIntRegOperand(vector_insn,0);
+                        bool vsetvli = (vector_insn->getName() =="vsetvli");
+                        bool vsetivli = (vector_insn->getName() =="vsetivli");
+                        uint64_t rvl = (!vsetivli) ? 
+                            xc->readIntRegOperand(vector_insn,0) :
+                            (uint64_t)vector_insn->imm5();
                         uint64_t vtype = (vsetvl) ?
-                            xc->readIntRegOperand(vector_insn,1) :
-                            (uint64_t)vector_insn->vtype();
+                            xc->readIntRegOperand(vector_insn,1) : (vsetvli) ?
+                            (uint64_t)vector_insn->vtype11() :
+                            (uint64_t)vector_insn->vtype10();
                         uint64_t gvl = cpu.ve_interface->reqAppVectorLength(
                             rvl,vtype,(vector_insn->vs1()==0));
 
@@ -1269,10 +1274,19 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                     //bool vx_src = (vector_insn->func3()==4) || (vector_insn->func3()==6);
                     bool vf_src = (vector_insn->func3()==5) && vector_insn->isVectorInstArith();
                     //bool vi_src = (vector_insn->func3()==3);
-
-                    src1 = (vf_src) ? xc->readFloatRegOperandBits(vector_insn,0) :
+                    DPRINTF(CpuVectorIssue,"1\n");
+                    if ((vector_insn->func6()==0x10) && (vector_insn->vs2()==0) && vf_src) {
+                        DPRINTF(CpuVectorIssue,"2\n");
+                        DPRINTF(CpuVectorIssue,"%s\n", vector_insn->getName());
+                        src1 = xc->readFloatRegOperandBits(vector_insn,0);
+                    } else {
+                        DPRINTF(CpuVectorIssue,"3\n");
+                        src1 = (vf_src) ? xc->readFloatRegOperandBits(vector_insn,0) :
                             xc->readIntRegOperand(vector_insn,0);
+                    }
+                    DPRINTF(CpuVectorIssue,"4\n");
                     src2 = xc->readIntRegOperand(vector_insn,1);
+                    DPRINTF(CpuVectorIssue,"5\n");
                     }
 
                     DPRINTF(CpuVectorIssue,"Sending vector isnt to the Vector"

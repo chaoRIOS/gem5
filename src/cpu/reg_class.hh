@@ -43,6 +43,7 @@
 
 #include <cassert>
 #include <cstddef>
+#include <iostream>
 
 #include "arch/generic/types.hh"
 #include "arch/registers.hh"
@@ -143,7 +144,9 @@ class RegId {
     bool isIntReg() const { return regClass == IntRegClass; }
 
     /** @return true if it is a floating-point physical register. */
-    bool isFloatReg() const { return regClass == FloatRegClass; }
+    bool isFloatReg() const { 
+        std::cout << regClass << std::endl;
+        return regClass == FloatRegClass; }
 
     /** @Return true if it is a  condition-code physical register. */
     bool isVecReg() const { return regClass == VecRegClass; }

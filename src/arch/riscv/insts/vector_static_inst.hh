@@ -128,7 +128,8 @@ public:
       virtual bool is_slide() const = 0;
 
       /* vtype field*/
-      virtual uint32_t vtype() const = 0;
+      virtual uint32_t vtype11() const = 0;
+      virtual uint32_t vtype10() const = 0;
       /* func3 field*/
       virtual uint32_t func3() const = 0;
       /* func5 field*/
@@ -178,7 +179,8 @@ class RiscvVectorInsn : public VectorStaticInst
 
   uint32_t opcode()          const { return x(0, 7); }
 
-  uint32_t vtype()           const  override   { return x(20, 11); }
+  uint32_t vtype11()           const  override   { return x(20, 11); }
+  uint32_t vtype10()           const  override   { return x(20, 10); }
 
   uint32_t func3()           const override { return x(12, 3); }
   uint32_t func5()           const override { return x(27, 5); }

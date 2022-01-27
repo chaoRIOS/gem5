@@ -100,8 +100,8 @@ VectorLane::issue(VectorEngine& vector_wrapper,
 
     std::string operation = insn.getName();
 
-    bool  move_to_core = (operation == "vfmv_fs") || (operation == "vext_xv");
-    bool  move_to_core_int = (operation == "vext_xv");
+    bool  move_to_core = (operation == "vfmv_fs") || (operation == "vmv_xs");
+    bool  move_to_core_int = (operation == "vmv_xs");
     bool  move_to_core_float = (operation == "vfmv_fs");
 
     uint64_t i;
@@ -194,9 +194,9 @@ VectorLane::issue(VectorEngine& vector_wrapper,
          * element of some vector register and send immediately to
          * the scalar reg,such as vfmv_fs and vmv_xs
          */
-        if (insn.getName() == "vext_xv") {
+        if (insn.getName() == "vmv_xs") {
             addr_src2 = ((uint64_t)dyn_insn->get_renamed_src2() * mvl_bits / 8) + (src1 * DATA_SIZE);
-            DPRINTF(VectorLane, "vext_xv: base addrs 0x%x , element addrs 0x%x, src1 %d\n",
+            DPRINTF(VectorLane, "vmv_xs: base addrs 0x%x , element addrs 0x%x, src1 %d\n",
                         ((uint64_t)dyn_insn->get_renamed_src2() * mvl_bits / 8), addr_src2,src1);
         }
 

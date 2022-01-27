@@ -88,12 +88,16 @@ class RiscvVectorCfgOp : public RiscvVectorInsn
            * destination registers for those vector
            * instructions that make use of it.
            */
-            if (getName() == "vsetvli") {
+            if (getName() == "vsetivli") {
+             _numSrcRegs =  0;
+             _numDestRegs = 1;
+             _destRegIdx[0] = RegId(IntRegClass, vd());
+             } else if (getName() == "vsetvli"){
              _numSrcRegs =  1;
              _numDestRegs = 1;
              _srcRegIdx[0] = RegId(IntRegClass, vs1());
              _destRegIdx[0] = RegId(IntRegClass, vd());
-             } else {
+             } else if (getName() == "vsetvl"){
              _numSrcRegs =  2;
              _numDestRegs = 1;
              _srcRegIdx[0] = RegId(IntRegClass, vs1());
@@ -152,6 +156,31 @@ class RiscvVectorToScalarOp : public RiscvVectorInsn
            * instructions that make use of it. These instructions writes
            * in the integer or floating point register.
            */
+          if ((func6()==0x10) && (vm()==1)){
+            if (func3()==2) {
+              // judge vmv_xs/vmv_sx 
+              if (vs1()==0) {
+                _numSrcRegs = 0;
+                _numDestRegs = 1;
+                _destRegIdx[0] = RegId(IntRegClass, vd());
+              } else if (vs2()==0) {
+                _numSrcRegs = 1;
+                _numDestRegs = 0;
+                _srcRegIdx[0] = RegId(IntRegClass, vs1());
+              }
+            } else if (func3()==5) {
+              // judge vfmv_xf/vfmv_fx
+              if (vs1()==0) {
+                _numSrcRegs = 0;
+                _numDestRegs = 1;
+                _destRegIdx[0] = RegId(FloatRegClass, vd());
+              } else if (vs2()==0) {
+                _numSrcRegs = 1;
+                _numDestRegs = 0;
+                _srcRegIdx[0] = RegId(FloatRegClass, vs1());
+              }
+            }
+          } else {
             if ((func3()==1)) {
                 _numSrcRegs = 0;
                 _numDestRegs = 1;
@@ -165,6 +194,7 @@ class RiscvVectorToScalarOp : public RiscvVectorInsn
                 _numDestRegs = 1;
                 _destRegIdx[0] = RegId(IntRegClass, vd());
             }
+          }  
         }
 
         std::string generateDisassembly(Addr pc,
@@ -186,49 +216,8 @@ class RiscvVectorRegisterMoveOp : public RiscvVectorInsn
            * instructions that make use of it. These instructions writes
            * in the integer or floating point register.
            */
-            if ((imm5()==0)) {
-                _numSrcRegs = 1;
-                _numDestRegs = 1;
-                _srcRegIdx[0] = RegId(IntRegClass, vs1());
-                _destRegIdx[0] = RegId(FloatRegClass, vd());
-            } else if ((imm5()==1)) {
-                _numSrcRegs = 2;
-                _numDestRegs = 2;
-                _srcRegIdx[0] = RegId(IntRegClass, vs1());
-                // _srcRegIdx[1] = RegId(IntRegClass, vs1()+(RegIndex)1);
-                _destRegIdx[0] = RegId(FloatRegClass, vd());
-                // _destRegIdx[1] = RegId(FloatRegClass, vd()+(RegIndex)1);
-            } else if ((imm5()==3)) {
-                _numSrcRegs = 4;
-                _numDestRegs = 4;
-                _srcRegIdx[0] = RegId(IntRegClass, vs1());
-                // _srcRegIdx[1] = RegId(IntRegClass, vs1()+(RegIndex)1);
-                // _srcRegIdx[2] = RegId(IntRegClass, vs1()+(RegIndex)2);
-                // _srcRegIdx[3] = RegId(IntRegClass, vs1()+(RegIndex)3);
-                _destRegIdx[0] = RegId(FloatRegClass, vd());
-                // _destRegIdx[1] = RegId(FloatRegClass, vd()+(RegIndex)1);
-                // _destRegIdx[2] = RegId(FloatRegClass, vd()+(RegIndex)2);
-                // _destRegIdx[3] = RegId(FloatRegClass, vd()+(RegIndex)3);
-            } else if ((imm5()==7)) {
-                _numSrcRegs = 8;
-                _numDestRegs = 8;
-                _srcRegIdx[0] = RegId(IntRegClass, vs1());
-                // _srcRegIdx[1] = RegId(IntRegClass, vs1()+(RegIndex)1);
-                // _srcRegIdx[2] = RegId(IntRegClass, vs1()+(RegIndex)2);
-                // _srcRegIdx[3] = RegId(IntRegClass, vs1()+(RegIndex)3);
-                // _srcRegIdx[4] = RegId(IntRegClass, vs1()+(RegIndex)4);
-                // _srcRegIdx[5] = RegId(IntRegClass, vs1()+(RegIndex)5);
-                // _srcRegIdx[6] = RegId(IntRegClass, vs1()+(RegIndex)6);
-                // _srcRegIdx[7] = RegId(IntRegClass, vs1()+(RegIndex)7);
-                _destRegIdx[0] = RegId(FloatRegClass, vd());
-                // _destRegIdx[1] = RegId(FloatRegClass, vd()+(RegIndex)1);
-                // _destRegIdx[2] = RegId(FloatRegClass, vd()+(RegIndex)2);
-                // _destRegIdx[3] = RegId(FloatRegClass, vd()+(RegIndex)3);
-                // _destRegIdx[4] = RegId(FloatRegClass, vd()+(RegIndex)4);
-                // _destRegIdx[5] = RegId(FloatRegClass, vd()+(RegIndex)5);
-                // _destRegIdx[6] = RegId(FloatRegClass, vd()+(RegIndex)6);
-                // _destRegIdx[7] = RegId(FloatRegClass, vd()+(RegIndex)7);
-            }
+          _numSrcRegs = 0;
+          _numDestRegs = 0;        
         }
 
         std::string generateDisassembly(Addr pc,
