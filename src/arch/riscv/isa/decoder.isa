@@ -2243,7 +2243,6 @@ decode QUADRANT default Unknown::unknown() {
                             }
                         }
                     }
-                }
             0x18: decode FUNCT3 {
                 0x0: VectorIntCompareOp::vmseq_vv();
                 0x1: VectorFPCompareOp::vmfeq_vv();
@@ -2663,5 +2662,5 @@ decode QUADRANT default Unknown::unknown() {
         }
 
         0x1e: M5Op::M5Op();
-
+    }
 }
