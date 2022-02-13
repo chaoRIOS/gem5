@@ -4,7 +4,7 @@ import subprocess
 
 test_path = os.path.join(str(pathlib.Path.home()), 'work', 'rvv-test64') 
 
-# tests = os.listdir(test_path)
+tests = os.listdir(test_path)
 tests = [test for test in tests if '-v-' not in test and '-vf' not in test and '-vmf' not in test]
 done_item = []
 fail_item = []
