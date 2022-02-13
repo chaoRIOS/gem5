@@ -137,4 +137,9 @@ def bitfield VIMM5         <19:15>;
 def bitfield VD            <11:7>;
 def bitfield VM            <25>;
 
-def bitfield MOP           <28:26>;
+def bitfield NF            <31:29>;
+def bitfield MEW           <28>;
+def bitfield MOP           <27:26>;
+def bitfield LUMOP         <24:20>;
+def bitfield SUMOP         <24:20>;
+def bitfield WIDTH         <14:12>;
