@@ -449,13 +449,25 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
     }
 
     if ((operation == "vsll_vv") || (operation == "vsll_vx") || (operation == "vsll_vi")) {
-        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem << Aitem :Dstitem;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (unsigned long int)Bitem << Aitem :Dstitem;
         DPRINTF(Datapath,"WB Instruction = %x << %x  = %x  \n",
             Bitem,Aitem, Ditem);
     }
 
     if ((operation == "vsrl_vv") || (operation == "vsrl_vx") || (operation == "vsrl_vi")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (unsigned long int)Bitem >> Aitem :Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d >> %d  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+
+    if ((operation == "vsra_vv") || (operation == "vsra_vx") || (operation == "vsra_vi")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem >> Aitem :Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d >> %d  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+
+    if ((operation == "vnsra_vv") || (operation == "vnsra_vv") || (operation == "vnsra_vv")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem >> (Aitem & 0x3f) :Dstitem;
         DPRINTF(Datapath,"WB Instruction = %d >> %d  = %d  \n",
             Bitem,Aitem, Ditem);
     }
@@ -624,14 +636,26 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
     }
 
     if ((operation == "vsll_vv") || (operation == "vsll_vx") || (operation == "vsll_vi")) {
-        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem << Aitem :Dstitem;
-        DPRINTF(Datapath,"WB Instruction = %lx << %lx  = %lx\n",
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (unsigned int)Bitem << Aitem :Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %x << %x  = %x  \n",
             Bitem,Aitem, Ditem);
     }
 
     if ((operation == "vsrl_vv") || (operation == "vsrl_vx") || (operation == "vsrl_vi")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (unsigned int)Bitem >> Aitem :Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d >> %d  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+
+    if ((operation == "vsra_vv") || (operation == "vsra_vx") || (operation == "vsra_vi")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem >> Aitem :Dstitem;
-        DPRINTF(Datapath,"WB Instruction = %d >> %d  = %d\n",
+        DPRINTF(Datapath,"WB Instruction = %d >> %d  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+
+    if ((operation == "vnsra_vv") || (operation == "vnsra_vv") || (operation == "vnsra_vv")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem >> (Aitem & 0x1f) :Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d >> %d  = %d  \n",
             Bitem,Aitem, Ditem);
     }
 
@@ -798,15 +822,27 @@ Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
     }
 
     if ((operation == "vsll_vv") || (operation == "vsll_vx") || (operation == "vsll_vi")) {
-        Ditem = ((vm == 1) || ((vm == 0) && (Mitem == 1))) ? Bitem << Aitem : Dstitem;
-        DPRINTF(Datapath, "WB Instruction = %lx << %lx  = %lx\n",
-            Bitem, Aitem, Ditem);
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint16_t)Bitem << Aitem :Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %x << %x  = %x  \n",
+            Bitem,Aitem, Ditem);
     }
 
     if ((operation == "vsrl_vv") || (operation == "vsrl_vx") || (operation == "vsrl_vi")) {
-        Ditem = ((vm == 1) || ((vm == 0) && (Mitem == 1))) ? Bitem >> Aitem : Dstitem;
-        DPRINTF(Datapath, "WB Instruction = %d >> %d  = %d\n",
-            Bitem, Aitem, Ditem);
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint16_t)Bitem >> Aitem :Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d >> %d  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+
+    if ((operation == "vsra_vv") || (operation == "vsra_vx") || (operation == "vsra_vi")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem >> Aitem :Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d >> %d  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+
+    if ((operation == "vnsra_vv") || (operation == "vnsra_vv") || (operation == "vnsra_vv")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem >> (Aitem & 0xf) :Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d >> %d  = %d  \n",
+            Bitem,Aitem, Ditem);
     }
 
     if ((operation == "vand_vv") || (operation == "vand_vx") || (operation == "vand_vi")) {
@@ -972,15 +1008,27 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
     }
 
     if ((operation == "vsll_vv") || (operation == "vsll_vx") || (operation == "vsll_vi")) {
-        Ditem = ((vm == 1) || ((vm == 0) && (Mitem == 1))) ? Bitem << Aitem : Dstitem;
-        DPRINTF(Datapath, "WB Instruction = %lx << %lx  = %lx\n",
-            Bitem, Aitem, Ditem);
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint8_t)Bitem << Aitem :Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %x << %x  = %x  \n",
+            Bitem,Aitem, Ditem);
     }
 
     if ((operation == "vsrl_vv") || (operation == "vsrl_vx") || (operation == "vsrl_vi")) {
-        Ditem = ((vm == 1) || ((vm == 0) && (Mitem == 1))) ? Bitem >> Aitem : Dstitem;
-        DPRINTF(Datapath, "WB Instruction = %d >> %d  = %d\n",
-            Bitem, Aitem, Ditem);
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint8_t)Bitem >> Aitem :Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d >> %d  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+
+    if ((operation == "vsra_vv") || (operation == "vsra_vx") || (operation == "vsra_vi")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem >> Aitem :Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d >> %d  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+
+    if ((operation == "vnsra_vv") || (operation == "vnsra_vv") || (operation == "vnsra_vv")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem >> (Aitem & 0x7) :Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d >> %d  = %d  \n",
+            Bitem,Aitem, Ditem);
     }
 
     if ((operation == "vand_vv") || (operation == "vand_vx") || (operation == "vand_vi")) {

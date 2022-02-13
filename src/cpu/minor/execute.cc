@@ -1274,19 +1274,14 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                     //bool vx_src = (vector_insn->func3()==4) || (vector_insn->func3()==6);
                     bool vf_src = (vector_insn->func3()==5) && vector_insn->isVectorInstArith();
                     //bool vi_src = (vector_insn->func3()==3);
-                    DPRINTF(CpuVectorIssue,"1\n");
                     if ((vector_insn->func6()==0x10) && (vector_insn->vs2()==0) && vf_src) {
-                        DPRINTF(CpuVectorIssue,"2\n");
                         DPRINTF(CpuVectorIssue,"%s\n", vector_insn->getName());
                         src1 = xc->readFloatRegOperandBits(vector_insn,0);
                     } else {
-                        DPRINTF(CpuVectorIssue,"3\n");
                         src1 = (vf_src) ? xc->readFloatRegOperandBits(vector_insn,0) :
                             xc->readIntRegOperand(vector_insn,0);
                     }
-                    DPRINTF(CpuVectorIssue,"4\n");
                     src2 = xc->readIntRegOperand(vector_insn,1);
-                    DPRINTF(CpuVectorIssue,"5\n");
                     }
 
                     DPRINTF(CpuVectorIssue,"Sending vector isnt to the Vector"
