@@ -2423,10 +2423,10 @@ decode QUADRANT default Unknown::unknown() {
             }
             0x2F: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vnclip_vv();
-                0x1: VectorData2SrcOp::vnmsac_vv();
+                0x2: VectorData2SrcOp::vnmsac_vv();
                 0x3: VectorData2SrcOp::vnclip_vi();
                 0x4: VectorData2SrcOp::vnclip_vx();
-                0x5: VectorData2SrcOp::vnmsac_vx();
+                0x6: VectorData2SrcOp::vnmsac_vx();
             }
             0x30: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vwredsumu_vv();

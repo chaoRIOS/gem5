@@ -162,10 +162,10 @@ Execute::Execute(const std::string &name_,
             fu_index++;
         }
 
-        if (!found_fu) {
-            warn("No functional unit for OpClass %s\n",
-                Enums::OpClassStrings[op_class]);
-        }
+        // if (!found_fu) {
+        //     warn("No functional unit for OpClass %s\n",
+        //         Enums::OpClassStrings[op_class]);
+        // }
     }
 
     /* Per-thread structures */
