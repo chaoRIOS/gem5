@@ -284,7 +284,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
                 {
                     /*
                      * vector_to_scalar refers to the instructions which are
-                     * executed in the datapath, such as vmfirst_m and vmpopc_m,
+                     * executed in the datapath, such as vmfirst_m and vcpop_m,
                      * There are instructions that also writes to the scalar reg,
                      * however, those instructions only read the first element of
                      * some vector register and send immediately to the scalar reg,

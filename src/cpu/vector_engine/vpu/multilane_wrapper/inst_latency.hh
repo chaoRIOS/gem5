@@ -212,7 +212,7 @@ Datapath::get_instruction_latency()
         (operation == "vmornot_mm") || (operation == "vmxnor_mm") ) {
         Oplatency           = 1;
     }
-    if (operation == "vmpopc_m") {
+    if (operation == "vcpop_m") {
         Oplatency           = 1;
     }
 
