@@ -21,7 +21,6 @@ tests = [
     # 'rv64uv-p-vrgather',
 
     # 9 integer
-    # 'rv64uv-p-vdivu_32',
     # 'rv64uv-p-vmacc',
     # 'rv64uv-p-vmadc_32',
     # 'rv64uv-p-vmadd', together with vmacc
@@ -36,7 +35,6 @@ tests = [
     # 'rv64uv-p-vmulh_32',
     # 'rv64uv-p-vmulhsu_32',
     # 'rv64uv-p-vmulhu_32', This 3 should work
-    'rv64uv-p-vremu',
     
     # 12
     # 'rv64uv-p-vnmsac', together with vmacc
@@ -97,6 +95,7 @@ fail_item = []
 err_item = []
 for test in tests[:]:
     subp = subprocess.run(['build/RISCV/gem5.opt', '--debug-flag=Exec,VectorInst,VectorEngine,Registers,Datapath', 'configs/example/riscv_vector_engine.py', '--cmd=' + os.path.join(test_path, test)], stderr=2)
+    # subp = subprocess.run(['build/RISCV/gem5.opt', 'configs/example/riscv_vector_engine.py', '--cmd=' + os.path.join(test_path, test)], stderr=2)
     if subp.returncode == 0:
         # result = input(len(done_item))
         result = ''
@@ -105,6 +104,7 @@ for test in tests[:]:
         else:
             fail_item.append(test)
     else:
+        print(subp.returncode)
         err_item.append(test)
     break
 print('done:', len(done_item), done_item)
