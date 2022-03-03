@@ -470,18 +470,6 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
             Aitem, Bitem, Ditem);
     }
 
-    if ((operation == "vdivu_vv") || (operation == "vdivu_vx")) {
-        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint64_t)((uint64_t)Bitem / (uint64_t)Aitem) : Dstitem;
-        DPRINTF(Datapath,"WB Instruction = %d / %d  = %d  \n"
-            ,Bitem,Aitem, Ditem);
-    }
-    if ((operation == "vremu_vv") || (operation == "vremu_vx")) {
-        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint64_t)((uint64_t)Bitem % (uint64_t)Aitem) : Dstitem;
-        DPRINTF(Datapath,"WB Instruction = %d mod %d  = %d  \n",
-            Bitem,Aitem, Ditem);
-    }
-
-    
     if ((operation == "vmacc_vv") || (operation == "vmacc_vx")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem * Aitem + Dstitem : Dstitem;
         DPRINTF(Datapath,"WB Instruction = %d * %d + %d = %d  \n",
@@ -622,8 +610,24 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
         DPRINTF(Datapath,"WB Instruction = %d / %d  = %d  \n"
             ,Bitem,Aitem, Ditem);
     }
+    if ((operation == "vdivu_vv") || (operation == "vdivu_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            ((Aitem == 0) ? 
+                (uint64_t)__UINT64_MAX__ : (uint64_t)((uint64_t)Bitem / (uint64_t)Aitem))
+                : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d / %d  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
     if ((operation == "vrem_vv") || (operation == "vrem_vx")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem % Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d mod %d  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+    if ((operation == "vremu_vv") || (operation == "vremu_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            ((Aitem == 0) ? 
+                (uint64_t)Bitem : (uint64_t)((uint64_t)Bitem % (uint64_t)Aitem))
+                : Dstitem;
         DPRINTF(Datapath,"WB Instruction = %d mod %d  = %d  \n",
             Bitem,Aitem, Ditem);
     }
@@ -827,10 +831,26 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
         DPRINTF(Datapath,"WB Instruction = %d / %d  = %d\n",
             Bitem,Aitem, Ditem);
     }
-
+    if ((operation == "vdivu_vv") || (operation == "vdivu_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            ((Aitem == 0) ? 
+                (uint32_t)__UINT32_MAX__ : (uint32_t)((uint32_t)Bitem / (uint32_t)Aitem))
+                : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d / %d  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
     if ((operation == "vrem_vv") || (operation == "vrem_vx")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem % Aitem : Dstitem;
         DPRINTF(Datapath,"WB Instruction = %d mod %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+    
+    if ((operation == "vremu_vv") || (operation == "vremu_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            ((Aitem == 0) ? 
+                (uint32_t)Bitem : (uint32_t)((uint32_t)Bitem % (uint32_t)Aitem))
+                : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d mod %d  = %d  \n",
             Bitem,Aitem, Ditem);
     }
 
@@ -1031,11 +1051,28 @@ Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
         DPRINTF(Datapath, "WB Instruction = %d / %d  = %d\n",
             Bitem, Aitem, Ditem);
     }
+    if ((operation == "vdivu_vv") || (operation == "vdivu_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            ((Aitem == 0) ? 
+                (uint16_t)__UINT16_MAX__ : (uint16_t)((uint16_t)Bitem / (uint16_t)Aitem))
+                : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d / %d  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
 
     if ((operation == "vrem_vv") || (operation == "vrem_vx")) {
         Ditem = ((vm == 1) || ((vm == 0) && (Mitem == 1))) ? Bitem % Aitem : Dstitem;
         DPRINTF(Datapath, "WB Instruction = %d mod %d  = %d\n",
             Bitem, Aitem, Ditem);
+    }
+
+    if ((operation == "vremu_vv") || (operation == "vremu_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            ((Aitem == 0) ? 
+                (uint16_t)Bitem : (uint16_t)((uint16_t)Bitem % (uint16_t)Aitem))
+                : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d mod %d  = %d  \n",
+            Bitem,Aitem, Ditem);
     }
 
     if ((operation == "vsll_vv") || (operation == "vsll_vx") || (operation == "vsll_vi")) {
@@ -1229,11 +1266,28 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
         DPRINTF(Datapath, "WB Instruction = %d / %d  = %d\n",
             Bitem, Aitem, Ditem);
     }
+    if ((operation == "vdivu_vv") || (operation == "vdivu_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            ((Aitem == 0) ? 
+                (uint8_t)__UINT8_MAX__ : (uint8_t)((uint8_t)Bitem / (uint8_t)Aitem))
+                : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d / %d  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
 
     if ((operation == "vrem_vv") || (operation == "vrem_vx")) {
         Ditem = ((vm == 1) || ((vm == 0) && (Mitem == 1))) ? Bitem % Aitem : Dstitem;
         DPRINTF(Datapath, "WB Instruction = %d mod %d  = %d\n",
             Bitem, Aitem, Ditem);
+    }
+  
+    if ((operation == "vremu_vv") || (operation == "vremu_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            ((Aitem == 0) ? 
+                (uint8_t)Bitem : (uint8_t)((uint8_t)Bitem % (uint8_t)Aitem))
+                : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d mod %d  = %d  \n",
+            Bitem,Aitem, Ditem);
     }
 
     if ((operation == "vsll_vv") || (operation == "vsll_vx") || (operation == "vsll_vi")) {
