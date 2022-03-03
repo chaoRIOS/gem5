@@ -446,6 +446,12 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
             Aitem, Bitem, Mitem, Ditem);
     }
 
+    if ((operation == "vsbc_vv") || (operation == "vsbc_vx") || (operation == "vsbc_vi")) {
+        Ditem = Bitem - Aitem - Mitem;
+        DPRINTF(Datapath,"WB Instruction = %d - %d - %d = %d  \n",
+            Bitem, Aitem, Mitem, Ditem);
+    }
+
     if ((operation == "vmadc_vvm") || (operation == "vmadc_vxm") || (operation == "vmadc_vim")) {
         Ditem = (((Mitem==1) ? 
             Aitem + Bitem + Mitem :
@@ -762,7 +768,7 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
     }
 
     if (vm==0) {
-        DPRINTF(Datapath,"WB Instruction is masked vm(%d), old(%d)"
+        DPRINTF(Datapath,"WB Instruction is masked vm(%d), old(%d) long int"
             "\n",Mitem,Dstitem);
     }
 
@@ -776,6 +782,19 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
     int Ditem=0;
     std::string operation = insn->getName();
     numALU32_operations = numALU32_operations.value() + 1; // number of 32-bit ALU operations
+
+        
+    if ((operation == "vadc_vvm") || (operation == "vadc_vxm") || (operation == "vadc_vim")) {
+        Ditem = Aitem + Bitem + Mitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d + %d = %d  \n",
+            Aitem, Bitem, Mitem, Ditem);
+    }
+
+    if ((operation == "vsbc_vv") || (operation == "vsbc_vx") || (operation == "vsbc_vi")) {
+        Ditem = Bitem - Aitem - Mitem;
+        DPRINTF(Datapath,"WB Instruction = %d - %d - %d = %d  \n",
+            Bitem, Aitem, Mitem, Ditem);
+    }
 
     if ((operation == "vadd_vv") || (operation == "vadd_vx") || (operation == "vadd_vi")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem + Bitem : Dstitem;
@@ -955,7 +974,7 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
     }
 
     if (vm==0) {
-        DPRINTF(Datapath,"WB Instruction is masked vm(%d), old(%d)"
+        DPRINTF(Datapath,"WB Instruction is masked vm(%d), old(%d) int"
             "\n",Mitem,Dstitem);
     }
     return Ditem;
@@ -968,6 +987,18 @@ Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
     int16_t Ditem = 0;
     std::string operation = insn->getName();
     numALU16_operations = numALU16_operations.value() + 1; // number of 16-bit ALU operations
+    
+    if ((operation == "vadc_vvm") || (operation == "vadc_vxm") || (operation == "vadc_vim")) {
+        Ditem = Aitem + Bitem + Mitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d + %d = %d  \n",
+            Aitem, Bitem, Mitem, Ditem);
+    }
+
+    if ((operation == "vsbc_vv") || (operation == "vsbc_vx") || (operation == "vsbc_vi")) {
+        Ditem = Bitem - Aitem - Mitem;
+        DPRINTF(Datapath,"WB Instruction = %d - %d - %d = %d  \n",
+            Bitem, Aitem, Mitem, Ditem);
+    }
 
     if ((operation == "vadd_vv") || (operation == "vadd_vx") || (operation == "vadd_vi")) {
         Ditem = ((vm == 1) || ((vm == 0) && (Mitem == 1))) ? Aitem + Bitem : Dstitem;
@@ -1147,7 +1178,7 @@ Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
     }
 
     if (vm == 0) {
-        DPRINTF(Datapath, "WB Instruction is masked vm(%d), old(%d)"
+        DPRINTF(Datapath, "WB Instruction is masked vm(%d), old(%d) int16"
             "\n", Mitem, Dstitem);
     }
     return Ditem;
@@ -1161,6 +1192,18 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
     std::string operation = insn->getName();
     numALU8_operations = numALU8_operations.value() + 1; // number of 8-bit ALU operations
 
+    if ((operation == "vadc_vvm") || (operation == "vadc_vxm") || (operation == "vadc_vim")) {
+        Ditem = Aitem + Bitem + Mitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d + %d = %d  \n",
+            Aitem, Bitem, Mitem, Ditem);
+    }
+
+    if ((operation == "vsbc_vv") || (operation == "vsbc_vx") || (operation == "vsbc_vi")) {
+        Ditem = Bitem - Aitem - Mitem;
+        DPRINTF(Datapath,"WB Instruction = %d - %d - %d = %d  \n",
+            Bitem, Aitem, Mitem, Ditem);
+    }
+
     if ((operation == "vadd_vv") || (operation == "vadd_vx") || (operation == "vadd_vi")) {
         Ditem = ((vm == 1) || ((vm == 0) && (Mitem == 1))) ? Aitem + Bitem : Dstitem;
         DPRINTF(Datapath, "WB Instruction = %d + %d  = %d\n",
@@ -1171,12 +1214,6 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
         Ditem = ((vm == 1) || ((vm == 0) && (Mitem == 1))) ? Bitem - Aitem : Dstitem;
         DPRINTF(Datapath, "WB Instruction = %d - %d  = %d\n",
             Bitem, Aitem, Ditem);
-    }
-    
-    if ((operation == "vrsub_vx") || (operation == "vrsub_vi")) {
-        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem - Bitem : Dstitem;
-        DPRINTF(Datapath,"WB Instruction = %d - %d  = %d  \n"
-            ,Aitem,Bitem, Ditem);
     }
 
     if ((operation == "vmul_vv") || (operation == "vmul_vx")) {
@@ -1339,7 +1376,7 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
     }
 
     if (vm == 0) {
-        DPRINTF(Datapath, "WB Instruction is masked vm(%d), old(%d)"
+        DPRINTF(Datapath, "WB Instruction is masked vm(%d), old(%d) int8"
             "\n", Mitem, Dstitem);
     }
     return Ditem;
