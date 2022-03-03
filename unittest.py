@@ -13,12 +13,12 @@ tests = [
 
     # 15 mask
     # 'rv64uv-p-viota', chap 15, mask instruction
-    'rv64uv-p-vsfmb',
+    # 'rv64uv-p-vsfmb',
 
     # 16 permutation
     # 'rv64uv-p-vcompress', datapath
     # 'rv64uv-p-vmre', vmvnr
-    'rv64uv-p-vrgather',
+    # 'rv64uv-p-vrgather',
 
     # 11 integer
     # 'rv64uv-p-vdivu_32',
@@ -88,6 +88,7 @@ tests = [
     'rv64uv-p-vwredsumu',
     'rv64uv-p-vwsub',
     'rv64uv-p-vwsubu',
+]
 # Done tests: 25
 # tests = ['rv64uv-p-vmin', 'rv64uv-p-vmaxu', 'rv64uv-p-vredmax', 'rv64uv-p-vand', 'rv64uv-p-vredmin', 'rv64uv-p-vredand', 'rv64uv-p-vxor', 'rv64uv-p-vle8ff', 'rv64uv-p-vredsum', 'rv64uv-p-vmul', 'rv64uv-p-vsll', 'rv64uv-p-vlxei', 'rv64uv-p-vredor', 'rv64uv-p-vadd', 'rv64uv-p-vle32ff', 'rv64uv-p-vle16ff', 'rv64uv-p-vredxor', 'rv64uv-p-vle64ff', 'rv64uv-p-vredminu', 'rv64uv-p-vmax', 'rv64uv-p-vor', 'rv64uv-p-vminu', 'rv64uv-p-vredmaxu', 'rv64uv-p-vle', 'rv64uv-p-vsub']
 # Sys error tests: 5
