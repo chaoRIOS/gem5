@@ -26,17 +26,15 @@ tests = [
     # 'rv64uv-p-vnmsub',    # together with vmacc
     # 'rv64uv-p-vmadd',     # together with vmacc
     # 'rv64uv-p-vmadc_32',  # seems like RAW, write back to int reg failed
-    # 'rv64uv-p-vmseq',
-    # 'rv64uv-p-vmsgt',
-    # 'rv64uv-p-vmsgtu',
-    # 'rv64uv-p-vmsle',
-    # 'rv64uv-p-vmsleu',
-    # 'rv64uv-p-vmslt',
-    # 'rv64uv-p-vmsltu',
-    # 'rv64uv-p-vmsne', This 8 should work but not
-    # 'rv64uv-p-vmulh_32',
-    # 'rv64uv-p-vmulhsu_32',
-    # 'rv64uv-p-vmulhu_32', This 3 should work
+    # 'rv64uv-p-vmseq',     # vcpop issue
+    # 'rv64uv-p-vmsgt',     # vcpop issue
+    # 'rv64uv-p-vmsgtu',    # vcpop issue
+    # 'rv64uv-p-vmsle',     # vcpop issue
+    # 'rv64uv-p-vmsleu',    # vcpop issue
+    # 'rv64uv-p-vmslt',     # vcpop issue
+    # 'rv64uv-p-vmsltu',    # vcpop issue
+    # 'rv64uv-p-vmsne',     # vcpop issue
+    # 'rv64uv-p-vmulhsu_32',  # Dont know why
     
     # 12
     'rv64uv-p-vpopc',

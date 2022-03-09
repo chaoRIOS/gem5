@@ -491,6 +491,27 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
             Dstitem, Aitem, Bitem, Ditem);
     }
 
+    // ----------------------- @TODO: check implementations above ----------------------
+
+
+    if ((operation == "vadd_vv") || (operation == "vadd_vx") || (operation == "vadd_vi")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem + Bitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d  \n",
+            Aitem,Bitem, Ditem);
+    }
+
+    if ((operation == "vsub_vv") || (operation == "vsub_vx") || (operation == "vsub_vi")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem - Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d - %d  = %d  \n"
+            ,Bitem,Aitem, Ditem);
+    }
+    
+    if ((operation == "vrsub_vx") || (operation == "vrsub_vi")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem - Bitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d - %d  = %d  \n"
+            ,Aitem,Bitem, Ditem);
+    }
+
     if ((operation == "vmulh_vv") || (operation == "vmulh_vx")) {
         if ((vm==1) || ((vm==0) && (Mitem==1))) {
             bool negate = (Aitem < 0) != (Bitem < 0);
@@ -522,10 +543,10 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
     }
     if ((operation == "vmulhu_vv") || (operation == "vmulhu_vx")) {
         if ((vm==1) || ((vm==0) && (Mitem==1))) {
-            uint64_t Vs1_lo = (uint32_t)abs(Aitem);
-            uint64_t Vs1_hi = (uint64_t)abs(Aitem) >> 32;
-            uint64_t Vs2_lo = (uint32_t)abs(Bitem);
-            uint64_t Vs2_hi = (uint64_t)abs(Bitem) >> 32;
+            uint64_t Vs1_lo = (uint32_t)(Aitem);
+            uint64_t Vs1_hi = (uint64_t)(Aitem) >> 32;
+            uint64_t Vs2_lo = (uint32_t)(Bitem);
+            uint64_t Vs2_hi = (uint64_t)(Bitem) >> 32;
 
             uint64_t hi = Vs1_hi*Vs2_hi;
             uint64_t mid1 = Vs1_hi*Vs2_lo;
@@ -548,11 +569,11 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
     }
     if ((operation == "vmulhsu_vv") || (operation == "vmulhsu_vx")) {
         if ((vm==1) || ((vm==0) && (Mitem==1))) {
-            bool negate = (Bitem < 0);
+            bool negate = (Aitem < 0);
 
             uint64_t Vs1_lo = (uint32_t)abs(Aitem);
             uint64_t Vs1_hi = (uint64_t)abs(Aitem) >> 32;
-            uint64_t Vs2_lo = (uint32_t)abs(Bitem);
+            uint64_t Vs2_lo = (uint32_t)(Bitem);
             uint64_t Vs2_hi = Bitem >> 32;
 
             uint64_t hi = Vs1_hi*Vs2_hi;
@@ -573,27 +594,6 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
         }
         
         DPRINTF(Datapath,"WB Instruction = %d * %d  = %d  \n"
-            ,Aitem,Bitem, Ditem);
-    }
-
-    // ----------------------- @TODO: check implementations above ----------------------
-
-
-    if ((operation == "vadd_vv") || (operation == "vadd_vx") || (operation == "vadd_vi")) {
-        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem + Bitem : Dstitem;
-        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d  \n",
-            Aitem,Bitem, Ditem);
-    }
-
-    if ((operation == "vsub_vv") || (operation == "vsub_vx") || (operation == "vsub_vi")) {
-        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Bitem - Aitem : Dstitem;
-        DPRINTF(Datapath,"WB Instruction = %d - %d  = %d  \n"
-            ,Bitem,Aitem, Ditem);
-    }
-    
-    if ((operation == "vrsub_vx") || (operation == "vrsub_vi")) {
-        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem - Bitem : Dstitem;
-        DPRINTF(Datapath,"WB Instruction = %d - %d  = %d  \n"
             ,Aitem,Bitem, Ditem);
     }
 
@@ -856,6 +856,91 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
             ,Aitem,Bitem, Ditem);
     }
 
+    if ((operation == "vmulh_vv") || (operation == "vmulh_vx")) {
+        if ((vm==1) || ((vm==0) && (Mitem==1))) {
+            bool negate = (Aitem < 0) != (Bitem < 0);
+
+            uint32_t Vs1_lo = (uint16_t)abs(Aitem);
+            uint32_t Vs1_hi = (uint32_t)abs(Aitem) >> 16;
+            uint32_t Vs2_lo = (uint16_t)abs(Bitem);
+            uint32_t Vs2_hi = (uint32_t)abs(Bitem) >> 16;
+
+            uint32_t hi = Vs1_hi*Vs2_hi;
+            uint32_t mid1 = Vs1_hi*Vs2_lo;
+            uint32_t mid2 = Vs1_lo*Vs2_hi;
+            uint32_t lo = Vs2_lo*Vs1_lo;
+            uint32_t carry = ((uint32_t)(uint16_t)mid1
+                    + (uint32_t)(uint16_t)mid2 + (lo >> 16)) >> 16;
+
+            uint32_t res = hi +
+                            (mid1 >> 16) +
+                            (mid2 >> 16) +
+                            carry;
+            Ditem = negate ? ~res + (Aitem*Bitem == 0 ? 1 : 0)
+                        : res;
+        } else {
+            Ditem = Dstitem;
+        }
+        
+        DPRINTF(Datapath,"WB Instruction = %d * %d  = %d  \n"
+            ,Aitem,Bitem, Ditem);
+    }
+    if ((operation == "vmulhu_vv") || (operation == "vmulhu_vx")) {
+        if ((vm==1) || ((vm==0) && (Mitem==1))) {
+            uint32_t Vs1_lo = (uint16_t)(Aitem);
+            uint32_t Vs1_hi = (uint32_t)(Aitem) >> 16;
+            uint32_t Vs2_lo = (uint16_t)(Bitem);
+            uint32_t Vs2_hi = (uint32_t)(Bitem) >> 16;
+
+            uint32_t hi = Vs1_hi*Vs2_hi;
+            uint32_t mid1 = Vs1_hi*Vs2_lo;
+            uint32_t mid2 = Vs1_lo*Vs2_hi;
+            uint32_t lo = Vs2_lo*Vs1_lo;
+            uint32_t carry = ((uint32_t)(uint16_t)mid1
+                    + (uint32_t)(uint16_t)mid2 + (lo >> 16)) >> 16;
+
+            uint32_t res = hi +
+                            (mid1 >> 16) +
+                            (mid2 >> 16) +
+                            carry;
+            Ditem = res;
+        } else {
+            Ditem = Dstitem;
+        }
+        
+        DPRINTF(Datapath,"WB Instruction = %d * %d  = %d  \n"
+            ,Aitem,Bitem, Ditem);
+    }
+    if ((operation == "vmulhsu_vv") || (operation == "vmulhsu_vx")) {
+        if ((vm==1) || ((vm==0) && (Mitem==1))) {
+            bool negate = (Aitem < 0);
+            
+            uint32_t Vs1_lo = (uint16_t)abs(Aitem);
+            uint32_t Vs1_hi = (uint32_t)abs(Aitem) >> 16;
+            uint32_t Vs2_lo = (uint16_t)(Bitem);
+            uint32_t Vs2_hi = Bitem >> 16;
+
+            uint32_t hi = Vs1_hi*Vs2_hi;
+            uint32_t mid1 = Vs1_hi*Vs2_lo;
+            uint32_t mid2 = Vs1_lo*Vs2_hi;
+            uint32_t lo = Vs2_lo*Vs1_lo;
+            uint32_t carry = ((uint32_t)(uint16_t)mid1
+                    + (uint32_t)(uint16_t)mid2 + (lo >> 16)) >> 16;
+            
+            uint32_t res = hi +
+                            (mid1 >> 16) +
+                            (mid2 >> 16) +
+                            carry; 
+            Ditem = negate ? ~res + (Aitem*Bitem == 0 ? 1 : 0)
+                        : res;
+        } else {
+            Ditem = Dstitem;
+        }
+        
+        DPRINTF(Datapath,"WB Instruction = %d * %d  = %d  \n"
+            ,Aitem,Bitem, Ditem);
+    }
+
     if ((operation == "vmul_vv") || (operation == "vmul_vx")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem * Bitem : Dstitem;
         DPRINTF(Datapath,"WB Instruction = %d * %d  = %d\n",
@@ -1115,6 +1200,91 @@ Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
             ,Aitem,Bitem, Ditem);
     }
 
+    if ((operation == "vmulh_vv") || (operation == "vmulh_vx")) {
+        if ((vm==1) || ((vm==0) && (Mitem==1))) {
+            bool negate = (Aitem < 0) != (Bitem < 0);
+
+            uint16_t Vs1_lo = (uint8_t)abs(Aitem);
+            uint16_t Vs1_hi = (uint16_t)abs(Aitem) >> 8;
+            uint16_t Vs2_lo = (uint8_t)abs(Bitem);
+            uint16_t Vs2_hi = (uint16_t)abs(Bitem) >> 8;
+
+            uint16_t hi = Vs1_hi*Vs2_hi;
+            uint16_t mid1 = Vs1_hi*Vs2_lo;
+            uint16_t mid2 = Vs1_lo*Vs2_hi;
+            uint16_t lo = Vs2_lo*Vs1_lo;
+            uint16_t carry = ((uint16_t)(uint8_t)mid1
+                    + (uint16_t)(uint8_t)mid2 + (lo >> 8)) >> 8;
+
+            uint16_t res = hi +
+                            (mid1 >> 8) +
+                            (mid2 >> 8) +
+                            carry;
+            Ditem = negate ? ~res + (Aitem*Bitem == 0 ? 1 : 0)
+                        : res;
+        } else {
+            Ditem = Dstitem;
+        }
+        
+        DPRINTF(Datapath,"WB Instruction = %d * %d  = %d  \n"
+            ,Aitem,Bitem, Ditem);
+    }
+    if ((operation == "vmulhu_vv") || (operation == "vmulhu_vx")) {
+        if ((vm==1) || ((vm==0) && (Mitem==1))) {
+            uint16_t Vs1_lo = (uint8_t)(Aitem);
+            uint16_t Vs1_hi = (uint16_t)(Aitem) >> 8;
+            uint16_t Vs2_lo = (uint8_t)(Bitem);
+            uint16_t Vs2_hi = (uint16_t)(Bitem) >> 8;
+
+            uint16_t hi = Vs1_hi*Vs2_hi;
+            uint16_t mid1 = Vs1_hi*Vs2_lo;
+            uint16_t mid2 = Vs1_lo*Vs2_hi;
+            uint16_t lo = Vs2_lo*Vs1_lo;
+            uint16_t carry = ((uint16_t)(uint8_t)mid1
+                    + (uint16_t)(uint8_t)mid2 + (lo >> 8)) >> 8;
+
+            uint16_t res = hi +
+                            (mid1 >> 8) +
+                            (mid2 >> 8) +
+                            carry;
+            Ditem = res;
+        } else {
+            Ditem = Dstitem;
+        }
+        
+        DPRINTF(Datapath,"WB Instruction = %d * %d  = %d  \n"
+            ,Aitem,Bitem, Ditem);
+    }
+    if ((operation == "vmulhsu_vv") || (operation == "vmulhsu_vx")) {
+        if ((vm==1) || ((vm==0) && (Mitem==1))) {
+            bool negate = (Aitem < 0);
+
+            uint16_t Vs1_lo = (uint8_t)abs(Aitem);
+            uint16_t Vs1_hi = (uint16_t)abs(Aitem) >> 8;
+            uint16_t Vs2_lo = (uint8_t)(Bitem);
+            uint16_t Vs2_hi = Bitem >> 8;
+
+            uint16_t hi = Vs1_hi*Vs2_hi;
+            uint16_t mid1 = Vs1_hi*Vs2_lo;
+            uint16_t mid2 = Vs1_lo*Vs2_hi;
+            uint16_t lo = Vs2_lo*Vs1_lo;
+            uint16_t carry = ((uint16_t)(uint8_t)mid1
+                    + (uint16_t)(uint8_t)mid2 + (lo >> 8)) >> 8;
+
+            uint16_t res = hi +
+                            (mid1 >> 8) +
+                            (mid2 >> 8) +
+                            carry;
+            Ditem = negate ? ~res + (Aitem*Bitem == 0 ? 1 : 0)
+                        : res;
+        } else {
+            Ditem = Dstitem;
+        }
+        
+        DPRINTF(Datapath,"WB Instruction = %d * %d  = %d  \n"
+            ,Aitem,Bitem, Ditem);
+    }
+
     if ((operation == "vmul_vv") || (operation == "vmul_vx")) {
         Ditem = ((vm == 1) || ((vm == 0) && (Mitem == 1))) ? Aitem * Bitem : Dstitem;
         DPRINTF(Datapath, "WB Instruction = %d * %d  = %d\n",
@@ -1367,6 +1537,91 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
         Ditem = ((vm == 1) || ((vm == 0) && (Mitem == 1))) ? Bitem - Aitem : Dstitem;
         DPRINTF(Datapath, "WB Instruction = %d - %d  = %d\n",
             Bitem, Aitem, Ditem);
+    }
+
+    if ((operation == "vmulh_vv") || (operation == "vmulh_vx")) {
+        if ((vm==1) || ((vm==0) && (Mitem==1))) {
+            bool negate = (Aitem < 0) != (Bitem < 0);
+
+            uint8_t Vs1_lo = (uint8_t)(abs(Aitem) & 0xf);
+            uint8_t Vs1_hi = (uint8_t)abs(Aitem) >> 4;
+            uint8_t Vs2_lo = (uint8_t)(abs(Bitem) & 0xf);
+            uint8_t Vs2_hi = (uint8_t)abs(Bitem) >> 4;
+
+            uint8_t hi = Vs1_hi*Vs2_hi;
+            uint8_t mid1 = Vs1_hi*Vs2_lo;
+            uint8_t mid2 = Vs1_lo*Vs2_hi;
+            uint8_t lo = Vs2_lo*Vs1_lo;
+            uint8_t carry = ((uint8_t)(mid1 & 0xf)
+                    + (uint8_t)(mid2 & 0xf) + (lo >> 4)) >> 4;
+
+            uint8_t res = hi +
+                            (mid1 >> 4) +
+                            (mid2 >> 4) +
+                            carry;
+            Ditem = negate ? ~res + (Aitem*Bitem == 0 ? 1 : 0)
+                        : res;
+        } else {
+            Ditem = Dstitem;
+        }
+        
+        DPRINTF(Datapath,"WB Instruction = %d * %d  = %d  \n"
+            ,Aitem,Bitem, Ditem);
+    }
+    if ((operation == "vmulhu_vv") || (operation == "vmulhu_vx")) {
+        if ((vm==1) || ((vm==0) && (Mitem==1))) {
+            uint8_t Vs1_lo = (uint8_t)((Aitem) & 0xf);
+            uint8_t Vs1_hi = (uint8_t)(Aitem) >> 4;
+            uint8_t Vs2_lo = (uint8_t)((Bitem) & 0xf);
+            uint8_t Vs2_hi = (uint8_t)(Bitem) >> 4;
+
+            uint8_t hi = Vs1_hi*Vs2_hi;
+            uint8_t mid1 = Vs1_hi*Vs2_lo;
+            uint8_t mid2 = Vs1_lo*Vs2_hi;
+            uint8_t lo = Vs2_lo*Vs1_lo;
+            uint8_t carry = ((uint8_t)(mid1 & 0xf)
+                    + (uint8_t)(mid2 & 0xf) + (lo >> 4)) >> 4;
+
+            uint8_t res = hi +
+                            (mid1 >> 4) +
+                            (mid2 >> 4) +
+                            carry;
+            Ditem = res;
+        } else {
+            Ditem = Dstitem;
+        }
+        
+        DPRINTF(Datapath,"WB Instruction = %d * %d  = %d  \n"
+            ,Aitem,Bitem, Ditem);
+    }
+    if ((operation == "vmulhsu_vv") || (operation == "vmulhsu_vx")) {
+        if ((vm==1) || ((vm==0) && (Mitem==1))) {
+            bool negate = (Aitem < 0);
+
+            uint8_t Vs1_lo = (uint8_t)(abs(Aitem) & 0xf);
+            uint8_t Vs1_hi = (uint8_t)abs(Aitem) >> 4;
+            uint8_t Vs2_lo = (uint8_t)((Bitem) & 0xf);
+            uint8_t Vs2_hi = Bitem >> 4;
+
+            uint8_t hi = Vs1_hi*Vs2_hi;
+            uint8_t mid1 = Vs1_hi*Vs2_lo;
+            uint8_t mid2 = Vs1_lo*Vs2_hi;
+            uint8_t lo = Vs2_lo*Vs1_lo;
+            uint8_t carry = ((uint8_t)(mid1 & 0xf)
+                    + (uint8_t)(mid2 & 0xf) + (lo >> 4)) >> 4;
+
+            uint8_t res = hi +
+                            (mid1 >> 4) +
+                            (mid2 >> 4) +
+                            carry;
+            Ditem = negate ? ~res + (Aitem*Bitem == 0 ? 1 : 0)
+                        : res;
+        } else {
+            Ditem = Dstitem;
+        }
+        
+        DPRINTF(Datapath,"WB Instruction = %d * %d  = %d  \n"
+            ,Aitem,Bitem, Ditem);
     }
 
     if ((operation == "vmul_vv") || (operation == "vmul_vx")) {
