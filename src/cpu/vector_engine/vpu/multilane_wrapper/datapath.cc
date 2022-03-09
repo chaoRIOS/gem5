@@ -76,6 +76,7 @@ Datapath::startTicking(
     curDstCount = 0;
     first_elem = 0;
     accum_mask = 0;
+    first_set_mask = -1;
     accumDp = 0.0;
     accumSp = 0.0;
     accumLongInt = 0;
@@ -150,8 +151,8 @@ Datapath::startTicking(
     vslidedown = this->insn->is_slidedown();
     vslide1down = (operation == "vslide1down_vx");
     /* Vector Mask-Register Logical Instructions */
-    vmpopc = (operation == "vmpopc_m");
-    vmfirst = (operation == "vmfirst_m");
+    vcpop = ((operation == "vcpop_m") || (operation == "vcpop_mm"));
+    vfirst = ((operation == "vfirst_m") || (operation == "vfirst_mm"));
     is_mask_logical = this->insn->VectorMaskLogical();
 
     vector_set =  ((operation == "vmv_vx") || (operation == "vmv_vi") || (operation == "vfmv_vf"));
@@ -159,8 +160,9 @@ Datapath::startTicking(
     DATA_SIZE = vsew/8; // Esto cambiará para widening y narrowing
     DST_SIZE = (isWidening && (vsew == 32)) ? vsew/4 :vsew/8;  // Esto cambiará para widening y narrowing
 
-    //Accumulator for reductions, vmpopc and vmfirst
-    accum_mask =-1;
+    //Accumulator for reductions, vcpop and vfirst
+    accum_mask = 0;
+    first_set_mask = -1;
 
     
 
@@ -615,9 +617,9 @@ Datapath::evaluate()
                 {
                     if (vsew == 64)
                     {
-                        if (vmpopc | vmfirst)
+                        if (vcpop | vfirst)
                         {
-                            if (vmpopc)
+                            if (vcpop)
                             {
                                 long int Bitem = (0x0000000000000001) &&
                                     (long int)((long int*)Bdata)[i] ;
@@ -625,23 +627,23 @@ Datapath::evaluate()
                                 accum_mask = (vm==1) ? accum_mask + Bitem :
                                     (Mitem) ? accum_mask + Bitem : accum_mask;
                                 red_SrcCount=red_SrcCount + 1;
-                                DPRINTF(Datapath," vmpopc: Source "
+                                DPRINTF(Datapath," vcpop: Source "
                                     "%ld  Acc= %ld  \n" ,Bitem, accum_mask);
-                            } else if (vmfirst) {
+                            } else if (vfirst) {
                                 int Bitem = (0x0000000000000001) &&
                                     (long int)((long int*)Bdata)[i] ;
                                 uint8_t Mitem = ((uint8_t*)Mdata)[i];
 
                                 first_elem = (Bitem == 0x0000000000000001);
-                                accum_mask = ((vm==1) || ((vm==0) && (Mitem==1)))
+                                first_set_mask = ((vm==1) || ((vm==0) && (Mitem==1)))
                                         ? (first_elem) ? red_SrcCount :
-                                        accum_mask : accum_mask;
+                                        first_set_mask : first_set_mask;
 
                                 if (first_elem)
                                 {
-                                    DPRINTF(Datapath," vmfirst: "
+                                    DPRINTF(Datapath," vfirst: "
                                         "first active element found at %ld"
-                                        " position \n" ,accum_mask);
+                                        " position \n" ,first_set_mask);
                                     break;
                                 }
                                 red_SrcCount=red_SrcCount + 1;
@@ -671,9 +673,9 @@ Datapath::evaluate()
                     }
                     else if (vsew == 32)
                     {
-                        if (vmpopc | vmfirst)
+                        if (vcpop | vfirst)
                         {
-                            if (vmpopc)
+                            if (vcpop)
                             {
                                 int Bitem = (0x00000001) &&
                                     (int)((int*)Bdata)[i];
@@ -681,24 +683,24 @@ Datapath::evaluate()
                                 accum_mask = (vm==1) ? accum_mask + Bitem : (Mitem)
                                      ? accum_mask + Bitem : accum_mask;
                                 red_SrcCount=red_SrcCount + 1;
-                                DPRINTF(Datapath," vmpopc: Source %d"
+                                DPRINTF(Datapath," vcpop: Source %d"
                                     " Acc= %d  \n" ,Bitem, accum_mask);
 
-                            } else if (vmfirst) {
+                            } else if (vfirst) {
                                 int Bitem = (0x00000001) &&
                                     (int)((int*)Bdata)[i];
                                 uint8_t Mitem = ((uint8_t*)Mdata)[i];
 
                                 first_elem = (Bitem == 0x00000001);
-                                accum_mask = ((vm==1) || ((vm==0) && (Mitem==1)))
+                                first_set_mask = ((vm==1) || ((vm==0) && (Mitem==1)))
                                     ? (first_elem) ? red_SrcCount :
-                                    accum_mask : accum_mask;
+                                    first_set_mask : first_set_mask;
 
                                 if (first_elem)
                                 {
-                                    DPRINTF(Datapath," vmfirst: "
+                                    DPRINTF(Datapath," vfirst: "
                                         "first active element found at %d "
-                                        "position \n" ,accum_mask);
+                                        "position \n" ,first_set_mask);
                                     break;
                                 }
 
@@ -728,9 +730,9 @@ Datapath::evaluate()
                     }
                     else if (vsew == 16)
                     {
-                        if (vmpopc | vmfirst)
+                        if (vcpop | vfirst)
                         {
-                            if (vmpopc)
+                            if (vcpop)
                             {
                                 uint16_t Bitem = (0x0001) &&
                                     (uint16_t)((uint16_t*)Bdata)[i];
@@ -738,24 +740,24 @@ Datapath::evaluate()
                                 accum_mask = (vm == 1) ? accum_mask + Bitem :
                                     (Mitem) ? accum_mask + Bitem : accum_mask;
                                 red_SrcCount = red_SrcCount + 1;
-                                DPRINTF(Datapath, " vmpopc: Source "
+                                DPRINTF(Datapath, " vcpop: Source "
                                     "%ld  Acc= %ld  \n", Bitem, accum_mask);
                             }
-                            else if (vmfirst) {
+                            else if (vfirst) {
                                 int Bitem = (0x0001) &&
                                     (uint16_t)((uint16_t*)Bdata)[i];
                                 uint8_t Mitem = ((uint8_t*)Mdata)[i];
 
                                 first_elem = (Bitem == 0x0001);
-                                accum_mask = ((vm == 1) || ((vm == 0) && (Mitem == 1)))
+                                first_set_mask = ((vm == 1) || ((vm == 0) && (Mitem == 1)))
                                     ? (first_elem) ? red_SrcCount :
-                                    accum_mask : accum_mask;
+                                    first_set_mask : first_set_mask;
 
                                 if (first_elem)
                                 {
-                                    DPRINTF(Datapath, " vmfirst: "
+                                    DPRINTF(Datapath, " vfirst: "
                                         "first active element found at %ld"
-                                        " position \n", accum_mask);
+                                        " position \n", first_set_mask);
                                     break;
                                 }
                                 red_SrcCount = red_SrcCount + 1;
@@ -786,9 +788,9 @@ Datapath::evaluate()
                     }
                     else if (vsew == 8)
                     {
-                        if (vmpopc | vmfirst)
+                        if (vcpop | vfirst)
                         {
-                            if (vmpopc)
+                            if (vcpop)
                             {
                                 int8_t Bitem = (0x01) &&
                                     (int8_t)((int8_t*)Bdata)[i];
@@ -796,24 +798,24 @@ Datapath::evaluate()
                                 accum_mask = (vm == 1) ? accum_mask + Bitem :
                                     (Mitem) ? accum_mask + Bitem : accum_mask;
                                 red_SrcCount = red_SrcCount + 1;
-                                DPRINTF(Datapath, " vmpopc: Source "
+                                DPRINTF(Datapath, " vcpop: Source "
                                     "%ld  Acc= %ld  \n", Bitem, accum_mask);
                             }
-                            else if (vmfirst) {
+                            else if (vfirst) {
                                 int Bitem = (0x01) &&
                                     (int8_t)((int8_t*)Bdata)[i];
                                 uint8_t Mitem = ((uint8_t*)Mdata)[i];
 
                                 first_elem = (Bitem == 0x01);
-                                accum_mask = ((vm == 1) || ((vm == 0) && (Mitem == 1)))
+                                first_set_mask = ((vm == 1) || ((vm == 0) && (Mitem == 1)))
                                     ? (first_elem) ? red_SrcCount :
-                                    accum_mask : accum_mask;
+                                    first_set_mask : first_set_mask;
 
                                 if (first_elem)
                                 {
-                                    DPRINTF(Datapath, " vmfirst: "
+                                    DPRINTF(Datapath, " vfirst: "
                                         "first active element found at %ld"
-                                        " position \n", accum_mask);
+                                        " position \n", first_set_mask);
                                     break;
                                 }
                                 red_SrcCount = red_SrcCount + 1;
@@ -921,16 +923,23 @@ Datapath::evaluate()
 
     if (!reduction)
     {
-        if ( (vmpopc && (red_SrcCount==srcCount)) | (vmfirst & first_elem) |
-            (vmfirst & (red_SrcCount==srcCount)) )
+        if ((vcpop && (red_SrcCount==srcCount)))
         {
-            DPRINTF(Datapath," Elements= %d  \n" , accum_mask);
+            DPRINTF(Datapath," vcpop Elements= %d  \n" , accum_mask);
             //WB Data to Int Register  File
             uint8_t *ndata = new uint8_t[DST_SIZE];
             memcpy(ndata, (uint8_t*)&accum_mask, DST_SIZE);
             dataCallback(ndata, DST_SIZE , 0);
         }
-        else if (!vmpopc & !vmfirst)
+        else if ((vfirst & first_elem) | (vfirst & (red_SrcCount==srcCount)))
+        {
+            DPRINTF(Datapath," vfirst Elements= %d  \n" , first_set_mask);
+            //WB Data to Int Register  File
+            uint8_t *ndata = new uint8_t[DST_SIZE];
+            memcpy(ndata, (uint8_t*)&first_set_mask, DST_SIZE);
+            dataCallback(ndata, DST_SIZE , 0);
+        }
+        else if (!vcpop & !vfirst)
         {
             //WB Data to Vect Register  File
             for (int i=0; i<simd_size; ++i) {

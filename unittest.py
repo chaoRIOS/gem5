@@ -21,9 +21,11 @@ tests = [
     # 'rv64uv-p-vrgather',
 
     # 9 integer
-    # 'rv64uv-p-vmacc',
-    # 'rv64uv-p-vmadc_32',
-    # 'rv64uv-p-vmadd', together with vmacc
+    # 'rv64uv-p-vmacc',     # RAW hazard!
+    # 'rv64uv-p-vnmsac',    # together with vmacc
+    # 'rv64uv-p-vnmsub',    # together with vmacc
+    # 'rv64uv-p-vmadd',     # together with vmacc
+    # 'rv64uv-p-vmadc_32',  # seems like RAW, write back to int reg failed
     # 'rv64uv-p-vmseq',
     # 'rv64uv-p-vmsgt',
     # 'rv64uv-p-vmsgtu',
@@ -37,8 +39,6 @@ tests = [
     # 'rv64uv-p-vmulhu_32', This 3 should work
     
     # 12
-    # 'rv64uv-p-vnmsac', together with vmacc
-    # 'rv64uv-p-vnmsub', together with vmacc
     'rv64uv-p-vpopc',
     'rv64uv-p-vsadd',
     'rv64uv-p-vsaddu',
@@ -94,7 +94,7 @@ done_item = []
 fail_item = []
 err_item = []
 for test in tests[:]:
-    subp = subprocess.run(['build/RISCV/gem5.opt', '--debug-flag=Exec,VectorInst,VectorEngine,Registers,Datapath', 'configs/example/riscv_vector_engine.py', '--cmd=' + os.path.join(test_path, test)], stderr=2)
+    subp = subprocess.run(['build/RISCV/gem5.opt', '--debug-flag=VectorLane,Exec,VectorInst,VectorEngine,Registers,Datapath', 'configs/example/riscv_vector_engine.py', '--cmd=' + os.path.join(test_path, test)], stderr=2)
     # subp = subprocess.run(['build/RISCV/gem5.opt', 'configs/example/riscv_vector_engine.py', '--cmd=' + os.path.join(test_path, test)], stderr=2)
     if subp.returncode == 0:
         # result = input(len(done_item))

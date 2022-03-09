@@ -149,7 +149,7 @@ private:
     /*********************************
      * Operations with mask
      */
-    bool vmpopc,vmfirst;
+    bool vcpop,vfirst;
     /*********************************
      * Operation type
      */
@@ -200,6 +200,7 @@ private:
 
     bool first_elem;
     long int accum_mask;
+    long int first_set_mask;
     double accumDp;
     float  accumSp;
     long int accumLongInt;

@@ -2166,13 +2166,23 @@ decode QUADRANT default Unknown::unknown() {
             0x10: decode VM {
                 0x0: decode FUNCT3 {
                     0x0: VectorData3SrcOp::vadc_vvm();
+                    0x2: decode VS1 {
+                        0x10: VectorToScalarOp::vcpop_mm();
+                        0x11: VectorToScalarOp::vfirst_mm();
+                    }
                     0x3: VectorData3SrcOp::vadc_vim();
                     0x4: VectorData3SrcOp::vadc_vxm();
                     }
                 0x1: decode FUNCT3 {
-                    0x2 : VectorToScalarOp::vmv_xs();
+                    0x2 : decode VS1 {
+                        0x0: VectorToScalarOp::vmv_xs();
+                        0x10: VectorToScalarOp::vcpop_m();
+                        0x11: VectorToScalarOp::vfirst_m();
+                    }
                     0x5 : VectorToScalarOp::vfmv_fs();
-                    0x6 : VectorToScalarOp::vmv_sx();
+                    0x6 : decode VS2 {
+                        0x0: VectorToScalarOp::vmv_sx();
+                    }
                     }
                 }
             0x11: decode VM {
@@ -2213,12 +2223,6 @@ decode QUADRANT default Unknown::unknown() {
                     0x3: VectorData3SrcOp::vmsbc_vi();
                     0x4: VectorData3SrcOp::vmsbc_vx();
                     }
-                }
-            0x14: decode FUNCT3 {
-                0x2: VectorToScalarOp::vcpop_m();
-                }
-            0x15: decode FUNCT3 {
-                0x2: VectorToScalarOp::vmfirst_m();
                 }
             0x17: decode VM {
                 0x0: decode FUNCT3 {

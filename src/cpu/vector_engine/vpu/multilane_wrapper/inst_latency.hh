@@ -216,7 +216,7 @@ Datapath::get_instruction_latency()
         Oplatency           = 1;
     }
 
-    if (operation == "vmfirst_m") {
+    if (operation == "vfirst_m") {
         Oplatency           = 1;
     }
     */
