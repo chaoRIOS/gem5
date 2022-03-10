@@ -29,6 +29,7 @@
  */
 
 #include "debug/Datapath.hh"
+#include "arith.h"
 
 float
 Datapath::compute_float_fp_op(float Aitem, float Bitem, uint8_t Mitem,
@@ -855,6 +856,34 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
         DPRINTF(Datapath,"WB Instruction = %d - %d  = %d  \n"
             ,Aitem,Bitem, Ditem);
     }
+
+    if ((operation == "vsadd_vv") || (operation == "vsadd_vx") || (operation == "vsadd_vi")) {
+        bool sat = false;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_add<int32_t,uint32_t>(Aitem, Bitem, sat): Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+    if ((operation == "vsaddu_vv") || (operation == "vsaddu_vx") || (operation == "vsaddu_vi")) {
+        bool sat = false;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_addu<uint32_t>(Aitem, Bitem, sat): Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+    
+    if ((operation == "vssub_vv") || (operation == "vssub_vx") || (operation == "vssub_vi")) {
+        bool sat = false;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_sub<int32_t,uint32_t>(Aitem, Bitem, sat): Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+    if ((operation == "vssubu_vv") || (operation == "vssubu_vx") || (operation == "vssubu_vi")) {
+        bool sat = false;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_subu<uint32_t>(Aitem, Bitem, sat): Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+
+
 
     if ((operation == "vmulh_vv") || (operation == "vmulh_vx")) {
         if ((vm==1) || ((vm==0) && (Mitem==1))) {

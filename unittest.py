@@ -37,9 +37,7 @@ tests = [
     # 'rv64uv-p-vmulhsu_32',  # Dont know why
     
     # 12
-    'rv64uv-p-vpopc',
-    'rv64uv-p-vsadd',
-    'rv64uv-p-vsaddu',
+    # 'rv64uv-p-vpopc',
     'rv64uv-p-vse',
     'rv64uv-p-vsra',
     'rv64uv-p-vsrl',
@@ -50,8 +48,6 @@ tests = [
     'rv64uv-p-vsmul',
     'rv64uv-p-vssra',
     'rv64uv-p-vssrl',
-    'rv64uv-p-vssub',
-    'rv64uv-p-vssubu',
     'rv64uv-p-vsxei',
     'rv64uv-p-vsxseg',
     'rv64uv-p-vnclip',
