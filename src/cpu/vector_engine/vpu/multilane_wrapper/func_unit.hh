@@ -29,6 +29,7 @@
  */
 
 #include "debug/Datapath.hh"
+#include "arith.h"
 
 float
 Datapath::compute_float_fp_op(float Aitem, float Bitem, uint8_t Mitem,
@@ -512,6 +513,32 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
             ,Aitem,Bitem, Ditem);
     }
 
+    if ((operation == "vsadd_vv") || (operation == "vsadd_vx") || (operation == "vsadd_vi")) {
+        bool sat = false;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_add<int64_t,uint64_t>(Aitem, Bitem, sat): Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+    if ((operation == "vsaddu_vv") || (operation == "vsaddu_vx") || (operation == "vsaddu_vi")) {
+        bool sat = false;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_addu<uint64_t>(Aitem, Bitem, sat): Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+    
+    if ((operation == "vssub_vv") || (operation == "vssub_vx") || (operation == "vssub_vi")) {
+        bool sat = false;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_sub<int64_t,uint64_t>(Aitem, Bitem, sat): Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+    if ((operation == "vssubu_vv") || (operation == "vssubu_vx") || (operation == "vssubu_vi")) {
+        bool sat = false;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_subu<uint64_t>(Aitem, Bitem, sat): Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+
     if ((operation == "vmulh_vv") || (operation == "vmulh_vx")) {
         if ((vm==1) || ((vm==0) && (Mitem==1))) {
             bool negate = (Aitem < 0) != (Bitem < 0);
@@ -855,6 +882,33 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
         DPRINTF(Datapath,"WB Instruction = %d - %d  = %d  \n"
             ,Aitem,Bitem, Ditem);
     }
+
+    if ((operation == "vsadd_vv") || (operation == "vsadd_vx") || (operation == "vsadd_vi")) {
+        bool sat = false;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_add<int32_t,uint32_t>(Aitem, Bitem, sat): Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+    if ((operation == "vsaddu_vv") || (operation == "vsaddu_vx") || (operation == "vsaddu_vi")) {
+        bool sat = false;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_addu<uint32_t>(Aitem, Bitem, sat): Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+    
+    if ((operation == "vssub_vv") || (operation == "vssub_vx") || (operation == "vssub_vi")) {
+        bool sat = false;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_sub<int32_t,uint32_t>(Aitem, Bitem, sat): Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+    if ((operation == "vssubu_vv") || (operation == "vssubu_vx") || (operation == "vssubu_vi")) {
+        bool sat = false;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_subu<uint32_t>(Aitem, Bitem, sat): Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+
 
     if ((operation == "vmulh_vv") || (operation == "vmulh_vx")) {
         if ((vm==1) || ((vm==0) && (Mitem==1))) {
@@ -1212,6 +1266,32 @@ Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
             ,Aitem,Bitem, Ditem);
     }
 
+    if ((operation == "vsadd_vv") || (operation == "vsadd_vx") || (operation == "vsadd_vi")) {
+        bool sat = false;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_add<int16_t,uint16_t>(Aitem, Bitem, sat): Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+    if ((operation == "vsaddu_vv") || (operation == "vsaddu_vx") || (operation == "vsaddu_vi")) {
+        bool sat = false;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_addu<uint16_t>(Aitem, Bitem, sat): Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+    
+    if ((operation == "vssub_vv") || (operation == "vssub_vx") || (operation == "vssub_vi")) {
+        bool sat = false;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_sub<int16_t,uint16_t>(Aitem, Bitem, sat): Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+    if ((operation == "vssubu_vv") || (operation == "vssubu_vx") || (operation == "vssubu_vi")) {
+        bool sat = false;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_subu<uint16_t>(Aitem, Bitem, sat): Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+
     if ((operation == "vmulh_vv") || (operation == "vmulh_vx")) {
         if ((vm==1) || ((vm==0) && (Mitem==1))) {
             bool negate = (Aitem < 0) != (Bitem < 0);
@@ -1550,6 +1630,39 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
         DPRINTF(Datapath, "WB Instruction = %d - %d  = %d\n",
             Bitem, Aitem, Ditem);
     }
+    
+    if ((operation == "vrsub_vx") || (operation == "vrsub_vi")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? Aitem - Bitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d - %d  = %d  \n"
+            ,Aitem,Bitem, Ditem);
+    }
+
+    if ((operation == "vsadd_vv") || (operation == "vsadd_vx") || (operation == "vsadd_vi")) {
+        bool sat = false;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_add<int8_t,uint8_t>(Aitem, Bitem, sat): Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+    if ((operation == "vsaddu_vv") || (operation == "vsaddu_vx") || (operation == "vsaddu_vi")) {
+        bool sat = false;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_addu<uint8_t>(Aitem, Bitem, sat): Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+    
+    if ((operation == "vssub_vv") || (operation == "vssub_vx") || (operation == "vssub_vi")) {
+        bool sat = false;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_sub<int8_t,uint8_t>(Aitem, Bitem, sat): Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+    if ((operation == "vssubu_vv") || (operation == "vssubu_vx") || (operation == "vssubu_vi")) {
+        bool sat = false;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_subu<uint8_t>(Aitem, Bitem, sat): Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
+            Bitem,Aitem, Ditem);
+    }
+
 
     if ((operation == "vmulh_vv") || (operation == "vmulh_vx")) {
         if ((vm==1) || ((vm==0) && (Mitem==1))) {
