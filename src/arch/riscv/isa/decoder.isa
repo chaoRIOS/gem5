@@ -2407,17 +2407,17 @@ decode QUADRANT default Unknown::unknown() {
                 0x6: VectorData2SrcOp::vnmsub_vx();
             }
             0x2C: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vnsrl_vv();
+                0x0: VectorData2SrcOp::vnsrl_wv();
                 0x2: VectorData3SrcOp::vfmacc_vv();
-                0x3: VectorData2SrcOp::vnsrl_vi();
-                0x4: VectorData2SrcOp::vnsrl_vx();
+                0x3: VectorData2SrcOp::vnsrl_wi();
+                0x4: VectorData2SrcOp::vnsrl_wx();
                 0x6: VectorData3SrcOp::vfmacc_vf();
                 }
             0x2D: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vnsra_vv();
+                0x0: VectorData2SrcOp::vnsra_wv();
                 0x2: VectorData2SrcOp::vmacc_vv();
-                0x3: VectorData2SrcOp::vnsra_vi();
-                0x4: VectorData2SrcOp::vnsra_vx();
+                0x3: VectorData2SrcOp::vnsra_wi();
+                0x4: VectorData2SrcOp::vnsra_wx();
                 0x6: VectorData2SrcOp::vmacc_vx();
                 }
             0x2E: decode FUNCT3 {

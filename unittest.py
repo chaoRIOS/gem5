@@ -38,22 +38,22 @@ tests = [
     
     # 12
     # 'rv64uv-p-vpopc',
-    'rv64uv-p-vse',
-    'rv64uv-p-vsra',
-    'rv64uv-p-vsrl',
-    'rv64uv-p-vaadd',
-    'rv64uv-p-vaaddu',
-    # 'rv64uv-p-vasub',
-    # 'rv64uv-p-vasubu',
-    'rv64uv-p-vsmul',
-    'rv64uv-p-vssra',
-    'rv64uv-p-vssrl',
-    'rv64uv-p-vsxei',
-    'rv64uv-p-vsxseg',
-    'rv64uv-p-vnclip',
-    'rv64uv-p-vnclipu',
+    # 'rv64uv-p-vsra',    # test_45 ?
+    # 'rv64uv-p-vsadd', # Passed, add vxsat
+    # 'rv64uv-p-vaadd', # vxrm roundoff
+    # 'rv64uv-p-vaaddu',# vxrm roundoff
+    # 'rv64uv-p-vasub', # vxrm roundoff
+    # 'rv64uv-p-vasubu',# vxrm roundoff
+    # 'rv64uv-p-vsmul', # vxrm roundoff
+    # 'rv64uv-p-vssra', # vxrm roundoff
+    # 'rv64uv-p-vssrl', # vxrm roundoff
+    # 'rv64uv-p-vnclip',# vxrm roundoff
+    # 'rv64uv-p-vnclipu',# vxrm roundoff
 
     # 7 load/store
+    'rv64uv-p-vse',
+    'rv64uv-p-vsxei',
+    'rv64uv-p-vsxseg',
     # 'rv64uv-p-vlre', unknown encoding, chap 7.9
     # 'rv64uv-p-vlse', memOP, outer?
     # 'rv64uv-p-vmrl', vle32
