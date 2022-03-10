@@ -926,13 +926,25 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
             uint32_t lo = Vs2_lo*Vs1_lo;
             uint32_t carry = ((uint32_t)(uint16_t)mid1
                     + (uint32_t)(uint16_t)mid2 + (lo >> 16)) >> 16;
+
+            uint32_t res_lo = (uint32_t)((uint32_t)((uint16_t)mid1 << 16)
+                    + (uint32_t)((uint16_t)mid2 << 16) + lo);
             
-            uint32_t res = hi +
+            uint32_t res_hi = hi +
                             (mid1 >> 16) +
                             (mid2 >> 16) +
-                            carry; 
-            Ditem = negate ? ~res + (Aitem*Bitem == 0 ? 1 : 0)
-                        : res;
+                            carry;
+            DPRINTF(Datapath,"res_lo = %08x\n" ,res_lo);
+            DPRINTF(Datapath,"res_hi = %08x\n" ,res_hi);
+            if (negate) {
+                if (res_hi > 0) {
+                    Ditem = ~res_hi + (((Bitem == 0) || (res_lo == 0)) ? 1 : 0);
+                } else {
+                    Ditem = 0; 
+                }
+            } else {
+                Ditem = res_hi;
+            }
         } else {
             Ditem = Dstitem;
         }
