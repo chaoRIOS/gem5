@@ -205,6 +205,14 @@ def template VectorRegisterMoveConstructor {{
     }
 }};
 
+def template VectorIntegerWideningConstructor {{
+    %(class_name)s::%(class_name)s(MachInst machInst)
+        : %(base_class)s("%(mnemonic)s", machInst, VectorIntegerWideningOp)
+    {
+        flags[IsVector] = true;
+    }
+}};
+
 // Basic instruction class execute method template.
 def template VectorExecute {{
     Fault
@@ -390,6 +398,14 @@ def format VectorRegisterMoveOp() {{
     iop = InstObjParams(name, Name, 'RiscvVectorRegisterMoveOp')
     header_output = BasicDeclare.subst(iop)
     decoder_output = VectorRegisterMoveConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = VectorExecute.subst(iop)
+}};
+
+def format VectorIntegerWideningOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorIntegerWideningOp')
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = VectorIntegerWideningConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};

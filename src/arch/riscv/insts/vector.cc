@@ -109,5 +109,17 @@ RiscvVectorRegisterMoveOp::generateDisassembly(Addr pc,
     return ss.str();
 }
 
+string
+RiscvVectorIntegerWideningOp::generateDisassembly(Addr pc,
+    const Loader::SymbolTable *symtab) const
+{
+    stringstream ss;
+    ss << csprintf("0x%08x", machInst) << ' ' << mnemonic << ' ';
+    ss << VectorRegNames[vd()];
+    ss << VectorRegNames[vs1()] << ", ";
+    ss << VectorRegNames[vs2()] ;
+    return ss.str();
+}
+
 
 }

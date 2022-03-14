@@ -224,5 +224,34 @@ class RiscvVectorRegisterMoveOp : public RiscvVectorInsn
             const Loader::SymbolTable *symtab) const;
     };
 
+/*
+ * Vector Integer Widending instructions
+ */
+class RiscvVectorIntegerWideningOp : public RiscvVectorInsn
+    {
+      public:
+        RiscvVectorIntegerWideningOp(const char *mnem, ExtMachInst _machInst,
+            OpClass __opClass) :
+            RiscvVectorInsn(mnem, _machInst, __opClass)
+        {
+          /*
+           * Here is defined the destination registers for those vector
+           * instructions that make use of it. These instructions writes
+           * in the integer or floating point register.
+           */
+          if (func3()==0x6) {
+            _numSrcRegs = 1;
+            _srcRegIdx[0] = RegId(IntRegClass, vs1());
+            _numDestRegs = 0;
+          } else {
+            _numSrcRegs = 0;
+            _numDestRegs = 0;
+          }       
+        }
+
+        std::string generateDisassembly(Addr pc,
+            const Loader::SymbolTable *symtab) const;
+    };
+
 }
 #endif // __ARCH_RISCV_VECTOR_INSTS_HH__

@@ -88,8 +88,11 @@ VectorLane::issue(VectorEngine& vector_wrapper,
     //In this moment there are not implemented widening and narrowing,
     //then dst and src are similar sizes
     bool isWidening = insn.isWidening();
+    bool isVectorIntegerWidening = insn.isVectorIntegerWidening();
+    bool isVectorIntegerWideningCrossSew = insn.isVectorIntegerWideningCrossSew();
     uint64_t DATA_SIZE = SIZE;
-    uint64_t DST_SIZE = (isWidening) ? SIZE*2 : SIZE;
+    uint64_t DATA_SIZE_B = isVectorIntegerWideningCrossSew ? SIZE*2 : SIZE;
+    uint64_t DST_SIZE = (isWidening || isVectorIntegerWidening) ? SIZE*2 : SIZE;
 
     uint64_t addr_dst;
     uint64_t addr_src1;
@@ -430,20 +433,20 @@ VectorLane::issue(VectorEngine& vector_wrapper,
         if (!vector_set)
         {
             DPRINTF(VectorLane,"Reading srcBReader \n" );
-            srcBReader->initialize(vector_wrapper, vl_count, DATA_SIZE, addr_src2, 0, 1,
-                location, xc, [DATA_SIZE, vl_count, this]
+            srcBReader->initialize(vector_wrapper, vl_count, DATA_SIZE_B, addr_src2, 0, 1,
+                location, xc, [DATA_SIZE_B, vl_count, this]
                 (uint8_t* data, uint8_t size, bool done)
                 {
-                    assert(size == DATA_SIZE);
-                    uint8_t* ndata = new uint8_t[DATA_SIZE];
-                    memcpy(ndata, data, DATA_SIZE);
+                    assert(size == DATA_SIZE_B);
+                    uint8_t* ndata = new uint8_t[DATA_SIZE_B];
+                    memcpy(ndata, data, DATA_SIZE_B);
                     this->BdataQ.push_back(ndata);
-                    if (DATA_SIZE == 8) {
+                    if (DATA_SIZE_B == 8) {
                         DPRINTF(VectorLane, "queue Data srcBReader "
                             "0x%x , queue_size = %d \n", *(uint64_t*)ndata,
                             this->BdataQ.size());                
                     }
-                    if (DATA_SIZE == 4) {
+                    if (DATA_SIZE_B == 4) {
                         DPRINTF(VectorLane, "queue Data srcBReader "
                             "0x%x , queue_size = %d \n", *(uint32_t*)ndata,
                             this->BdataQ.size());                

@@ -2224,6 +2224,15 @@ decode QUADRANT default Unknown::unknown() {
                     0x4: VectorData3SrcOp::vmsbc_vx();
                     }
                 }
+            0x14: decode FUNCT3 {
+                0x2: decode VS1 {
+                    0x1: VectorMaskLogicalOp::vmsbf();
+                    0x2: VectorMaskLogicalOp::vmsof();
+                    0x3: VectorMaskLogicalOp::vmsif();
+                    0x10: VectorMaskLogicalOp::viota();
+                    0x11: VectorMaskLogicalOp::vid();
+                }
+            }
             0x17: decode VM {
                 0x0: decode FUNCT3 {
                     0x0: VectorData2SrcOp::vmerge_vv();
@@ -2433,67 +2442,67 @@ decode QUADRANT default Unknown::unknown() {
                 0x6: VectorData2SrcOp::vnmsac_vx();
             }
             0x30: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vwredsumu_vv();
-                0x2: VectorData2SrcOp::vwaddu_vv();
-                0x6: VectorData2SrcOp::vwaddu_vx();
+                0x0: VectorIntegerWideningOp::vwredsumu_vv();
+                0x2: VectorIntegerWideningOp::vwaddu_vv();
+                0x6: VectorIntegerWideningOp::vwaddu_vx();
                 0x7: VectorConfigOp::vsetivli();
             }
             0x31: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vwredsum_vv();
-                0x2: VectorData2SrcOp::vwadd_vv();
-                0x6: VectorData2SrcOp::vwadd_vx();
+                0x0: VectorIntegerWideningOp::vwredsum_vv();
+                0x2: VectorIntegerWideningOp::vwadd_vv();
+                0x6: VectorIntegerWideningOp::vwadd_vx();
             }
             0x32: decode FUNCT3 {
-                0x2: VectorData2SrcOp::vwsubu_vv();
-                0x6: VectorData2SrcOp::vwsubu_vx();
+                0x2: VectorIntegerWideningOp::vwsubu_vv();
+                0x6: VectorIntegerWideningOp::vwsubu_vx();
             }
             0x33: decode FUNCT3 {
-                0x2: VectorData2SrcOp::vwsub_vv();
-                0x6: VectorData2SrcOp::vwsub_vx();
+                0x2: VectorIntegerWideningOp::vwsub_vv();
+                0x6: VectorIntegerWideningOp::vwsub_vx();
             }
             0x34: decode FUNCT3 {
-                0x2: VectorData2SrcOp::vwaddu_wv();
-                0x6: VectorData2SrcOp::vwaddu_wx();
+                0x2: VectorIntegerWideningOp::vwaddu_wv();
+                0x6: VectorIntegerWideningOp::vwaddu_wx();
             }
             0x35: decode FUNCT3 {
-                0x2: VectorData2SrcOp::vwadd_wv();
-                0x6: VectorData2SrcOp::vwadd_wx();
+                0x2: VectorIntegerWideningOp::vwadd_wv();
+                0x6: VectorIntegerWideningOp::vwadd_wx();
             }
             0x36: decode FUNCT3 {
-                0x2: VectorData2SrcOp::vwsubu_wv();
-                0x6: VectorData2SrcOp::vwsubu_wx();
+                0x2: VectorIntegerWideningOp::vwsubu_wv();
+                0x6: VectorIntegerWideningOp::vwsubu_wx();
             }
             0x37: decode FUNCT3 {
-                0x2: VectorData2SrcOp::vwsub_wv();
-                0x6: VectorData2SrcOp::vwsub_wx();
+                0x2: VectorIntegerWideningOp::vwsub_wv();
+                0x6: VectorIntegerWideningOp::vwsub_wx();
             }
             0x38: decode FUNCT3 {
-                0x2: VectorData2SrcOp::vwmulu_vv();
-                0x6: VectorData2SrcOp::vwmulu_vx();
+                0x2: VectorIntegerWideningOp::vwmulu_vv();
+                0x6: VectorIntegerWideningOp::vwmulu_vx();
             }
             0x3A: decode FUNCT3 {
-                0x2: VectorData2SrcOp::vwmulsu_vv();
-                0x6: VectorData2SrcOp::vwmulsu_vx();
+                0x2: VectorIntegerWideningOp::vwmulsu_vv();
+                0x6: VectorIntegerWideningOp::vwmulsu_vx();
             }
             0x3B: decode FUNCT3 {
-                0x2: VectorData2SrcOp::vwmul_vv();
-                0x6: VectorData2SrcOp::vwmul_vx();
+                0x2: VectorIntegerWideningOp::vwmul_vv();
+                0x6: VectorIntegerWideningOp::vwmul_vx();
             }
             0x3C: decode FUNCT3 {
-                0x2: VectorData2SrcOp::vwaccu_vv();
-                0x6: VectorData2SrcOp::vwaccu_vx();
+                0x2: VectorIntegerWideningOp::vwaccu_vv();
+                0x6: VectorIntegerWideningOp::vwaccu_vx();
             }
             0x3D: decode FUNCT3 {
-                0x2: VectorData2SrcOp::vwacc_vv();
-                0x6: VectorData2SrcOp::vwacc_vx();
+                0x2: VectorIntegerWideningOp::vwacc_vv();
+                0x6: VectorIntegerWideningOp::vwacc_vx();
             }
             0x3E: decode FUNCT3 {
-                0x2: VectorData2SrcOp::vwaccus_vv();
-                0x6: VectorData2SrcOp::vwaccus_vx();
+                0x2: VectorIntegerWideningOp::vwaccus_vv();
+                0x6: VectorIntegerWideningOp::vwaccus_vx();
             }
             0x3F: decode FUNCT3 {
-                0x2: VectorData2SrcOp::vwaccsu_vv();
-                0x6: VectorData2SrcOp::vwaccsu_vx();
+                0x2: VectorIntegerWideningOp::vwaccsu_vv();
+                0x6: VectorIntegerWideningOp::vwaccsu_vx();
             }
         }
         0x18: decode FUNCT3 {

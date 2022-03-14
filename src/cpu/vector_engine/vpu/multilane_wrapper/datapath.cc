@@ -92,6 +92,8 @@ Datapath::startTicking(
     is_convert      =0;
     is_slide        =0;
     isVectorRegisterMove =0;
+    isVectorIntegerWidening =0;
+    isVectorIntegerWideningCrossSew =0;
 
     vector_set      =0;
 
@@ -134,6 +136,8 @@ Datapath::startTicking(
     is_INT_to_FP    = this->insn->isConvertIntToFP();
     is_FP_to_INT    = this->insn->isConvertFPToInt();
     isVectorRegisterMove = this->insn->isVectorRegisterMove();
+    isVectorIntegerWidening = this->insn->isVectorIntegerWidening();
+    isVectorIntegerWideningCrossSew = this->insn->isVectorIntegerWideningCrossSew();
 
     /* isFPCompare is a FP subset */
     is_FP_Comp  = this->insn->isFPCompare();
@@ -158,7 +162,7 @@ Datapath::startTicking(
     vector_set =  ((operation == "vmv_vx") || (operation == "vmv_vi") || (operation == "vfmv_vf"));
 
     DATA_SIZE = vsew/8; // Esto cambiará para widening y narrowing
-    DST_SIZE = (isWidening && (vsew == 32)) ? vsew/4 :vsew/8;  // Esto cambiará para widening y narrowing
+    DST_SIZE = ((isWidening && (vsew == 32)) || isVectorIntegerWidening) ? vsew/4 :vsew/8;  // Esto cambiará para widening y narrowing
 
     //Accumulator for reductions, vcpop and vfirst
     accum_mask = 0;
@@ -376,7 +380,11 @@ Datapath::evaluate()
         if(!vector_set)
         {
             uint8_t *Bitem = vector_lane->BdataQ.front();
-            memcpy(Bdata+(i*DATA_SIZE), Bitem, DATA_SIZE);
+            if (isVectorIntegerWideningCrossSew) {
+                memcpy(Bdata+(i*DATA_SIZE), Bitem, DATA_SIZE * 2);
+            } else {
+                memcpy(Bdata+(i*DATA_SIZE), Bitem, DATA_SIZE);
+            }
             vector_lane->BdataQ.pop_front();
             delete[] Bitem;
         }
@@ -659,6 +667,8 @@ Datapath::evaluate()
                             uint8_t Mitem = ((uint8_t*)Mdata)[i];
                             accumLongInt = computeLongIntReduction(accumLongInt,Bitem,Mitem);
                             red_SrcCount=red_SrcCount + 1;
+                        } else if (isVectorIntegerWidening){
+
                         } else {
                             long int Aitem = (long int)((long int*)Adata)[i];
                             long int Bitem = (long int)((long int*)Bdata)[i];
@@ -717,6 +727,15 @@ Datapath::evaluate()
                             uint8_t Mitem = ((uint8_t*)Mdata)[i];
                             accumInt = computeIntReduction(accumInt,Bitem,Mitem);
                             red_SrcCount=red_SrcCount + 1;
+                        } else if (isVectorIntegerWidening){
+                            int64_t Aitem = (int64_t)((int64_t*)Adata)[i] ;
+                            int64_t Bitem = (int64_t)((int64_t*)Bdata)[i] ;
+                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
+                            int64_t Dstitem = (int64_t)((int64_t*)Dstdata)[i] ;
+                            int64_t Ditem = compute_int_widening_op(Aitem, Bitem, Mitem,
+                                Dstitem, insn);
+                            memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
+                                DST_SIZE);
                         } else {
                             int Aitem = (int)((int*)Adata)[i] ;
                             int Bitem = (int)((int*)Bdata)[i] ;
@@ -774,6 +793,8 @@ Datapath::evaluate()
                             uint8_t Mitem = ((uint8_t*)Mdata)[i];
                             accumInt16 = computeInt16Reduction(accumInt16,Bitem,Mitem);
                             red_SrcCount=red_SrcCount + 1;
+                        } else if (isVectorIntegerWidening){
+
                         } else {
                             uint16_t Aitem = (uint16_t)((uint16_t*)Adata)[i];
                             uint16_t Bitem = (uint16_t)((uint16_t*)Bdata)[i];
@@ -832,6 +853,8 @@ Datapath::evaluate()
                             uint8_t Mitem = ((uint8_t*)Mdata)[i];
                             accumInt8 = computeInt8Reduction(accumInt8,Bitem,Mitem);
                             red_SrcCount=red_SrcCount + 1;
+                        } else if (isVectorIntegerWidening){
+
                         } else {
                             int8_t Aitem = (int8_t)((int8_t*)Adata)[i];
                             int8_t Bitem = (int8_t)((int8_t*)Bdata)[i];

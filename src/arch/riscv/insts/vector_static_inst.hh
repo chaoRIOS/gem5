@@ -74,6 +74,10 @@ public:
       virtual bool isVecConfig() const = 0;
       /* Vector instructions that moves whole vector registers */
       virtual bool isVectorRegisterMove() const = 0;
+      /* Vector Integer Widening instructions */
+      virtual bool isVectorIntegerWidening() const = 0;
+      /* Vector Integer Widening instructions that operate on 2 operands of different SEWs*/
+      virtual bool isVectorIntegerWideningCrossSew() const = 0;
       /* general riscv vector memory instruction */
       virtual bool isVectorInstMem() const = 0;
       /* vector load */
@@ -111,6 +115,10 @@ public:
       virtual bool VectorToScalar() const = 0;
       /* Vector instructions that moves whole vector registers */
       virtual bool VectorRegisterMove() const = 0;
+      /* Vector Integer Widening instructions */
+      virtual bool VectorIntegerWidening() const = 0;
+      /* Vector Integer Widening instructions that operate on 2 operands of different SEWs*/
+      virtual bool VectorIntegerWideningCrossSew() const = 0;
       /* Vector instructions  that have src2 as vector source*/
       virtual bool arith1Src() const = 0;
       /* Vector instructions  that have src1 and src2 as vector sources*/
@@ -203,6 +211,8 @@ class RiscvVectorInsn : public VectorStaticInst
 
   bool VectorToScalar()      const override { return opClass() == VectorToScalarOp; }
   bool VectorRegisterMove()      const override { return opClass() == VectorRegisterMoveOp; }
+  bool VectorIntegerWidening()      const override { return opClass() == VectorIntegerWideningOp; }
+  bool VectorIntegerWideningCrossSew()      const override { return (opClass() == VectorIntegerWideningOp) && (func6()==0x34 || func6()==0x35 || func6()==0x36 || func6()==0x37); }
 
   bool VectorMaskLogical()   const override { return opClass() == VectorMaskLogicalOp; }
 
@@ -212,7 +222,7 @@ class RiscvVectorInsn : public VectorStaticInst
                                                     || isWConvertFPToInt() || isWConvertIntToFP() || isWConvertFPToFP()
                                                     ; }
 
-  bool arith2Srcs()          const override { return (opClass() == VectorArith2SrcOp) || is_slide() || VectorMaskLogical() || is_reduction() || isFPCompare() || isIntCompare(); }
+  bool arith2Srcs()          const override { return (opClass() == VectorArith2SrcOp) || is_slide() || VectorMaskLogical() || is_reduction() || isFPCompare() || isIntCompare() || isVectorIntegerWidening(); }
 
   bool arith3Srcs()          const override { return opClass() == VectorArith3SrcOp; }
 
@@ -249,10 +259,14 @@ class RiscvVectorInsn : public VectorStaticInst
   bool isVectorInstMem()     const override { return isLoad() || isStore(); }
 
   bool isVectorRegisterMove() const { return VectorRegisterMove(); }
+  
+  bool isVectorIntegerWidening() const { return VectorIntegerWidening(); }
+
+  bool isVectorIntegerWideningCrossSew() const { return VectorIntegerWideningCrossSew(); }
 
   bool isVecConfig()         const override { return opClass() == VectorConfigOp; }
 
-  bool isVectorInst()        const { return isVectorInstArith() || isVectorInstMem() || isVecConfig() || isVectorRegisterMove(); }
+  bool isVectorInst()        const { return isVectorInstArith() || isVectorInstMem() || isVecConfig() || isVectorRegisterMove() || isVectorIntegerWidening(); }
 
   uint32_t width()           const override { return x(12, 3); }
 

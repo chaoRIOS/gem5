@@ -64,7 +64,7 @@ class OpClass(Enum):
             'VectorNConvertFPToInt','VectorNConvertIntToFP','VectorNConvertFPToFP',
             'VectorFPCompare','VectorIntCompare',
             'VectorSlideUp','VectorSlideDown',
-            'VectorToScalar', 'VectorRegisterMove',
+            'VectorToScalar', 'VectorRegisterMove', "VectorIntegerWidening", 
             'VectorMemoryLoad', 'VectorMemoryStore', 
             'VectorConfig']
 

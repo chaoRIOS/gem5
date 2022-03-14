@@ -124,6 +124,7 @@ static const OpClass VectorMemoryStoreOp = Enums::VectorMemoryStore;
 static const OpClass VectorConfigOp = Enums::VectorConfig;
 static const OpClass VectorToScalarOp = Enums::VectorToScalar;
 static const OpClass VectorRegisterMoveOp = Enums::VectorRegisterMove;
+static const OpClass VectorIntegerWideningOp = Enums::VectorIntegerWidening;
 static const OpClass Num_OpClasses = Enums::Num_OpClass;
 
 #endif // __CPU__OP_CLASS_HH__

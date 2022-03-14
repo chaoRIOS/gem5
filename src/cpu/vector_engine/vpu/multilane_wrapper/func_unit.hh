@@ -1956,6 +1956,85 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
     return Ditem;
 }
 
+
+/* 
+ * Integer Widening Instructions
+ */
+
+__int128_t
+Datapath::compute_long_int_widening_op(__int128_t Aitem, __int128_t Bitem,
+    uint8_t Mitem, __int128_t Dstitem, RiscvISA::VectorStaticInst* insn)
+{
+    return 0;
+}
+
+int64_t
+Datapath::compute_int_widening_op(int64_t Aitem, int64_t Bitem,  uint8_t Mitem, int64_t Dstitem,
+    RiscvISA::VectorStaticInst* insn)
+{
+    int64_t Ditem=0;
+    std::string operation = insn->getName();
+    numALU32_operations = numALU32_operations.value() + 1; // number of 32-bit ALU operations
+
+    if ((operation == "vwadd_vv") || (operation == "vwadd_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (int64_t)(int32_t)Aitem + (int64_t)(int32_t)Bitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x + %#018x = %#018x  \n",
+            Aitem, Bitem, Ditem);
+    }
+    if ((operation == "vwaddu_vv") || (operation == "vwaddu_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint64_t)(uint32_t)Aitem + (uint64_t)(uint32_t)Bitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d = %d  \n",
+            Aitem, Bitem, Ditem);
+    }
+    if ((operation == "vwadd_wv") || (operation == "vwadd_wx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (int64_t)(int32_t)Aitem + (int64_t)Bitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x + %#018x = %#018x  \n",
+            Aitem, Bitem, Ditem);
+    }
+    if ((operation == "vwaddu_wv") || (operation == "vwaddu_wx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint64_t)(uint32_t)Aitem + (uint64_t)Bitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d + %d = %d  \n",
+            Aitem, Bitem, Ditem);
+    }
+    
+    if ((operation == "vwsub_vv") || (operation == "vwsub_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (int64_t)(int32_t)Aitem - (int64_t)(int32_t)Bitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d - %d = %d  \n",
+            Aitem, Bitem, Ditem);
+    }
+    if ((operation == "vwsubu_vv") || (operation == "vwsubu_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint64_t)(uint32_t)Aitem - (uint64_t)(uint32_t)Bitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d - %d = %d  \n",
+            Aitem, Bitem, Ditem);
+    }
+    if ((operation == "vwsub_wv") || (operation == "vwsub_wx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (int64_t)(int32_t)Aitem - (int64_t)Bitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d - %d = %d  \n",
+            Aitem, Bitem, Ditem);
+    }
+    if ((operation == "vwsubu_wv") || (operation == "vwsubu_wx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint64_t)(uint32_t)Aitem - (uint64_t)Bitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %d - %d = %d  \n",
+            Aitem, Bitem, Ditem);
+    }
+    
+    return Ditem;
+}
+
+int32_t
+Datapath::compute_int16_widening_op(int32_t Aitem, int32_t Bitem, uint8_t Mitem, int32_t Dstitem,
+    RiscvISA::VectorStaticInst* insn)
+{
+    return 0;
+}
+
+int16_t
+Datapath::compute_int8_widening_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem, int16_t Dstitem,
+    RiscvISA::VectorStaticInst* insn)
+{
+    return 0;
+}
+
 /*
  * Integer Reductions :Missing cases
  */
