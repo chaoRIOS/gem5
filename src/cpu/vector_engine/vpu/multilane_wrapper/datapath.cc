@@ -676,8 +676,9 @@ Datapath::evaluate()
                             __int128_t Bitem = (__int128_t)((__int128_t*)Bdata)[i] ;
                             uint8_t Mitem = ((uint8_t*)Mdata)[i];
                             __int128_t Dstitem = (__int128_t)((__int128_t*)Dstdata)[i] ;
-                            __int128_t Ditem = compute_long_int_widening_op(Aitem, Bitem, Mitem,
-                                Dstitem, insn);
+                            numALU64_operations = numALU64_operations.value() + 1;
+                            __int128_t Ditem = compute_widening_op<__int128_t, __uint128_t,
+                                int64_t, uint64_t>(Aitem, Bitem, Mitem, Dstitem, insn);
                             memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
                                 DST_SIZE);
                         } else {
@@ -743,9 +744,9 @@ Datapath::evaluate()
                             int64_t Bitem = (int64_t)((int64_t*)Bdata)[i] ;
                             uint8_t Mitem = ((uint8_t*)Mdata)[i];
                             int64_t Dstitem = (int64_t)((int64_t*)Dstdata)[i] ;
-                            int64_t Ditem = compute_widening_op<int64_t,uint64_t,int32_t,uint32_t>(Aitem, Bitem, Mitem,Dstitem, insn);
-                            // int64_t Ditem = compute_int_widening_op(Aitem, Bitem, Mitem,
-                            //     Dstitem, insn);
+                            numALU32_operations = numALU32_operations.value() + 1;
+                            int64_t Ditem = compute_widening_op<int64_t, uint64_t,
+                                int32_t, uint32_t>(Aitem, Bitem, Mitem,Dstitem, insn);
                             memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
                                 DST_SIZE);
                         } else {
@@ -810,8 +811,9 @@ Datapath::evaluate()
                             int32_t Bitem = (int32_t)((int32_t*)Bdata)[i] ;
                             uint8_t Mitem = ((uint8_t*)Mdata)[i];
                             int32_t Dstitem = (int32_t)((int32_t*)Dstdata)[i] ;
-                            int32_t Ditem = compute_int16_widening_op(Aitem, Bitem, Mitem,
-                                Dstitem, insn);
+                            numALU16_operations = numALU16_operations.value() + 1;
+                            int32_t Ditem = compute_widening_op<int32_t, uint32_t,
+                                int16_t, uint16_t>(Aitem, Bitem, Mitem, Dstitem, insn);
                             memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
                                 DST_SIZE);
                         } else {
@@ -877,8 +879,9 @@ Datapath::evaluate()
                             int16_t Bitem = (int16_t)((int16_t*)Bdata)[i] ;
                             uint8_t Mitem = ((uint8_t*)Mdata)[i];
                             int16_t Dstitem = (int16_t)((int16_t*)Dstdata)[i] ;
-                            int16_t Ditem = compute_int8_widening_op(Aitem, Bitem, Mitem,
-                                Dstitem, insn);
+                            numALU8_operations = numALU8_operations.value() + 1;
+                            int16_t Ditem = compute_widening_op<int16_t, uint16_t,
+                                int8_t, uint8_t>(Aitem, Bitem, Mitem, Dstitem, insn);
                             memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
                                 DST_SIZE);
                         } else {

@@ -97,16 +97,6 @@ public:
     template<typename WT, typename UWT, typename T, typename UT> WT 
     compute_widening_op(WT Aitem, WT Bitem,  uint8_t Mitem, WT Dstitem,
     RiscvISA::VectorStaticInst* insn);
-    
-    __int128_t compute_long_int_widening_op(__int128_t Aitem, __int128_t Bitem,
-        uint8_t Mitem, __int128_t Dstitem, RiscvISA::VectorStaticInst* insn);
-    int64_t compute_int_widening_op(int64_t Aitem, int64_t Bitem,  uint8_t Mitem, int64_t Dstitem,
-        RiscvISA::VectorStaticInst* insn);
-    int32_t compute_int16_widening_op(int32_t Aitem, int32_t Bitem, uint8_t Mitem, int32_t Dstitem,
-        RiscvISA::VectorStaticInst* insn);
-    int16_t compute_int8_widening_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem, int16_t Dstitem,
-        RiscvISA::VectorStaticInst* insn);
-
 
     long int computeLongMaskLogicalOp(bool Aitem, bool Bitem,
         RiscvISA::VectorStaticInst* insn);
