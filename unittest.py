@@ -67,15 +67,6 @@ tests = [
 
 
     # 11 widening
-    'rv64uv-p-vwadd',
-    'rv64uv-p-vwaddu',
-    'rv64uv-p-vwsub',
-    'rv64uv-p-vwsubu',
-    'rv64uv-p-vwmacc',
-    'rv64uv-p-vwmaccu',
-    'rv64uv-p-vwmaccsu',
-    'rv64uv-p-vwmaccus',
-    'rv64uv-p-vwmul',
     'rv64uv-p-vwredsum',
     'rv64uv-p-vwredsumu',
 ]

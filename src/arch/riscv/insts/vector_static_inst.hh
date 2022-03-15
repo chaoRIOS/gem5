@@ -222,9 +222,9 @@ class RiscvVectorInsn : public VectorStaticInst
                                                     || isWConvertFPToInt() || isWConvertIntToFP() || isWConvertFPToFP()
                                                     ; }
 
-  bool arith2Srcs()          const override { return (opClass() == VectorArith2SrcOp) || is_slide() || VectorMaskLogical() || is_reduction() || isFPCompare() || isIntCompare() || isVectorIntegerWidening(); }
+  bool arith2Srcs()          const override { return (opClass() == VectorArith2SrcOp) || is_slide() || VectorMaskLogical() || is_reduction() || isFPCompare() || isIntCompare() || (isVectorIntegerWidening() && !(func6()==0x3C || func6()==0x3D || func6()==0x3E || func6()==0x3F)); }
 
-  bool arith3Srcs()          const override { return opClass() == VectorArith3SrcOp; }
+  bool arith3Srcs()          const override { return (opClass() == VectorArith3SrcOp) || (isVectorIntegerWidening() && (func6()==0x3C || func6()==0x3D || func6()==0x3E || func6()==0x3F)); }
 
   bool isLoad()              const override { return opClass() == VectorMemoryLoadOp; }
 

@@ -481,20 +481,20 @@ VectorLane::issue(VectorEngine& vector_wrapper,
         {
             DPRINTF(VectorLane,"Reading dstReader \n" );
             //Leemos el old detination para el caso de mask Op
-            dstReader->initialize(vector_wrapper, vl_count, DATA_SIZE,
-                addr_OldDst, 0, 1, location, xc, [addr_OldDst, DATA_SIZE, vl_count, this]
+            dstReader->initialize(vector_wrapper, vl_count, DST_SIZE,
+                addr_OldDst, 0, 1, location, xc, [addr_OldDst, DST_SIZE, vl_count, this]
                 (uint8_t* data, uint8_t size, bool done)
                 {
-                    assert(size == DATA_SIZE);
-                    uint8_t* ndata = new uint8_t[DATA_SIZE];
-                    memcpy(ndata, data, DATA_SIZE);
+                    assert(size == DST_SIZE);
+                    uint8_t* ndata = new uint8_t[DST_SIZE];
+                    memcpy(ndata, data, DST_SIZE);
                     this->DstdataQ.push_back(ndata);
-                    if (DATA_SIZE == 8) {
+                    if (DST_SIZE == 8) {
                         DPRINTF(VectorLane, "queue Data dstReader "
                             "0x%x , queue_size = %d \n", *(uint64_t*)ndata,
                             this->DstdataQ.size());                    
                     }
-                    if (DATA_SIZE == 4) {
+                    if (DST_SIZE == 4) {
                         DPRINTF(VectorLane, "queue Data dstReader "
                             "0x%x , queue_size = %d \n", *(uint32_t*)ndata,
                             this->DstdataQ.size());                    

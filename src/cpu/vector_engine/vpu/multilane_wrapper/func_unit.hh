@@ -1961,6 +1961,101 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
  * Integer Widening Instructions
  */
 
+template<typename WT, typename UWT, typename T, typename UT>
+WT
+Datapath::compute_widening_op(WT Aitem, WT Bitem,  uint8_t Mitem, WT Dstitem,
+    RiscvISA::VectorStaticInst* insn)
+{
+    WT Ditem=0;
+    std::string operation = insn->getName();
+
+    if ((operation == "vwadd_vv") || (operation == "vwadd_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (WT)(T)Bitem + (WT)(T)Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x + %#018x = %#018x  \n",
+            Bitem, Aitem, Ditem);
+    }
+    if ((operation == "vwaddu_vv") || (operation == "vwaddu_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (UWT)(UT)Bitem + (UWT)(UT)Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x + %#018x = %#018x  \n",
+            Bitem, Aitem, Ditem);
+    }
+    if ((operation == "vwadd_wv") || (operation == "vwadd_wx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (WT)Bitem + (WT)(T)Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x + %#018x = %#018x  \n",
+            Bitem, Aitem, Ditem);
+    }
+    if ((operation == "vwaddu_wv") || (operation == "vwaddu_wx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (UWT)Bitem + (UWT)(UT)Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x + %#018x = %#018x  \n",
+            Bitem, Aitem, Ditem);
+    }
+    
+    if ((operation == "vwsub_vv") || (operation == "vwsub_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (WT)(T)Bitem - (WT)(T)Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x - %#018x = %#018x  \n",
+            Bitem, Aitem, Ditem);
+    }
+    if ((operation == "vwsubu_vv") || (operation == "vwsubu_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (UWT)(UT)Bitem - (UWT)(UT)Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x - %#018x = %#018x  \n",
+            Bitem, Aitem, Ditem);
+    }
+    if ((operation == "vwsub_wv") || (operation == "vwsub_wx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (WT)Bitem - (WT)(T)Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x - %#018x = %#018x  \n",
+            Bitem, Aitem, Ditem);
+    }
+    if ((operation == "vwsubu_wv") || (operation == "vwsubu_wx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (UWT)Bitem - (UWT)(UT)Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x - %#018x = %#018x  \n",
+            Bitem, Aitem, Ditem);
+    }
+    
+    if ((operation == "vwmul_vv") || (operation == "vwmul_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (WT)(T)Bitem * (WT)(T)Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x * %#018x = %#018x  \n",
+            Aitem, Bitem, Ditem);
+    }
+    if ((operation == "vwmulu_vv") || (operation == "vwmulu_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (UWT)(UT)Bitem * (UWT)(UT)Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x * %#018x = %#018x  \n",
+            Aitem, Bitem, Ditem);
+    }
+    // signed(vs2), unsigned(vs1)
+    if ((operation == "vwmulsu_vv") || (operation == "vwmulsu_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (WT)(T)Bitem * (UWT)(UT)Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x * %#018x = %#018x  \n",
+            Aitem, Bitem, Ditem);
+    }
+    
+    if ((operation == "vwmacc_vv") || (operation == "vwmacc_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? ((WT)(T)Bitem * (WT)(T)Aitem) + (WT)Dstitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x * %#018x + %#018x = %#018x  \n",
+            Aitem, Bitem, Dstitem, Ditem);
+    }
+    if ((operation == "vwmaccu_vv") || (operation == "vwmaccu_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? ((UWT)(UT)Bitem * (UWT)(UT)Aitem) + (WT)Dstitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x * %#018x + %#018x = %#018x  \n",
+            Aitem, Bitem, Dstitem, Ditem);
+    }
+    // signed(vs1/rs1), unsigned(vs2)
+    if ((operation == "vwmaccsu_vv") || (operation == "vwmaccsu_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? ((UWT)(UT)Bitem * (WT)(T)Aitem) + (WT)Dstitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x * %#018x + %#018x = %#018x  \n",
+            Aitem, Bitem, Dstitem, Ditem);
+    }
+    // signed(vs2), unsigned(rs1)
+    // (operation == "vwmaccus_vv") is not provided in riscv-v-spec 
+    if ((operation == "vwmaccus_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? ((WT)(T)Bitem * (UWT)(UT)Aitem) + (WT)Dstitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x * %#018x + %#018x = %#018x  \n",
+            Aitem, Bitem, Dstitem, Ditem);
+    }
+        
+    return Ditem;
+}
+
+
 __int128_t
 Datapath::compute_long_int_widening_op(__int128_t Aitem, __int128_t Bitem,
     uint8_t Mitem, __int128_t Dstitem, RiscvISA::VectorStaticInst* insn)
@@ -1977,47 +2072,88 @@ Datapath::compute_int_widening_op(int64_t Aitem, int64_t Bitem,  uint8_t Mitem, 
     numALU32_operations = numALU32_operations.value() + 1; // number of 32-bit ALU operations
 
     if ((operation == "vwadd_vv") || (operation == "vwadd_vx")) {
-        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (int64_t)(int32_t)Aitem + (int64_t)(int32_t)Bitem : Dstitem;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (int64_t)(int32_t)Bitem + (int64_t)(int32_t)Aitem : Dstitem;
         DPRINTF(Datapath,"WB Instruction = %#018x + %#018x = %#018x  \n",
-            Aitem, Bitem, Ditem);
+            Bitem, Aitem, Ditem);
     }
     if ((operation == "vwaddu_vv") || (operation == "vwaddu_vx")) {
-        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint64_t)(uint32_t)Aitem + (uint64_t)(uint32_t)Bitem : Dstitem;
-        DPRINTF(Datapath,"WB Instruction = %d + %d = %d  \n",
-            Aitem, Bitem, Ditem);
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint64_t)(uint32_t)Bitem + (uint64_t)(uint32_t)Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x + %#018x = %#018x  \n",
+            Bitem, Aitem, Ditem);
     }
     if ((operation == "vwadd_wv") || (operation == "vwadd_wx")) {
-        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (int64_t)(int32_t)Aitem + (int64_t)Bitem : Dstitem;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (int64_t)Bitem + (int64_t)(int32_t)Aitem : Dstitem;
         DPRINTF(Datapath,"WB Instruction = %#018x + %#018x = %#018x  \n",
-            Aitem, Bitem, Ditem);
+            Bitem, Aitem, Ditem);
     }
     if ((operation == "vwaddu_wv") || (operation == "vwaddu_wx")) {
-        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint64_t)(uint32_t)Aitem + (uint64_t)Bitem : Dstitem;
-        DPRINTF(Datapath,"WB Instruction = %d + %d = %d  \n",
-            Aitem, Bitem, Ditem);
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint64_t)Bitem + (uint64_t)(uint32_t)Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x + %#018x = %#018x  \n",
+            Bitem, Aitem, Ditem);
     }
     
     if ((operation == "vwsub_vv") || (operation == "vwsub_vx")) {
-        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (int64_t)(int32_t)Aitem - (int64_t)(int32_t)Bitem : Dstitem;
-        DPRINTF(Datapath,"WB Instruction = %d - %d = %d  \n",
-            Aitem, Bitem, Ditem);
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (int64_t)(int32_t)Bitem - (int64_t)(int32_t)Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x - %#018x = %#018x  \n",
+            Bitem, Aitem, Ditem);
     }
     if ((operation == "vwsubu_vv") || (operation == "vwsubu_vx")) {
-        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint64_t)(uint32_t)Aitem - (uint64_t)(uint32_t)Bitem : Dstitem;
-        DPRINTF(Datapath,"WB Instruction = %d - %d = %d  \n",
-            Aitem, Bitem, Ditem);
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint64_t)(uint32_t)Bitem - (uint64_t)(uint32_t)Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x - %#018x = %#018x  \n",
+            Bitem, Aitem, Ditem);
     }
     if ((operation == "vwsub_wv") || (operation == "vwsub_wx")) {
-        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (int64_t)(int32_t)Aitem - (int64_t)Bitem : Dstitem;
-        DPRINTF(Datapath,"WB Instruction = %d - %d = %d  \n",
-            Aitem, Bitem, Ditem);
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (int64_t)Bitem - (int64_t)(int32_t)Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x - %#018x = %#018x  \n",
+            Bitem, Aitem, Ditem);
     }
     if ((operation == "vwsubu_wv") || (operation == "vwsubu_wx")) {
-        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint64_t)(uint32_t)Aitem - (uint64_t)Bitem : Dstitem;
-        DPRINTF(Datapath,"WB Instruction = %d - %d = %d  \n",
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint64_t)Bitem - (uint64_t)(uint32_t)Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x - %#018x = %#018x  \n",
+            Bitem, Aitem, Ditem);
+    }
+    
+    if ((operation == "vwmul_vv") || (operation == "vwmul_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (int64_t)(int32_t)Bitem * (int64_t)(int32_t)Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x * %#018x = %#018x  \n",
+            Aitem, Bitem, Ditem);
+    }
+    if ((operation == "vwmulu_vv") || (operation == "vwmulu_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint64_t)(uint32_t)Bitem * (uint64_t)(uint32_t)Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x * %#018x = %#018x  \n",
+            Aitem, Bitem, Ditem);
+    }
+    // signed(vs2), unsigned(vs1)
+    if ((operation == "vwmulsu_vv") || (operation == "vwmulsu_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (int64_t)(int32_t)Bitem * (uint64_t)(uint32_t)Aitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x * %#018x = %#018x  \n",
             Aitem, Bitem, Ditem);
     }
     
+    if ((operation == "vwmacc_vv") || (operation == "vwmacc_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? ((int64_t)(int32_t)Bitem * (int64_t)(int32_t)Aitem) + (int64_t)Dstitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x * %#018x + %#018x = %#018x  \n",
+            Aitem, Bitem, Dstitem, Ditem);
+    }
+    if ((operation == "vwmaccu_vv") || (operation == "vwmaccu_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? ((uint64_t)(uint32_t)Bitem * (uint64_t)(uint32_t)Aitem) + (int64_t)Dstitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x * %#018x + %#018x = %#018x  \n",
+            Aitem, Bitem, Dstitem, Ditem);
+    }
+    // signed(vs1/rs1), unsigned(vs2)
+    if ((operation == "vwmaccsu_vv") || (operation == "vwmaccsu_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? ((uint64_t)(uint32_t)Bitem * (int64_t)(int32_t)Aitem) + (int64_t)Dstitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x * %#018x + %#018x = %#018x  \n",
+            Aitem, Bitem, Dstitem, Ditem);
+    }
+    // signed(vs2), unsigned(rs1)
+    // (operation == "vwmaccus_vv") is not provided in riscv-v-spec 
+    if ((operation == "vwmaccus_vx")) {
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? ((int64_t)(int32_t)Bitem * (uint64_t)(uint32_t)Aitem) + (int64_t)Dstitem : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = %#018x * %#018x + %#018x = %#018x  \n",
+            Aitem, Bitem, Dstitem, Ditem);
+    }
+
     return Ditem;
 }
 

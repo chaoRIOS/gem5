@@ -94,6 +94,10 @@ public:
     int8_t compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem, int8_t Dstitem,
         RiscvISA::VectorStaticInst* insn);
 
+    template<typename WT, typename UWT, typename T, typename UT> WT 
+    compute_widening_op(WT Aitem, WT Bitem,  uint8_t Mitem, WT Dstitem,
+    RiscvISA::VectorStaticInst* insn);
+    
     __int128_t compute_long_int_widening_op(__int128_t Aitem, __int128_t Bitem,
         uint8_t Mitem, __int128_t Dstitem, RiscvISA::VectorStaticInst* insn);
     int64_t compute_int_widening_op(int64_t Aitem, int64_t Bitem,  uint8_t Mitem, int64_t Dstitem,

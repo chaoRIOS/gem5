@@ -411,7 +411,11 @@ Datapath::evaluate()
         if (((vm==0) & !reduction) | arith3Srcs | is_slide)
         {
             uint8_t *Dstitem = vector_lane->DstdataQ.front();
-            memcpy(Dstdata+(i*DATA_SIZE), Dstitem, DATA_SIZE);
+            if (isVectorIntegerWidening && arith3Srcs) {
+                memcpy(Dstdata+(i*DATA_SIZE), Dstitem, DATA_SIZE * 2);
+            } else {
+                memcpy(Dstdata+(i*DATA_SIZE), Dstitem, DATA_SIZE);
+            }
             vector_lane->DstdataQ.pop_front();
             delete[] Dstitem;
         }
@@ -668,7 +672,14 @@ Datapath::evaluate()
                             accumLongInt = computeLongIntReduction(accumLongInt,Bitem,Mitem);
                             red_SrcCount=red_SrcCount + 1;
                         } else if (isVectorIntegerWidening){
-
+                            __int128_t Aitem = (__int128_t)((__int128_t*)Adata)[i] ;
+                            __int128_t Bitem = (__int128_t)((__int128_t*)Bdata)[i] ;
+                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
+                            __int128_t Dstitem = (__int128_t)((__int128_t*)Dstdata)[i] ;
+                            __int128_t Ditem = compute_long_int_widening_op(Aitem, Bitem, Mitem,
+                                Dstitem, insn);
+                            memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
+                                DST_SIZE);
                         } else {
                             long int Aitem = (long int)((long int*)Adata)[i];
                             long int Bitem = (long int)((long int*)Bdata)[i];
@@ -732,8 +743,9 @@ Datapath::evaluate()
                             int64_t Bitem = (int64_t)((int64_t*)Bdata)[i] ;
                             uint8_t Mitem = ((uint8_t*)Mdata)[i];
                             int64_t Dstitem = (int64_t)((int64_t*)Dstdata)[i] ;
-                            int64_t Ditem = compute_int_widening_op(Aitem, Bitem, Mitem,
-                                Dstitem, insn);
+                            int64_t Ditem = compute_widening_op<int64_t,uint64_t,int32_t,uint32_t>(Aitem, Bitem, Mitem,Dstitem, insn);
+                            // int64_t Ditem = compute_int_widening_op(Aitem, Bitem, Mitem,
+                            //     Dstitem, insn);
                             memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
                                 DST_SIZE);
                         } else {
@@ -794,7 +806,14 @@ Datapath::evaluate()
                             accumInt16 = computeInt16Reduction(accumInt16,Bitem,Mitem);
                             red_SrcCount=red_SrcCount + 1;
                         } else if (isVectorIntegerWidening){
-
+                            int32_t Aitem = (int32_t)((int32_t*)Adata)[i] ;
+                            int32_t Bitem = (int32_t)((int32_t*)Bdata)[i] ;
+                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
+                            int32_t Dstitem = (int32_t)((int32_t*)Dstdata)[i] ;
+                            int32_t Ditem = compute_int16_widening_op(Aitem, Bitem, Mitem,
+                                Dstitem, insn);
+                            memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
+                                DST_SIZE);
                         } else {
                             uint16_t Aitem = (uint16_t)((uint16_t*)Adata)[i];
                             uint16_t Bitem = (uint16_t)((uint16_t*)Bdata)[i];
@@ -854,7 +873,14 @@ Datapath::evaluate()
                             accumInt8 = computeInt8Reduction(accumInt8,Bitem,Mitem);
                             red_SrcCount=red_SrcCount + 1;
                         } else if (isVectorIntegerWidening){
-
+                            int16_t Aitem = (int16_t)((int16_t*)Adata)[i] ;
+                            int16_t Bitem = (int16_t)((int16_t*)Bdata)[i] ;
+                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
+                            int16_t Dstitem = (int16_t)((int16_t*)Dstdata)[i] ;
+                            int16_t Ditem = compute_int8_widening_op(Aitem, Bitem, Mitem,
+                                Dstitem, insn);
+                            memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
+                                DST_SIZE);
                         } else {
                             int8_t Aitem = (int8_t)((int8_t*)Adata)[i];
                             int8_t Bitem = (int8_t)((int8_t*)Bdata)[i];
