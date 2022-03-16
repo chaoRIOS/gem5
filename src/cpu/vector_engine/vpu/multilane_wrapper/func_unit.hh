@@ -596,12 +596,11 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
     }
     if ((operation == "vmulhsu_vv") || (operation == "vmulhsu_vx")) {
         if ((vm==1) || ((vm==0) && (Mitem==1))) {
-            bool negate = (Aitem < 0);
-
-            uint64_t Vs1_lo = (uint32_t)abs(Aitem);
-            uint64_t Vs1_hi = (uint64_t)abs(Aitem) >> 32;
-            uint64_t Vs2_lo = (uint32_t)(Bitem);
-            uint64_t Vs2_hi = Bitem >> 32;
+            bool negate = (Bitem < 0);
+            uint64_t Vs1_lo = (uint32_t)(Aitem);
+            uint64_t Vs1_hi = (uint64_t)(Aitem) >> 32;
+            uint64_t Vs2_lo = (uint32_t)abs(Bitem);
+            uint64_t Vs2_hi = (uint64_t)abs(Bitem) >> 32;
 
             uint64_t hi = Vs1_hi*Vs2_hi;
             uint64_t mid1 = Vs1_hi*Vs2_lo;
@@ -610,12 +609,23 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
             uint64_t carry = ((uint64_t)(uint32_t)mid1
                     + (uint64_t)(uint32_t)mid2 + (lo >> 32)) >> 32;
 
-            uint64_t res = hi +
+            uint64_t res_lo = (uint64_t)((uint64_t)((uint64_t)(uint32_t)mid1 << 32)
+                    + (uint64_t)((uint64_t)(uint32_t)mid2 << 32) + lo);
+            
+            uint64_t res_hi = hi +
                             (mid1 >> 32) +
                             (mid2 >> 32) +
                             carry;
-            Ditem = negate ? ~res + (Aitem*Bitem == 0 ? 1 : 0)
-                        : res;
+                            
+            if (negate) {
+                if (res_hi > 0) {
+                    Ditem = ~res_hi + (((Aitem == 0) || (res_lo == 0)) ? 1 : 0);
+                } else {
+                    Ditem = (Aitem == 0) ? 0 : -1; 
+                }
+            } else {
+                Ditem = res_hi;
+            }
         } else {
             Ditem = Dstitem;
         }
@@ -973,12 +983,11 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
     }
     if ((operation == "vmulhsu_vv") || (operation == "vmulhsu_vx")) {
         if ((vm==1) || ((vm==0) && (Mitem==1))) {
-            bool negate = (Aitem < 0);
-            
-            uint32_t Vs1_lo = (uint16_t)abs(Aitem);
-            uint32_t Vs1_hi = (uint32_t)abs(Aitem) >> 16;
-            uint32_t Vs2_lo = (uint16_t)(Bitem);
-            uint32_t Vs2_hi = Bitem >> 16;
+            bool negate = (Bitem < 0);
+            uint32_t Vs1_lo = (uint16_t)(Aitem);
+            uint32_t Vs1_hi = (uint32_t)(Aitem) >> 16;
+            uint32_t Vs2_lo = (uint16_t)abs(Bitem);
+            uint32_t Vs2_hi = (uint32_t)abs(Bitem) >> 16;
 
             uint32_t hi = Vs1_hi*Vs2_hi;
             uint32_t mid1 = Vs1_hi*Vs2_lo;
@@ -994,13 +1003,12 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
                             (mid1 >> 16) +
                             (mid2 >> 16) +
                             carry;
-            DPRINTF(Datapath,"res_lo = %08x\n" ,res_lo);
-            DPRINTF(Datapath,"res_hi = %08x\n" ,res_hi);
+                            
             if (negate) {
                 if (res_hi > 0) {
-                    Ditem = ~res_hi + (((Bitem == 0) || (res_lo == 0)) ? 1 : 0);
+                    Ditem = ~res_hi + (((Aitem == 0) || (res_lo == 0)) ? 1 : 0);
                 } else {
-                    Ditem = 0; 
+                    Ditem = (Aitem == 0) ? 0 : -1; 
                 }
             } else {
                 Ditem = res_hi;
@@ -1361,12 +1369,11 @@ Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
     }
     if ((operation == "vmulhsu_vv") || (operation == "vmulhsu_vx")) {
         if ((vm==1) || ((vm==0) && (Mitem==1))) {
-            bool negate = (Aitem < 0);
-
-            uint16_t Vs1_lo = (uint8_t)abs(Aitem);
-            uint16_t Vs1_hi = (uint16_t)abs(Aitem) >> 8;
-            uint16_t Vs2_lo = (uint8_t)(Bitem);
-            uint16_t Vs2_hi = Bitem >> 8;
+            bool negate = (Bitem < 0);
+            uint16_t Vs1_lo = (uint8_t)(Aitem);
+            uint16_t Vs1_hi = (uint16_t)(Aitem) >> 8;
+            uint16_t Vs2_lo = (uint8_t)abs(Bitem);
+            uint16_t Vs2_hi = (uint16_t)abs(Bitem) >> 8;
 
             uint16_t hi = Vs1_hi*Vs2_hi;
             uint16_t mid1 = Vs1_hi*Vs2_lo;
@@ -1375,12 +1382,23 @@ Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
             uint16_t carry = ((uint16_t)(uint8_t)mid1
                     + (uint16_t)(uint8_t)mid2 + (lo >> 8)) >> 8;
 
-            uint16_t res = hi +
+            uint16_t res_lo = (uint16_t)((uint16_t)((uint8_t)mid1 << 8)
+                    + (uint16_t)((uint8_t)mid2 << 8) + lo);
+            
+            uint16_t res_hi = hi +
                             (mid1 >> 8) +
                             (mid2 >> 8) +
                             carry;
-            Ditem = negate ? ~res + (Aitem*Bitem == 0 ? 1 : 0)
-                        : res;
+                            
+            if (negate) {
+                if (res_hi > 0) {
+                    Ditem = ~res_hi + (((Aitem == 0) || (res_lo == 0)) ? 1 : 0);
+                } else {
+                    Ditem = (Aitem == 0) ? 0 : -1; 
+                }
+            } else {
+                Ditem = res_hi;
+            }
         } else {
             Ditem = Dstitem;
         }
@@ -1739,12 +1757,11 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
     }
     if ((operation == "vmulhsu_vv") || (operation == "vmulhsu_vx")) {
         if ((vm==1) || ((vm==0) && (Mitem==1))) {
-            bool negate = (Aitem < 0);
-
-            uint8_t Vs1_lo = (uint8_t)(abs(Aitem) & 0xf);
-            uint8_t Vs1_hi = (uint8_t)abs(Aitem) >> 4;
-            uint8_t Vs2_lo = (uint8_t)((Bitem) & 0xf);
-            uint8_t Vs2_hi = Bitem >> 4;
+            bool negate = (Bitem < 0);
+            uint8_t Vs1_lo = (uint8_t)((Aitem) & 0xf);
+            uint8_t Vs1_hi = (uint8_t)(Aitem) >> 4;
+            uint8_t Vs2_lo = (uint8_t)(abs(Bitem) & 0xf);
+            uint8_t Vs2_hi = (uint8_t)abs(Bitem) >> 4;
 
             uint8_t hi = Vs1_hi*Vs2_hi;
             uint8_t mid1 = Vs1_hi*Vs2_lo;
@@ -1753,12 +1770,23 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
             uint8_t carry = ((uint8_t)(mid1 & 0xf)
                     + (uint8_t)(mid2 & 0xf) + (lo >> 4)) >> 4;
 
-            uint8_t res = hi +
+            uint8_t res_lo = (uint8_t)((uint8_t)((mid1 & 0xf) << 4)
+                    + (uint8_t)((mid2 & 0xf) << 4) + lo);
+            
+            uint8_t res_hi = hi +
                             (mid1 >> 4) +
                             (mid2 >> 4) +
                             carry;
-            Ditem = negate ? ~res + (Aitem*Bitem == 0 ? 1 : 0)
-                        : res;
+                            
+            if (negate) {
+                if (res_hi > 0) {
+                    Ditem = ~res_hi + (((Aitem == 0) || (res_lo == 0)) ? 1 : 0);
+                } else {
+                    Ditem = (Aitem == 0) ? 0 : -1; 
+                }
+            } else {
+                Ditem = res_hi;
+            }
         } else {
             Ditem = Dstitem;
         }

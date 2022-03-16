@@ -34,7 +34,6 @@ tests = [
     # 'rv64uv-p-vmslt',     # vcpop issue
     # 'rv64uv-p-vmsltu',    # vcpop issue
     # 'rv64uv-p-vmsne',     # vcpop issue
-    # 'rv64uv-p-vmulhsu_32',  # Dont know why
     
     # 12
     # 'rv64uv-p-vpopc',
