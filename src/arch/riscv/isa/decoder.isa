@@ -2398,10 +2398,10 @@ decode QUADRANT default Unknown::unknown() {
                 }
             0x29: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vsra_vv();
-                0x2: VectorData2SrcOp::vmadd_vv();
+                0x2: VectorData3SrcOp::vmadd_vv();
                 0x3: VectorData2SrcOp::vsra_vi();
                 0x4: VectorData2SrcOp::vsra_vx();
-                0x6: VectorData2SrcOp::vmadd_vx();
+                0x6: VectorData3SrcOp::vmadd_vx();
                 }
             0x2A: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vssrl_vv();
@@ -2410,10 +2410,10 @@ decode QUADRANT default Unknown::unknown() {
                 }
             0x2B: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vssra_vv();
-                0x2: VectorData2SrcOp::vnmsub_vv();
+                0x2: VectorData3SrcOp::vnmsub_vv();
                 0x3: VectorData2SrcOp::vssra_vi();
                 0x4: VectorData2SrcOp::vssra_vx();
-                0x6: VectorData2SrcOp::vnmsub_vx();
+                0x6: VectorData3SrcOp::vnmsub_vx();
             }
             0x2C: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vnsrl_wv();
@@ -2424,10 +2424,10 @@ decode QUADRANT default Unknown::unknown() {
                 }
             0x2D: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vnsra_wv();
-                0x2: VectorData2SrcOp::vmacc_vv();
+                0x2: VectorData3SrcOp::vmacc_vv();
                 0x3: VectorData2SrcOp::vnsra_wi();
                 0x4: VectorData2SrcOp::vnsra_wx();
-                0x6: VectorData2SrcOp::vmacc_vx();
+                0x6: VectorData3SrcOp::vmacc_vx();
                 }
             0x2E: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vnclipu_vv();
@@ -2436,10 +2436,10 @@ decode QUADRANT default Unknown::unknown() {
             }
             0x2F: decode FUNCT3 {
                 0x0: VectorData2SrcOp::vnclip_vv();
-                0x2: VectorData2SrcOp::vnmsac_vv();
+                0x2: VectorData3SrcOp::vnmsac_vv();
                 0x3: VectorData2SrcOp::vnclip_vi();
                 0x4: VectorData2SrcOp::vnclip_vx();
-                0x6: VectorData2SrcOp::vnmsac_vx();
+                0x6: VectorData3SrcOp::vnmsac_vx();
             }
             0x30: decode FUNCT3 {
                 0x0: VectorIntegerWideningOp::vwredsumu_vs();

@@ -21,10 +21,6 @@ tests = [
     # 'rv64uv-p-vrgather',
 
     # 9 integer
-    # 'rv64uv-p-vmacc',     # RAW hazard!
-    # 'rv64uv-p-vnmsac',    # together with vmacc
-    # 'rv64uv-p-vnmsub',    # together with vmacc
-    # 'rv64uv-p-vmadd',     # together with vmacc
     # 'rv64uv-p-vmadc_32',  # seems like RAW, write back to int reg failed
     # 'rv64uv-p-vmseq',     # vcpop issue
     # 'rv64uv-p-vmsgt',     # vcpop issue
