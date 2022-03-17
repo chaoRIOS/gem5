@@ -259,7 +259,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
             assert(slide_count < vl_count);
         }
 
-        dataPath->startTicking(*this, insn, vl_count, dst_count, sew,
+        dataPath->startTicking(*this, insn, xc, vl_count, dst_count, sew,
             slide_count, src1,
             [dyn_insn, done_callback, xc, mvl_element, vl_count, DST_SIZE, mask_dst, mask_dst_data, this]
         (uint8_t* data, uint8_t size, bool done) mutable {

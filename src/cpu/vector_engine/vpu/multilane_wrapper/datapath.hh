@@ -118,7 +118,7 @@ public:
 
 
     void startTicking(VectorLane& data_op_unit,
-        RiscvISA::VectorStaticInst& insn, uint64_t src_count,
+        RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc, uint64_t src_count,
         uint64_t dst_count, uint64_t vsew, uint64_t slide_count,uint64_t src1,
         std::function<void(uint8_t*,uint8_t,bool)> data_callback);
 
@@ -190,6 +190,7 @@ private:
     //state passed in for current instruction
     VectorLane* vector_lane;
     RiscvISA::VectorStaticInst* insn;
+    ExecContextPtr* xc;
     uint64_t srcCount;
     uint64_t dstCount;
     uint64_t src1;

@@ -55,6 +55,7 @@ Datapath::~Datapath()
 void
 Datapath::startTicking(
     VectorLane& data_op_unit, RiscvISA::VectorStaticInst& insn,
+    ExecContextPtr& xc, 
     uint64_t src_count, uint64_t dst_count, uint64_t vsew,
     uint64_t slide_count, uint64_t src1,
     std::function<void(uint8_t*,uint8_t,bool)> data_callback)
@@ -64,6 +65,7 @@ Datapath::startTicking(
     //copy over the configuration inputs
     this->vector_lane = &data_op_unit;
     this->insn = &insn;
+    this->xc = &xc;
     this->srcCount = src_count;
     this->dstCount = dst_count;
     this->vsew = vsew;
