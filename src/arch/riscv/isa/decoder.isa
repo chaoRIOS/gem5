@@ -2219,19 +2219,16 @@ decode QUADRANT default Unknown::unknown() {
                         0x6: VectorData1SrcOp::vzext_vf2();
                         0x7: VectorData1SrcOp::vsext_vf2();
                         }
-                    0x3: VectorData3SrcOp::vsbc_vi();
                     0x4: VectorData3SrcOp::vsbc_vx();
                     }
                 }
             0x13: decode VM {
                 0x0: decode FUNCT3 {
                     0x0: VectorData3SrcOp::vmsbc_vvm();
-                    0x3: VectorData3SrcOp::vmsbc_vim();
                     0x4: VectorData3SrcOp::vmsbc_vxm();
                     }
                 0x1: decode FUNCT3 {
                     0x0: VectorData3SrcOp::vmsbc_vv();
-                    0x3: VectorData3SrcOp::vmsbc_vi();
                     0x4: VectorData3SrcOp::vmsbc_vx();
                     }
                 }

@@ -21,7 +21,6 @@ tests = [
     # 'rv64uv-p-vrgather',
 
     # 9 integer
-    'rv64uv-p-vmadc_32',  # seems like RAW, write back to int reg failed
     # 'rv64uv-p-vmseq',     # vcpop issue
     # 'rv64uv-p-vmsgt',     # vcpop issue
     # 'rv64uv-p-vmsgtu',    # vcpop issue
@@ -32,8 +31,8 @@ tests = [
     # 'rv64uv-p-vmsne',     # vcpop issue
     
     # 12
-    # 'rv64uv-p-vpopc',
     # 'rv64uv-p-vsra',    # test_45 ?
+    # 'rv64uv-p-vpopc', # vle32
     # 'rv64uv-p-vsadd', # Passed, add vxsat
     # 'rv64uv-p-vaadd', # vxrm roundoff
     # 'rv64uv-p-vaaddu',# vxrm roundoff

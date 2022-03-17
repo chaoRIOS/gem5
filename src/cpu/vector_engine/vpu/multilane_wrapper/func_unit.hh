@@ -447,28 +447,46 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
             Aitem, Bitem, Mitem, Ditem);
     }
 
-    if ((operation == "vsbc_vv") || (operation == "vsbc_vx") || (operation == "vsbc_vi")) {
+    if ((operation == "vsbc_vv") || (operation == "vsbc_vx")) {
         Ditem = Bitem - Aitem - Mitem;
         DPRINTF(Datapath,"WB Instruction = %d - %d - %d = %d  \n",
             Bitem, Aitem, Mitem, Ditem);
     }
 
     if ((operation == "vmadc_vvm") || (operation == "vmadc_vxm") || (operation == "vmadc_vim")) {
-        Ditem = (((Mitem==1) ? 
-            Aitem + Bitem + Mitem :
-            Aitem + Bitem) > UINT64_MAX) ? 
+        Ditem = (((__uint128_t)(uint64_t)Bitem
+            + (__uint128_t)(uint64_t)Aitem
+            + ((Mitem==1) ? (__uint128_t)(uint64_t)Mitem : (__uint128_t)0))
+            > UINT64_MAX) ? 
                 1 : 
                 0;
         DPRINTF(Datapath,"WB Instruction = carry_out(%d + %d + %d) = %d  \n",
-            Aitem, Bitem, Mitem, Ditem);
+            Bitem, Aitem, Mitem, Ditem);
     }
 
     if ((operation == "vmadc_vv") || (operation == "vmadc_vx") || (operation == "vmadc_vi")) {
-        Ditem = (Aitem + Bitem > UINT64_MAX) ? 
+        Ditem = ((__uint128_t)(uint64_t)Bitem + (__uint128_t)(uint64_t)Aitem) > UINT64_MAX ? 
             1 :
             0;
         DPRINTF(Datapath,"WB Instruction = carry_out(%d + %d) = %d  \n",
-            Aitem, Bitem, Ditem);
+            Bitem, Aitem, Ditem);
+    }
+
+    if ((operation == "vmsbc_vvm") || (operation == "vmsbc_vxm")) {
+        Ditem = ((__uint128_t)(uint64_t)Bitem <
+            (__uint128_t)(uint64_t)Aitem + (__uint128_t)((Mitem==1) ? (uint64_t)Mitem : 0)) ? 
+                1 : 
+                0;
+        DPRINTF(Datapath,"WB Instruction = borrow_out(%d - %d - %d) = %d  \n",
+            Bitem, Aitem, Mitem, Ditem);
+    }
+
+    if ((operation == "vmsbc_vv") || (operation == "vmsbc_vx")) {
+        Ditem = ((uint64_t)Bitem < (uint64_t)Aitem) ? 
+            1 :
+            0;
+        DPRINTF(Datapath,"WB Instruction = borrow_out(%d - %d) = %d  \n",
+            Bitem, Aitem, Ditem);
     }
 
     if ((operation == "vmacc_vv") || (operation == "vmacc_vx")) {
@@ -831,21 +849,39 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
     numALU32_operations = numALU32_operations.value() + 1; // number of 32-bit ALU operations
 
     if ((operation == "vmadc_vvm") || (operation == "vmadc_vxm") || (operation == "vmadc_vim")) {
-        Ditem = (((Mitem==1) ? 
-            Aitem + Bitem + Mitem :
-            Aitem + Bitem) > UINT32_MAX) ? 
+        Ditem = (((uint64_t)(uint32_t)Bitem
+            + (uint64_t)(uint32_t)Aitem
+            + ((Mitem==1) ? (uint64_t)(uint32_t)Mitem : (uint64_t)0))
+            > UINT32_MAX) ? 
                 1 : 
                 0;
         DPRINTF(Datapath,"WB Instruction = carry_out(%d + %d + %d) = %d  \n",
-            Aitem, Bitem, Mitem, Ditem);
+            Bitem, Aitem, Mitem, Ditem);
     }
 
     if ((operation == "vmadc_vv") || (operation == "vmadc_vx") || (operation == "vmadc_vi")) {
-        Ditem = (Aitem > UINT32_MAX - Bitem) ? 
+        Ditem = ((uint64_t)(uint32_t)Bitem + (uint64_t)(uint32_t)Aitem) > UINT32_MAX ? 
             1 :
             0;
         DPRINTF(Datapath,"WB Instruction = carry_out(%d + %d) = %d  \n",
-            Aitem, Bitem, Ditem);
+            Bitem, Aitem, Ditem);
+    }
+
+    if ((operation == "vmsbc_vvm") || (operation == "vmsbc_vxm")) {
+        Ditem = ((uint64_t)(uint32_t)Bitem <
+            (uint64_t)(uint32_t)Aitem + (uint64_t)((Mitem==1) ? (uint32_t)Mitem : 0)) ? 
+                1 : 
+                0;
+        DPRINTF(Datapath,"WB Instruction = borrow_out(%d - %d - %d) = %d  \n",
+            Bitem, Aitem, Mitem, Ditem);
+    }
+
+    if ((operation == "vmsbc_vv") || (operation == "vmsbc_vx")) {
+        Ditem = ((uint32_t)Bitem < (uint32_t)Aitem) ? 
+            1 :
+            0;
+        DPRINTF(Datapath,"WB Instruction = borrow_out(%d - %d) = %d  \n",
+            Bitem, Aitem, Ditem);
     }
 
     if ((operation == "vmacc_vv") || (operation == "vmacc_vx")) {
@@ -1218,21 +1254,39 @@ Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
     numALU16_operations = numALU16_operations.value() + 1; // number of 16-bit ALU operations
     
     if ((operation == "vmadc_vvm") || (operation == "vmadc_vxm") || (operation == "vmadc_vim")) {
-        Ditem = (((Mitem==1) ? 
-            Aitem + Bitem + Mitem :
-            Aitem + Bitem) > UINT16_MAX) ? 
+        Ditem = (((uint32_t)(uint16_t)Bitem
+            + (uint32_t)(uint16_t)Aitem
+            + ((Mitem==1) ? (uint32_t)(uint16_t)Mitem : (uint32_t)0))
+            > UINT16_MAX) ? 
                 1 : 
                 0;
         DPRINTF(Datapath,"WB Instruction = carry_out(%d + %d + %d) = %d  \n",
-            Aitem, Bitem, Mitem, Ditem);
+            Bitem, Aitem, Mitem, Ditem);
     }
 
     if ((operation == "vmadc_vv") || (operation == "vmadc_vx") || (operation == "vmadc_vi")) {
-        Ditem = (Aitem + Bitem > UINT16_MAX) ? 
+        Ditem = ((uint32_t)(uint16_t)Bitem + (uint32_t)(uint16_t)Aitem) > UINT16_MAX ? 
             1 :
             0;
         DPRINTF(Datapath,"WB Instruction = carry_out(%d + %d) = %d  \n",
-            Aitem, Bitem, Ditem);
+            Bitem, Aitem, Ditem);
+    }
+
+    if ((operation == "vmsbc_vvm") || (operation == "vmsbc_vxm")) {
+        Ditem = ((uint32_t)(uint16_t)Bitem <
+            (uint32_t)(uint16_t)Aitem + (uint32_t)((Mitem==1) ? (uint16_t)Mitem : 0)) ? 
+                1 : 
+                0;
+        DPRINTF(Datapath,"WB Instruction = borrow_out(%d - %d - %d) = %d  \n",
+            Bitem, Aitem, Mitem, Ditem);
+    }
+
+    if ((operation == "vmsbc_vv") || (operation == "vmsbc_vx")) {
+        Ditem = ((uint16_t)Bitem < (uint16_t)Aitem) ? 
+            1 :
+            0;
+        DPRINTF(Datapath,"WB Instruction = borrow_out(%d - %d) = %d  \n",
+            Bitem, Aitem, Ditem);
     }
 
     if ((operation == "vmacc_vv") || (operation == "vmacc_vx")) {
@@ -1605,21 +1659,39 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
     numALU8_operations = numALU8_operations.value() + 1; // number of 8-bit ALU operations
 
     if ((operation == "vmadc_vvm") || (operation == "vmadc_vxm") || (operation == "vmadc_vim")) {
-        Ditem = (((Mitem==1) ? 
-            Aitem + Bitem + Mitem :
-            Aitem + Bitem) > UINT8_MAX) ? 
+        Ditem = (((uint16_t)(uint8_t)Bitem
+            + (uint16_t)(uint8_t)Aitem
+            + ((Mitem==1) ? (uint16_t)(uint8_t)Mitem : (uint16_t)0))
+            > UINT8_MAX) ? 
                 1 : 
                 0;
         DPRINTF(Datapath,"WB Instruction = carry_out(%d + %d + %d) = %d  \n",
-            Aitem, Bitem, Mitem, Ditem);
+            Bitem, Aitem, Mitem, Ditem);
     }
 
     if ((operation == "vmadc_vv") || (operation == "vmadc_vx") || (operation == "vmadc_vi")) {
-        Ditem = (Aitem + Bitem > UINT8_MAX) ? 
+        Ditem = ((uint16_t)(uint8_t)Bitem + (uint16_t)(uint8_t)Aitem) > UINT8_MAX ? 
             1 :
             0;
         DPRINTF(Datapath,"WB Instruction = carry_out(%d + %d) = %d  \n",
-            Aitem, Bitem, Ditem);
+            Bitem, Aitem, Ditem);
+    }
+
+    if ((operation == "vmsbc_vvm") || (operation == "vmsbc_vxm")) {
+        Ditem = ((uint16_t)(uint8_t)Bitem <
+            (uint16_t)(uint8_t)Aitem + (uint16_t)((Mitem==1) ? (uint8_t)Mitem : 0)) ? 
+                1 : 
+                0;
+        DPRINTF(Datapath,"WB Instruction = borrow_out(%d - %d - %d) = %d  \n",
+            Bitem, Aitem, Mitem, Ditem);
+    }
+
+    if ((operation == "vmsbc_vv") || (operation == "vmsbc_vx")) {
+        Ditem = ((uint8_t)Bitem < (uint8_t)Aitem) ? 
+            1 :
+            0;
+        DPRINTF(Datapath,"WB Instruction = borrow_out(%d - %d) = %d  \n",
+            Bitem, Aitem, Ditem);
     }
 
     if ((operation == "vmacc_vv") || (operation == "vmacc_vx")) {
