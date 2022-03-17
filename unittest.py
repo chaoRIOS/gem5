@@ -20,16 +20,6 @@ tests = [
     # 'rv64uv-p-vmre', vmvnr
     # 'rv64uv-p-vrgather',
 
-    # 9 integer
-    # 'rv64uv-p-vmseq',     # vcpop issue
-    # 'rv64uv-p-vmsgt',     # vcpop issue
-    # 'rv64uv-p-vmsgtu',    # vcpop issue
-    # 'rv64uv-p-vmsle',     # vcpop issue
-    # 'rv64uv-p-vmsleu',    # vcpop issue
-    # 'rv64uv-p-vmslt',     # vcpop issue
-    # 'rv64uv-p-vmsltu',    # vcpop issue
-    # 'rv64uv-p-vmsne',     # vcpop issue
-    
     # 12
     # 'rv64uv-p-vsra',    # test_45 ?
     # 'rv64uv-p-vpopc', # vle32
