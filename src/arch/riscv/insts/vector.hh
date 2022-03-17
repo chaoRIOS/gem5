@@ -156,51 +156,46 @@ class RiscvVectorToScalarOp : public RiscvVectorInsn
            * instructions that make use of it. These instructions writes
            * in the integer or floating point register.
            */
-          if ((func6()==0x10) && (vm()==1)){
-            if (func3()==2) {
-              // judge vmv_xs/vmv_sx 
-              if (vs1()==0) {
-                _numSrcRegs = 0;
-                _numDestRegs = 1;
-                _destRegIdx[0] = RegId(IntRegClass, vd());
-              } else if (vs2()==0) {
-                _numSrcRegs = 1;
-                _numDestRegs = 0;
-                _srcRegIdx[0] = RegId(IntRegClass, vs1());
-              }
-            } else if (func3()==5) {
-              // judge vfmv_xf/vfmv_fx
-              if (vs1()==0) {
-                _numSrcRegs = 0;
-                _numDestRegs = 1;
-                _destRegIdx[0] = RegId(FloatRegClass, vd());
-              } else if (vs2()==0) {
-                _numSrcRegs = 1;
-                _numDestRegs = 0;
-                _srcRegIdx[0] = RegId(FloatRegClass, vs1());
-              }
-            }
-          } else {
-            if ((func3()==1)) {
-                _numSrcRegs = 0;
-                _numDestRegs = 1;
-                _destRegIdx[0] = RegId(FloatRegClass, vd());
-            } else if ((func3()==2)) {
-                _numSrcRegs = 0;
-                if ((func6()==12)) {
-                  _numSrcRegs = 1;
-                  _srcRegIdx[0] = RegId(IntRegClass, vs1());
-                }
-                _numDestRegs = 1;
-                _destRegIdx[0] = RegId(IntRegClass, vd());
-            }
-          }  
-        }
+          if (func3() == 1) {
+            // vfmv_fs
+            _numSrcRegs = 0;
+            _numDestRegs = 1;
+            _destRegIdx[0] = RegId(FloatRegClass, vd());
+          } else if (func3() == 2) {
+            if (vs1() == 0) {
+              // vmv_xs
+            _numSrcRegs = 0;
+            _numDestRegs = 1;
+            _destRegIdx[0] = RegId(IntRegClass, vd());
+            } else if (vs1() == 0x10) {
+              // vcpop
+            _numSrcRegs = 0;
+            _numDestRegs = 1;
+            _destRegIdx[0] = RegId(IntRegClass, vd());
 
+            } else if (vs1() == 0x11) {
+              // vfirst
+            _numSrcRegs = 0;
+            _numDestRegs = 1;
+            _destRegIdx[0] = RegId(IntRegClass, vd());
+
+            }
+          } else if (func3() == 5) {
+            // vfmv_sf
+            _numSrcRegs = 1;
+            _numDestRegs = 0;
+            _srcRegIdx[0] = RegId(FloatRegClass, vs1());
+          } else if (func3() == 6) {
+            // vmv_sx
+            _numSrcRegs = 1;
+            _numDestRegs = 0;
+            _srcRegIdx[0] = RegId(IntRegClass, vs1());
+          }
+        }
+        
         std::string generateDisassembly(Addr pc,
             const Loader::SymbolTable *symtab) const;
     };
-
 /*
  * Whole Vector Register Move instructions
  */

@@ -2163,28 +2163,39 @@ decode QUADRANT default Unknown::unknown() {
                 0x4: VectorSlideDownOp::vslidedown_vx();
                 0x6: VectorSlideDownOp::vslide1down_vx();
                 }
-            0x10: decode VM {
-                0x0: decode FUNCT3 {
+            0x10: decode FUNCT3 {
+                0x0: decode VM {
                     0x0: VectorData3SrcOp::vadc_vvm();
-                    0x2: decode VS1 {
-                        0x10: VectorToScalarOp::vcpop_mm();
-                        0x11: VectorToScalarOp::vfirst_mm();
-                    }
-                    0x3: VectorData3SrcOp::vadc_vim();
-                    0x4: VectorData3SrcOp::vadc_vxm();
-                    }
-                0x1: decode FUNCT3 {
-                    0x2 : decode VS1 {
-                        0x0: VectorToScalarOp::vmv_xs();
-                        0x10: VectorToScalarOp::vcpop_m();
-                        0x11: VectorToScalarOp::vfirst_m();
-                    }
-                    0x5 : VectorToScalarOp::vfmv_fs();
-                    0x6 : decode VS2 {
-                        0x0: VectorToScalarOp::vmv_sx();
-                    }
+                }
+                0x1: decode VS1 {
+                    0x0: decode VM {
+                        0x1: VectorToScalarOp::vfmv_fs();
                     }
                 }
+                0x2: decode VS1 {
+                    0x0: decode VM {
+                        0x1: VectorToScalarOp::vmv_xs();
+                    }
+                    0x10: VectorToScalarOp::vcpop_m();
+                    0x11: VectorToScalarOp::vfirst_m();
+                }
+                0x3: decode VM {
+                    0x0: VectorData3SrcOp::vadc_vim();
+                }
+                0x4: decode VM {
+                    0x0: VectorData3SrcOp::vadc_vxm();
+                }
+                0x5: decode VS2 {
+                    0x0: decode VM {
+                        0x1: VectorToScalarOp::vfmv_sf();
+                    }
+                }
+                0x6: decode VS2 {
+                    0x0: decode VM {
+                        0x1: VectorToScalarOp::vmv_sx();
+                    }
+                }
+            }
             0x11: decode VM {
                 0x0: decode FUNCT3 {
                     0x0: VectorData3SrcOp::vmadc_vvm();

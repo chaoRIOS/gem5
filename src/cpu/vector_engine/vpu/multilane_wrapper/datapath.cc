@@ -155,8 +155,8 @@ Datapath::startTicking(
     vslidedown = this->insn->is_slidedown();
     vslide1down = (operation == "vslide1down_vx");
     /* Vector Mask-Register Logical Instructions */
-    vcpop = ((operation == "vcpop_m") || (operation == "vcpop_mm"));
-    vfirst = ((operation == "vfirst_m") || (operation == "vfirst_mm"));
+    vcpop = (operation == "vcpop_m");
+    vfirst = (operation == "vfirst_m");
     is_mask_logical = this->insn->VectorMaskLogical();
 
     vector_set =  ((operation == "vmv_vx") || (operation == "vmv_vi") || (operation == "vfmv_vf"));
