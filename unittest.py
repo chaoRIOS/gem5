@@ -24,10 +24,6 @@ tests = [
     # 'rv64uv-p-vsra',    # test_45 ?
     # 'rv64uv-p-vpopc', # vle32
     # 'rv64uv-p-vsadd', # Passed, add vxsat
-    # 'rv64uv-p-vaadd', # vxrm roundoff
-    # 'rv64uv-p-vaaddu',# vxrm roundoff
-    # 'rv64uv-p-vasub', # vxrm roundoff
-    # 'rv64uv-p-vasubu',# vxrm roundoff
     # 'rv64uv-p-vsmul', # vxrm roundoff
     # 'rv64uv-p-vssra', # vxrm roundoff
     # 'rv64uv-p-vssrl', # vxrm roundoff

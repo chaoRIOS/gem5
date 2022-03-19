@@ -86,6 +86,19 @@ bits(T val, int bit)
 }
 
 /**
+ * Sail-style extraction
+ * Extract the bitfield from position 'from' to 'from+num' from 'val' 
+ * and right justify it.
+ */
+template <class T>
+inline
+T
+slice(T val, int lsb, int num)
+{
+    return bits(val, lsb + num - 1, lsb);
+}
+
+/**
  * Mask off the given bits in place like bits() but without shifting.
  * msb = 63, lsb = 0
  */

@@ -410,37 +410,80 @@ Datapath::compute_double_fp_comp_op(double Aitem, double Bitem,
     return Ditem;
 }
 
+template <typename T>
+bool get_fixed_rounding_incr(T vec_elem, uint8_t shift_amount, int rounding_mode){
+    if (shift_amount == 0){
+        return 0;
+    } else {
+        switch (rounding_mode)
+        {
+        case 0b00:
+            return slice(vec_elem, shift_amount - 1, 1);
+            break;
+        case 0b01:
+            return (slice(vec_elem, shift_amount - 1, 1) == 0b1)
+                & ((slice(vec_elem, 0, shift_amount - 1) != 0)
+                    | (slice(vec_elem, shift_amount, 1) == 0b1));
+            break;
+        case 0b10:
+            return 0;
+            break;
+        case 0b11:
+            return !(slice(vec_elem, shift_amount, 1) == 0b1)
+                & (slice(vec_elem, 0, shift_amount) != 0);
+            break;
+        default:
+            break;
+        }
+    }
+    return 0;
+}
+
 long int
 Datapath::compute_long_int_op(long int Aitem, long int Bitem,
     uint8_t Mitem, long int Dstitem,  RiscvISA::VectorStaticInst* insn)
 {
     long int Ditem=0;
     std::string operation = insn->getName();
-    numALU64_operations = numALU64_operations.value() + 1; // number of 64-bit ALU operations
-
-    // @TODO: add VXRM
+    numALU64_operations = numALU64_operations.value() + 1; // number of 64-bit ALU operations    
+    
     if ((operation == "vaadd_vv") || (operation == "vaadd_vx")) {
-        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (Aitem + Bitem) >> 1 : Dstitem;
+        __int128_t res = (__int128_t)Bitem + (__int128_t)Aitem;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            (res >> 1) + (uint64_t)get_fixed_rounding_incr<__int128_t>(res, 1, 
+                (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM))
+            : Dstitem;
         DPRINTF(Datapath,"WB Instruction = roundoff_signed(%d + %d)  = %d  \n",
-            Aitem,Bitem, Ditem);
+            Bitem,Aitem, Ditem);
     }
     if ((operation == "vaaddu_vv") || (operation == "vaaddu_vx")) {
-        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint64_t)(Aitem + Bitem) >> 1 : Dstitem;
+        __uint128_t res = (__uint128_t)(uint64_t)Bitem + (__uint128_t)(uint64_t)Aitem;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            (res >> 1) + (uint64_t)get_fixed_rounding_incr<__uint128_t>(res, 1, 
+                (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM))
+            : Dstitem;
         DPRINTF(Datapath,"WB Instruction = roundoff_unsigned(%d + %d)  = %d  \n",
-            Aitem,Bitem, Ditem);
+            Bitem,Aitem, Ditem);
     }
     if ((operation == "vasub_vv") || (operation == "vasub_vx")) {
-        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (Aitem + Bitem) >> 1 : Dstitem;
+        __int128_t res = (__int128_t)Bitem - (__int128_t)Aitem;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            (res >> 1) + (uint64_t)get_fixed_rounding_incr<__int128_t>(res, 1, 
+                (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM))
+            : Dstitem;
         DPRINTF(Datapath,"WB Instruction = roundoff_signed(%d - %d)  = %d  \n",
-            Aitem,Bitem, Ditem);
+            Bitem,Aitem, Ditem);
     }
     if ((operation == "vasubu_vv") || (operation == "vasubu_vx")) {
-        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (uint64_t)(Aitem + Bitem) >> 1 : Dstitem;
+        __uint128_t res = (__uint128_t)(uint64_t)Bitem - (__uint128_t)(uint64_t)Aitem;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            (res >> 1) + (uint64_t)get_fixed_rounding_incr<__uint128_t>(res, 1, 
+                (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM))
+            : Dstitem;
         DPRINTF(Datapath,"WB Instruction = roundoff_unsigned(%d - %d)  = %d  \n",
-            Aitem,Bitem, Ditem);
+            Bitem,Aitem, Ditem);
     }
-    
-    
+
     if ((operation == "vadc_vvm") || (operation == "vadc_vxm") || (operation == "vadc_vim")) {
         Ditem = Aitem + Bitem + Mitem;
         DPRINTF(Datapath,"WB Instruction = %d + %d + %d = %d  \n",
@@ -848,6 +891,43 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
     std::string operation = insn->getName();
     numALU32_operations = numALU32_operations.value() + 1; // number of 32-bit ALU operations
 
+    if ((operation == "vaadd_vv") || (operation == "vaadd_vx")) {
+        int64_t res = (int64_t)Bitem + (int64_t)Aitem;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            (res >> 1) + (uint32_t)get_fixed_rounding_incr<int64_t>(res, 1, 
+                (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM))
+            : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = roundoff_signed(%d + %d)  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+    if ((operation == "vaaddu_vv") || (operation == "vaaddu_vx")) {
+        uint64_t res = (uint64_t)(uint32_t)Bitem + (uint64_t)(uint32_t)Aitem;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            (res >> 1) + (uint32_t)get_fixed_rounding_incr<uint64_t>(res, 1, 
+                (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM))
+            : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = roundoff_unsigned(%d + %d)  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+    if ((operation == "vasub_vv") || (operation == "vasub_vx")) {
+        int64_t res = (int64_t)Bitem - (int64_t)Aitem;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            (res >> 1) + (uint32_t)get_fixed_rounding_incr<int64_t>(res, 1, 
+                (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM))
+            : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = roundoff_signed(%d - %d)  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+    if ((operation == "vasubu_vv") || (operation == "vasubu_vx")) {
+        uint64_t res = (uint64_t)(uint32_t)Bitem - (uint64_t)(uint32_t)Aitem;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            (res >> 1) + (uint32_t)get_fixed_rounding_incr<uint64_t>(res, 1, 
+                (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM))
+            : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = roundoff_unsigned(%d - %d)  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+
     if ((operation == "vmadc_vvm") || (operation == "vmadc_vxm") || (operation == "vmadc_vim")) {
         Ditem = (((uint64_t)(uint32_t)Bitem
             + (uint64_t)(uint32_t)Aitem
@@ -1253,6 +1333,43 @@ Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
     std::string operation = insn->getName();
     numALU16_operations = numALU16_operations.value() + 1; // number of 16-bit ALU operations
     
+    if ((operation == "vaadd_vv") || (operation == "vaadd_vx")) {
+        int32_t res = (int32_t)Bitem + (int32_t)Aitem;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            (res >> 1) + (uint16_t)get_fixed_rounding_incr<int32_t>(res, 1, 
+                (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM))
+            : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = roundoff_signed(%d + %d)  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+    if ((operation == "vaaddu_vv") || (operation == "vaaddu_vx")) {
+        uint32_t res = (uint32_t)(uint16_t)Bitem + (uint32_t)(uint16_t)Aitem;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            (res >> 1) + (uint16_t)get_fixed_rounding_incr<uint32_t>(res, 1, 
+                (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM))
+            : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = roundoff_unsigned(%d + %d)  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+    if ((operation == "vasub_vv") || (operation == "vasub_vx")) {
+        int32_t res = (int32_t)Bitem - (int32_t)Aitem;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            (res >> 1) + (uint16_t)get_fixed_rounding_incr<int32_t>(res, 1, 
+                (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM))
+            : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = roundoff_signed(%d - %d)  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+    if ((operation == "vasubu_vv") || (operation == "vasubu_vx")) {
+        uint32_t res = (uint32_t)(uint16_t)Bitem - (uint32_t)(uint16_t)Aitem;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            (res >> 1) + (uint16_t)get_fixed_rounding_incr<uint32_t>(res, 1, 
+                (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM))
+            : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = roundoff_unsigned(%d - %d)  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+
     if ((operation == "vmadc_vvm") || (operation == "vmadc_vxm") || (operation == "vmadc_vim")) {
         Ditem = (((uint32_t)(uint16_t)Bitem
             + (uint32_t)(uint16_t)Aitem
@@ -1657,6 +1774,43 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
     int8_t Ditem = 0;
     std::string operation = insn->getName();
     numALU8_operations = numALU8_operations.value() + 1; // number of 8-bit ALU operations
+
+    if ((operation == "vaadd_vv") || (operation == "vaadd_vx")) {
+        int16_t res = (int16_t)Bitem + (int16_t)Aitem;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            (res >> 1) + (uint8_t)get_fixed_rounding_incr<int16_t>(res, 1, 
+                (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM))
+            : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = roundoff_signed(%d + %d)  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+    if ((operation == "vaaddu_vv") || (operation == "vaaddu_vx")) {
+        uint16_t res = (uint16_t)(uint8_t)Bitem + (uint16_t)(uint8_t)Aitem;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            (res >> 1) + (uint8_t)get_fixed_rounding_incr<uint16_t>(res, 1, 
+                (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM))
+            : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = roundoff_unsigned(%d + %d)  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+    if ((operation == "vasub_vv") || (operation == "vasub_vx")) {
+        int16_t res = (int16_t)Bitem - (int16_t)Aitem;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            (res >> 1) + (uint8_t)get_fixed_rounding_incr<int16_t>(res, 1, 
+                (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM))
+            : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = roundoff_signed(%d - %d)  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
+    if ((operation == "vasubu_vv") || (operation == "vasubu_vx")) {
+        uint16_t res = (uint16_t)(uint8_t)Bitem - (uint16_t)(uint8_t)Aitem;
+        Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
+            (res >> 1) + (uint8_t)get_fixed_rounding_incr<uint16_t>(res, 1, 
+                (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM))
+            : Dstitem;
+        DPRINTF(Datapath,"WB Instruction = roundoff_unsigned(%d - %d)  = %d  \n",
+            Bitem,Aitem, Ditem);
+    }
 
     if ((operation == "vmadc_vvm") || (operation == "vmadc_vxm") || (operation == "vmadc_vim")) {
         Ditem = (((uint16_t)(uint8_t)Bitem
