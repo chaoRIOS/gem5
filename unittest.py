@@ -26,7 +26,7 @@ tests = [
     # 'rv64uv-p-vsadd', # Passed, add vxsat
     # 'rv64uv-p-vsmul', # vxrm roundoff
     # 'rv64uv-p-vssra', # vxrm roundoff
-    # 'rv64uv-p-vssrl', # vxrm roundoff
+    'rv64uv-p-vssrl', # vxrm roundoff
     # 'rv64uv-p-vnclip',# vxrm roundoff
     # 'rv64uv-p-vnclipu',# vxrm roundoff
 
