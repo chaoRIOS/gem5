@@ -460,7 +460,6 @@ VectorLane::issue(VectorEngine& vector_wrapper,
         if (masked_op)
         {
             DPRINTF(VectorLane,"Reading srcMReader \n" );
-            //DPRINTF(VectorLane,"Reading Source M \n" );
             srcMReader->initialize(vector_wrapper, vl_count, DATA_SIZE, addr_Mask,
                 0, 1, location, xc, [addr_Mask, DATA_SIZE, vl_count, this]
                 (uint8_t* data, uint8_t size, bool done)

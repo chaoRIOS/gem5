@@ -22,14 +22,12 @@ tests = [
 
     # 12
     # 'rv64uv-p-vsra',    # test_45 ?
-    # 'rv64uv-p-vpopc', # vle32
-    # 'rv64uv-p-vnclip',# vxrm roundoff
-    # 'rv64uv-p-vnclipu',# vxrm roundoff
+    'rv64uv-p-vpopc', # vcpop(0xc = 0b1100) -> 2 ?
+    # 'rv64uv-p-vnclip',# test_2 ?
+    # 'rv64uv-p-vnclipu',
 
     # 7 load/store
-    # 'rv64uv-p-vse',
 
-    # 'rv64uv-p-vsse',
     # 'rv64uv-p-vlse',
     
     # 'rv64uv-p-vsxei',
@@ -59,7 +57,7 @@ done_item = []
 fail_item = []
 err_item = []
 for test in tests[:]:
-    subp = subprocess.run(['build/RISCV/gem5.opt', '--debug-flag=VectorLane,Exec,VectorInst,VectorEngine,Registers,Datapath', 'configs/example/riscv_vector_engine.py', '--cmd=' + os.path.join(test_path, test)], stderr=2)
+    subp = subprocess.run(['build/RISCV/gem5.opt', '--debug-flag=MemUnitReadTiming,VectorRegister,VectorMemUnit,VectorLane,Exec,VectorInst,VectorEngine,Registers,Datapath', 'configs/example/riscv_vector_engine.py', '--cmd=' + os.path.join(test_path, test)], stderr=2)
     # subp = subprocess.run(['build/RISCV/gem5.opt', 'configs/example/riscv_vector_engine.py', '--cmd=' + os.path.join(test_path, test)], stderr=2)
     if subp.returncode == 0:
         # result = input(len(done_item))
