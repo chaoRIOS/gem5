@@ -2438,15 +2438,15 @@ decode QUADRANT default Unknown::unknown() {
                 0x6: VectorData3SrcOp::vmacc_vx();
                 }
             0x2E: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vnclipu_vv();
-                0x3: VectorData2SrcOp::vnclipu_vi();
-                0x4: VectorData2SrcOp::vnclipu_vx();
+                0x0: VectorIntegerWideningOp::vnclipu_wv();
+                0x3: VectorIntegerWideningOp::vnclipu_wi();
+                0x4: VectorIntegerWideningOp::vnclipu_wx();
             }
             0x2F: decode FUNCT3 {
-                0x0: VectorData2SrcOp::vnclip_vv();
+                0x0: VectorIntegerWideningOp::vnclip_wv();
                 0x2: VectorData3SrcOp::vnmsac_vv();
-                0x3: VectorData2SrcOp::vnclip_vi();
-                0x4: VectorData2SrcOp::vnclip_vx();
+                0x3: VectorIntegerWideningOp::vnclip_wi();
+                0x4: VectorIntegerWideningOp::vnclip_wx();
                 0x6: VectorData3SrcOp::vnmsac_vx();
             }
             0x30: decode FUNCT3 {

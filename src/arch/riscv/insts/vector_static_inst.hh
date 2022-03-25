@@ -212,7 +212,12 @@ class RiscvVectorInsn : public VectorStaticInst
   bool VectorToScalar()      const override { return opClass() == VectorToScalarOp; }
   bool VectorRegisterMove()      const override { return opClass() == VectorRegisterMoveOp; }
   bool VectorIntegerWidening()      const override { return opClass() == VectorIntegerWideningOp; }
-  bool VectorIntegerWideningCrossSew()      const override { return (opClass() == VectorIntegerWideningOp) && (func6()==0x34 || func6()==0x35 || func6()==0x36 || func6()==0x37); }
+  bool VectorIntegerWideningCrossSew()      const override { 
+    // @TODO: add narrowing op for vnclip
+    return (opClass() == VectorIntegerWideningOp) &&
+      ((func6()==0x34 || func6()==0x35 || func6()==0x36 || func6()==0x37) ||
+       (func6()==0x2E || func6()==0x2F));
+  }
 
   bool VectorMaskLogical()   const override { return opClass() == VectorMaskLogicalOp; }
 

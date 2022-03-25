@@ -441,7 +441,7 @@ bool get_fixed_rounding_incr(T vec_elem, uint8_t shift_amount, int rounding_mode
 }
 
 template <typename T,  typename UT>
-int
+T
 signed_saturation(int len, T elem, bool& sat)
 {
     T elem_sat = 0;
@@ -452,6 +452,22 @@ signed_saturation(int len, T elem, bool& sat)
     } else if ((T)elem < (T)(1 << (len - 1))) {
         // INT_MIN
         elem_sat = (T)(1 << (len - 1));
+        sat = true;
+    } else {
+        elem_sat = slice(elem, 0, len);
+        sat = false;
+    }
+    return elem_sat;
+}
+
+template <typename T, typename UT>
+UT
+unsigned_saturation(int len, T elem, bool& sat)
+{
+    UT elem_sat = 0;
+    if (elem > mask(len)) {
+        // UINT_MAX
+        elem_sat = mask(len);
         sat = true;
     } else {
         elem_sat = slice(elem, 0, len);
@@ -478,7 +494,7 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
                     (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM));
 
             Ditem = signed_saturation<int64_t, uint64_t>(64, Ditem, sat);
-            (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 0: 1);
+            (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
         } else {
             Ditem = Dstitem;
         }
@@ -641,14 +657,14 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
     if ((operation == "vsadd_vv") || (operation == "vsadd_vx") || (operation == "vsadd_vi")) {
         bool sat = false;
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_add<int64_t,uint64_t>(Aitem, Bitem, sat): Dstitem;
-        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 0: 1);
+        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
         DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
             Bitem,Aitem, Ditem);
     }
     if ((operation == "vsaddu_vv") || (operation == "vsaddu_vx") || (operation == "vsaddu_vi")) {
         bool sat = false;
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_addu<uint64_t>(Aitem, Bitem, sat): Dstitem;
-        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 0: 1);
+        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
         DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
             Bitem,Aitem, Ditem);
     }
@@ -656,14 +672,14 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
     if ((operation == "vssub_vv") || (operation == "vssub_vx") || (operation == "vssub_vi")) {
         bool sat = false;
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_sub<int64_t,uint64_t>(Aitem, Bitem, sat): Dstitem;
-        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 0: 1);
+        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
         DPRINTF(Datapath,"WB Instruction = %d - %d  = %d\n",
             Bitem,Aitem, Ditem);
     }
     if ((operation == "vssubu_vv") || (operation == "vssubu_vx") || (operation == "vssubu_vi")) {
         bool sat = false;
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_subu<uint64_t>(Aitem, Bitem, sat): Dstitem;
-        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 0: 1);
+        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
         DPRINTF(Datapath,"WB Instruction = %d - %d  = %d\n",
             Bitem,Aitem, Ditem);
     }
@@ -968,7 +984,7 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
                     (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM));
 
             Ditem = signed_saturation<int32_t, uint32_t>(32, Ditem, sat);
-            (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 0: 1);
+            (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
         } else {
             Ditem = Dstitem;
         }
@@ -1127,14 +1143,14 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
     if ((operation == "vsadd_vv") || (operation == "vsadd_vx") || (operation == "vsadd_vi")) {
         bool sat = false;
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_add<int32_t,uint32_t>(Aitem, Bitem, sat): Dstitem;
-        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 0: 1);
+        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
         DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
             Bitem,Aitem, Ditem);
     }
     if ((operation == "vsaddu_vv") || (operation == "vsaddu_vx") || (operation == "vsaddu_vi")) {
         bool sat = false;
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_addu<uint32_t>(Aitem, Bitem, sat): Dstitem;
-        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 0: 1);
+        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
         DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
             Bitem,Aitem, Ditem);
     }
@@ -1142,14 +1158,14 @@ Datapath::compute_int_op(int Aitem, int Bitem, uint8_t Mitem,
     if ((operation == "vssub_vv") || (operation == "vssub_vx") || (operation == "vssub_vi")) {
         bool sat = false;
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_sub<int32_t,uint32_t>(Aitem, Bitem, sat): Dstitem;
-        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 0: 1);
+        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
         DPRINTF(Datapath,"WB Instruction = %d - %d  = %d\n",
             Bitem,Aitem, Ditem);
     }
     if ((operation == "vssubu_vv") || (operation == "vssubu_vx") || (operation == "vssubu_vi")) {
         bool sat = false;
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_subu<uint32_t>(Aitem, Bitem, sat): Dstitem;
-        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 0: 1);
+        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
         DPRINTF(Datapath,"WB Instruction = %d - %d  = %d\n",
             Bitem,Aitem, Ditem);
     }
@@ -1456,7 +1472,7 @@ Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
                     (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM));
 
             Ditem = signed_saturation<int16_t, uint16_t>(16, Ditem, sat);
-            (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 0: 1);
+            (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
         } else {
             Ditem = Dstitem;
         }
@@ -1615,14 +1631,14 @@ Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
     if ((operation == "vsadd_vv") || (operation == "vsadd_vx") || (operation == "vsadd_vi")) {
         bool sat = false;
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_add<int16_t,uint16_t>(Aitem, Bitem, sat): Dstitem;
-        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 0: 1);
+        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
         DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
             Bitem,Aitem, Ditem);
     }
     if ((operation == "vsaddu_vv") || (operation == "vsaddu_vx") || (operation == "vsaddu_vi")) {
         bool sat = false;
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_addu<uint16_t>(Aitem, Bitem, sat): Dstitem;
-        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 0: 1);
+        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
         DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
             Bitem,Aitem, Ditem);
     }
@@ -1630,14 +1646,14 @@ Datapath::compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
     if ((operation == "vssub_vv") || (operation == "vssub_vx") || (operation == "vssub_vi")) {
         bool sat = false;
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_sub<int16_t,uint16_t>(Aitem, Bitem, sat): Dstitem;
-        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 0: 1);
+        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
         DPRINTF(Datapath,"WB Instruction = %d - %d  = %d\n",
             Bitem,Aitem, Ditem);
     }
     if ((operation == "vssubu_vv") || (operation == "vssubu_vx") || (operation == "vssubu_vi")) {
         bool sat = false;
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_subu<uint16_t>(Aitem, Bitem, sat): Dstitem;
-        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 0: 1);
+        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
         DPRINTF(Datapath,"WB Instruction = %d - %d  = %d\n",
             Bitem,Aitem, Ditem);
     }
@@ -1943,7 +1959,7 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
                     (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM));
 
             Ditem = signed_saturation<int8_t, uint8_t>(8, Ditem, sat);
-            (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 0: 1);
+            (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
         } else {
             Ditem = Dstitem;
         }
@@ -2102,14 +2118,14 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
     if ((operation == "vsadd_vv") || (operation == "vsadd_vx") || (operation == "vsadd_vi")) {
         bool sat = false;
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_add<int8_t,uint8_t>(Aitem, Bitem, sat): Dstitem;
-        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 0: 1);
+        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
         DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
             Bitem,Aitem, Ditem);
     }
     if ((operation == "vsaddu_vv") || (operation == "vsaddu_vx") || (operation == "vsaddu_vi")) {
         bool sat = false;
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_addu<uint8_t>(Aitem, Bitem, sat): Dstitem;
-        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 0: 1);
+        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
         DPRINTF(Datapath,"WB Instruction = %d + %d  = %d\n",
             Bitem,Aitem, Ditem);
     }
@@ -2117,14 +2133,14 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
     if ((operation == "vssub_vv") || (operation == "vssub_vx") || (operation == "vssub_vi")) {
         bool sat = false;
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_sub<int8_t,uint8_t>(Aitem, Bitem, sat): Dstitem;
-        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 0: 1);
+        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
         DPRINTF(Datapath,"WB Instruction = %d - %d  = %d\n",
             Bitem,Aitem, Ditem);
     }
     if ((operation == "vssubu_vv") || (operation == "vssubu_vx") || (operation == "vssubu_vi")) {
         bool sat = false;
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? sat_subu<uint8_t>(Aitem, Bitem, sat): Dstitem;
-        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 0: 1);
+        (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
         DPRINTF(Datapath,"WB Instruction = %d - %d  = %d\n",
             Bitem,Aitem, Ditem);
     }
@@ -2417,6 +2433,9 @@ Datapath::compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
 
 /* 
  * Integer Widening Instructions
+ * WT: widening type (2*sew)
+ * T: type (sew)
+ * U: unsigned type
  */
 
 template<typename WT, typename UWT, typename T, typename UT>
@@ -2428,6 +2447,52 @@ Datapath::compute_widening_op(WT Aitem, WT Bitem,  uint8_t Mitem, WT Dstitem,
     std::string operation = insn->getName();
 
     // @TODO: add overload for 'operator<<' for __int128
+
+    if((operation == "vnclip_wv") || (operation == "vnclip_wx") || (operation == "vnclip_wx")) {
+        if ((vm==1) || ((vm==0) && (Mitem==1))) {
+            bool sat = false;
+            T shift_amount = (T)Aitem & mask(vsew);
+
+            Ditem = (Bitem >> shift_amount)
+                + get_fixed_rounding_incr<WT>(Bitem, shift_amount, 
+                    (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM));
+
+            Ditem = signed_saturation<WT, UWT>(vsew, Ditem, sat);
+
+            // @TODO: add narrowing op
+            // Currently re-use wideningCrossSew op
+            Ditem = (WT)(Ditem & (UWT)mask(vsew)) | (UWT)(Dstitem & ((UWT)mask(vsew) << vsew));
+
+            (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
+        } else {
+            Ditem = Dstitem;
+        }
+        DPRINTF(Datapath, "WB Instruction = clip(roundoff_signed(%#010x, %#010x)) = %#010x  \n",
+            (T)Bitem, (T)Aitem, (T)Ditem);
+    }
+
+    if((operation == "vnclipu_wv") || (operation == "vnclipu_wx") || (operation == "vnclipu_wx")) {
+        if ((vm==1) || ((vm==0) && (Mitem==1))) {
+            bool sat = false;
+            T shift_amount = (T)Aitem & mask(vsew);
+
+            Ditem = ((UWT)Bitem >> shift_amount)
+                + get_fixed_rounding_incr<UWT>((UWT)Bitem, shift_amount, 
+                    (*xc) -> readMiscReg(RiscvISA::MISCREG_VXRM));
+
+            Ditem = unsigned_saturation<UWT, UT>(vsew, Ditem, sat);
+
+            // @TODO: add narrowing op
+            // Currently re-use wideningCrossSew op
+            Ditem = (UWT)(Ditem & (UWT)mask(vsew)) | (UWT)(Dstitem & ((UWT)mask(vsew) << vsew));
+
+            (*xc) -> setMiscReg(RiscvISA::MISCREG_VXSAT, sat ? 1: 0);
+        } else {
+            Ditem = Dstitem;
+        }
+        DPRINTF(Datapath, "WB Instruction = clip(roundoff_signed(%#010x, %#010x)) = %#010x  \n",
+            (T)Bitem, (T)Aitem, (T)Ditem);
+    }
 
     if ((operation == "vwadd_vv") || (operation == "vwadd_vx")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? (WT)(T)Bitem + (WT)(T)Aitem : Dstitem;
