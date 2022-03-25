@@ -28,19 +28,23 @@ tests = [
 
     # 7 load/store
     # 'rv64uv-p-vse',
+
+    # 'rv64uv-p-vsse',
+    # 'rv64uv-p-vlse',
+    
     # 'rv64uv-p-vsxei',
-    # 'rv64uv-p-vsxseg',
-    # 'rv64uv-p-vlre', unknown encoding, chap 7.9
-    # 'rv64uv-p-vlse', memOP, outer?
-    # 'rv64uv-p-vmrl', vle32
+
+    # Seg
     # 'rv64uv-p-vlseg',
     # 'rv64uv-p-vlsseg',
     # 'rv64uv-p-vlxseg',
-    # 'rv64uv-p-vsre',
-    # 'rv64uv-p-vsse',
     # 'rv64uv-p-vsseg',
     # 'rv64uv-p-vssseg',
+    # 'rv64uv-p-vsxseg', # vsuxseg
 
+    # Whole register load/store: vl<nf>r
+    # 'rv64uv-p-vlre', 
+    # 'rv64uv-p-vsre',
 
     # 11 widening
     'rv64uv-p-vwredsum',

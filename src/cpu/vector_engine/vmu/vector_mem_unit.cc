@@ -89,6 +89,24 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
      *     1 1 1  indexed-unordered          VSUXx            - not implemented
      */
 
+    /* Note:
+     * ========================================================
+     *  Vector Load/Store Addressing Modes   - version 1.0
+     * ========================================================
+     *  mop [1:0] encoding for loads
+     *     0 0  unit-stride                 VLE        
+     *     0 1  indexed-unordered           VLUXEI
+     *     1 0  strided                     VLSE
+     *     1 1  indexed-ordered             VLOXEI
+     * 
+     *  mop [2:0] encoding for stores
+     *     0 0  unit-stride                 VSE
+     *     0 1  indexed-unordered           VSUXEI
+     *     1 0  strided                     VSSE
+     *     1 1  indexed-ordered             VSOXEI
+     * 
+     */
+
     assert(!occupied);
     occupied = true;
 

@@ -663,8 +663,8 @@ Datapath::evaluate()
                                 red_SrcCount=red_SrcCount + 1;
                             }
                         } else if(is_mask_logical) {
-                            bool Aitem = (bool)((bool*)Adata)[i];
-                            bool Bitem = (bool)((bool*)Bdata)[i];
+                            int Aitem = (int)((int*)Adata)[i];
+                            int Bitem = (int)((int*)Bdata)[i];
                             long int Ditem = computeLongMaskLogicalOp(Aitem,Bitem,insn);
                             memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
                                 DST_SIZE);
@@ -731,8 +731,8 @@ Datapath::evaluate()
                                 red_SrcCount=red_SrcCount + 1;
                             }
                         } else if(is_mask_logical) {
-                            bool Aitem = (bool)((bool*)Adata)[i];
-                            bool Bitem = (bool)((bool*)Bdata)[i];
+                            int Aitem = (int)((int*)Adata)[i];
+                            int Bitem = (int)((int*)Bdata)[i];
                             int Ditem = computeIntMaskLogicalOp(Aitem,Bitem,insn);
                             memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
                                 DST_SIZE);
@@ -798,8 +798,8 @@ Datapath::evaluate()
                             }
                         }
                         else if (is_mask_logical) {
-                            bool Aitem = (bool)((bool*)Adata)[i];
-                            bool Bitem = (bool)((bool*)Bdata)[i];
+                            int Aitem = (int)((int*)Adata)[i];
+                            int Bitem = (int)((int*)Bdata)[i];
                             uint16_t Ditem = computeLongMaskLogicalOp(Aitem, Bitem, insn);
                             memcpy(Ddata + (i * DST_SIZE), (uint8_t*)&Ditem,
                                 DST_SIZE);
@@ -866,8 +866,8 @@ Datapath::evaluate()
                             }
                         }
                         else if (is_mask_logical) {
-                            bool Aitem = (bool)((bool*)Adata)[i];
-                            bool Bitem = (bool)((bool*)Bdata)[i];
+                            int Aitem = (int)((int*)Adata)[i];
+                            int Bitem = (int)((int*)Bdata)[i];
                             long int Ditem = computeLongMaskLogicalOp(Aitem, Bitem, insn);
                             memcpy(Ddata + (i * DST_SIZE), (uint8_t*)&Ditem,
                                 DST_SIZE);
