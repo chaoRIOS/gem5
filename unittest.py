@@ -22,7 +22,6 @@ tests = [
 
     # 12
     # 'rv64uv-p-vsra',    # test_45 ?
-    'rv64uv-p-vpopc', # vcpop(0xc = 0b1100) -> 2 ?
     # 'rv64uv-p-vnclip',# test_2 ?
     # 'rv64uv-p-vnclipu',
 

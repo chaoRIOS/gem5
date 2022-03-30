@@ -635,8 +635,7 @@ Datapath::evaluate()
                         {
                             if (vcpop)
                             {
-                                long int Bitem = (0x0000000000000001) &&
-                                    (long int)((long int*)Bdata)[i] ;
+                                int64_t Bitem = ((int64_t)((int64_t*)Bdata)[0] >> i) & 0x1;
                                 uint8_t Mitem = ((uint8_t*)Mdata)[i];
                                 accum_mask = (vm==1) ? accum_mask + Bitem :
                                     (Mitem) ? accum_mask + Bitem : accum_mask;
@@ -644,8 +643,7 @@ Datapath::evaluate()
                                 DPRINTF(Datapath," vcpop: Source "
                                     "%ld  Acc= %ld  \n" ,Bitem, accum_mask);
                             } else if (vfirst) {
-                                int Bitem = (0x0000000000000001) &&
-                                    (long int)((long int*)Bdata)[i] ;
+                                int64_t Bitem = ((int64_t)((int64_t*)Bdata)[0] >> i) & 0x1;
                                 uint8_t Mitem = ((uint8_t*)Mdata)[i];
 
                                 first_elem = (Bitem == 0x0000000000000001);
@@ -701,8 +699,7 @@ Datapath::evaluate()
                         {
                             if (vcpop)
                             {
-                                int Bitem = (0x00000001) &&
-                                    (int)((int*)Bdata)[i];
+                                int Bitem = ((int)((int*)Bdata)[0] >> i) & 0x1;
                                 uint8_t Mitem = ((uint8_t*)Mdata)[i];
                                 accum_mask = (vm==1) ? accum_mask + Bitem : (Mitem)
                                      ? accum_mask + Bitem : accum_mask;
@@ -711,8 +708,7 @@ Datapath::evaluate()
                                     " Acc= %d  \n" ,Bitem, accum_mask);
 
                             } else if (vfirst) {
-                                int Bitem = (0x00000001) &&
-                                    (int)((int*)Bdata)[i];
+                                int Bitem = ((int)((int*)Bdata)[0] >> i) & 0x1;
                                 uint8_t Mitem = ((uint8_t*)Mdata)[i];
 
                                 first_elem = (Bitem == 0x00000001);
@@ -768,8 +764,7 @@ Datapath::evaluate()
                         {
                             if (vcpop)
                             {
-                                uint16_t Bitem = (0x0001) &&
-                                    (uint16_t)((uint16_t*)Bdata)[i];
+                                int16_t Bitem = ((int16_t)((int16_t*)Bdata)[0] >> i) & 0x1;
                                 uint8_t Mitem = ((uint8_t*)Mdata)[i];
                                 accum_mask = (vm == 1) ? accum_mask + Bitem :
                                     (Mitem) ? accum_mask + Bitem : accum_mask;
@@ -778,8 +773,7 @@ Datapath::evaluate()
                                     "%ld  Acc= %ld  \n", Bitem, accum_mask);
                             }
                             else if (vfirst) {
-                                int Bitem = (0x0001) &&
-                                    (uint16_t)((uint16_t*)Bdata)[i];
+                                int16_t Bitem = ((int16_t)((int16_t*)Bdata)[0] >> i) & 0x1;
                                 uint8_t Mitem = ((uint8_t*)Mdata)[i];
 
                                 first_elem = (Bitem == 0x0001);
@@ -836,8 +830,7 @@ Datapath::evaluate()
                         {
                             if (vcpop)
                             {
-                                int8_t Bitem = (0x01) &&
-                                    (int8_t)((int8_t*)Bdata)[i];
+                                int8_t Bitem = ((int8_t)((int8_t*)Bdata)[0] >> i) & 0x1;
                                 uint8_t Mitem = ((uint8_t*)Mdata)[i];
                                 accum_mask = (vm == 1) ? accum_mask + Bitem :
                                     (Mitem) ? accum_mask + Bitem : accum_mask;
@@ -846,8 +839,7 @@ Datapath::evaluate()
                                     "%ld  Acc= %ld  \n", Bitem, accum_mask);
                             }
                             else if (vfirst) {
-                                int Bitem = (0x01) &&
-                                    (int8_t)((int8_t*)Bdata)[i];
+                                int8_t Bitem = ((int8_t)((int8_t*)Bdata)[0] >> i) & 0x1;
                                 uint8_t Mitem = ((uint8_t*)Mdata)[i];
 
                                 first_elem = (Bitem == 0x01);

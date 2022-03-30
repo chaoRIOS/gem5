@@ -302,12 +302,13 @@ VectorLane::issue(VectorEngine& vector_wrapper,
                     }
                     else if (DST_SIZE == 4)
                     {
-                        scalar_data = (uint64_t)((uint32_t*)ndata)[0];
+                        scalar_data = (uint64_t)(int64_t)(int32_t)(((uint32_t*)ndata)[0]);
                     }
-                    xc->setIntRegOperand(
-                        dyn_insn->get_VectorStaticInst(), 0, scalar_data);
+
                     DPRINTF(VectorLane, "Writting Int Register: %d ,data: 0x%x \n"
                         , scalar_reg, scalar_data);
+                    xc->setIntRegOperand(
+                        dyn_insn->get_VectorStaticInst(), 0, scalar_data);
                     delete data;
                     this->occupied = false;
                     this->dataPath->stopTicking();
