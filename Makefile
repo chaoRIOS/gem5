@@ -18,4 +18,4 @@ rebuild:
 	# scons $(GEM5_PATH) -j$$(nproc)
 
 test:
-	python unittest.py
+	python3 unittest.py

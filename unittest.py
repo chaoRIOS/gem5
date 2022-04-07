@@ -12,16 +12,15 @@ tests = [test for test in tests if '-v-' not in test and '-vf' not in test and '
 tests = [
 
     # 15 mask
-    # 'rv64uv-p-viota', chap 15, mask instruction
+    # 'rv64uv-p-viota', # chap 15, mask instruction
     # 'rv64uv-p-vsfmb',
 
     # 16 permutation
-    # 'rv64uv-p-vcompress', datapath
-    # 'rv64uv-p-vmre', vmvnr
+    # 'rv64uv-p-vcompress', # datapath
+    # 'rv64uv-p-vmre', # vmvnr, vmvnr is wrongly ahead of vle
     # 'rv64uv-p-vrgather',
 
     # 12
-    # 'rv64uv-p-vsra',    # test_45 ?
     # 'rv64uv-p-vnclip',# test_2 ?
     # 'rv64uv-p-vnclipu',
 
