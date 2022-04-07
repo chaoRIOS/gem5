@@ -14,8 +14,8 @@ debug:
 	$(GEM5_PATH) --debug-flag=$(flag) $(CONFIG_PATH) --cmd=$(workload)
 
 rebuild:
-	scons $(GEM5_PATH) -j16
-	# scons $(GEM5_PATH) -j$$(nproc)
+	# scons $(GEM5_PATH) -j16
+	scons $(GEM5_PATH) -j$$(nproc)
 
 test:
 	python unittest.py

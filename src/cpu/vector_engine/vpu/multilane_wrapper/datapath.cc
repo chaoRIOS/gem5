@@ -171,8 +171,9 @@ Datapath::startTicking(
     first_set_mask = -1;
 
     
-
+#ifdef DEBUG
     uint64_t pc = this->insn->getPC();
+#endif
     DPRINTF(Datapath,"Executing inst %s, pc 0x%lx, Oplatency = %d,"
         " DataType = %d-bit\n" , this->insn->getName(),*(uint64_t*)&pc,
         Oplatency , DATA_SIZE*8);

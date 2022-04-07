@@ -43,7 +43,7 @@ from common import CacheConfig
 from common import CpuConfig
 from common import MemConfig
 from common.Caches import *
-
+import time
 
 # Parse options
 ps = OptionParser()
@@ -395,6 +395,7 @@ system.mem_ctrl.port = system.membus.master
 ###############################################################################
 # Create Workload
 ###############################################################################
+begin = time.clock()
 
 process = Process()
 
@@ -429,6 +430,10 @@ root = Root(full_system = False, system = system)
 m5.instantiate()
 
 print("Beginning simulation!")
+
+
 exit_event = m5.simulate()
+end = time.clock()
 print('Exiting @ tick %i because %s' % (m5.curTick(), exit_event.getCause()))
+print("Duration:", end-begin)
 print("gem5 finished %s" % datetime.datetime.now().strftime("%b %e %Y %X"))

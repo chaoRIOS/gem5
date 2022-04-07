@@ -194,7 +194,9 @@ VectorEngine::cluster_available()
 void
 VectorEngine::printConfigInst(RiscvISA::VectorStaticInst& insn, uint64_t src1,uint64_t src2)
 {
+#ifdef DEBUG
     uint64_t pc = insn.getPC();
+#endif
     DPRINTF(VectorInst,"inst: %s vl:%d, vtype:%d       PC 0x%X\n"
         ,insn.getName(),src1,src2,*(uint64_t*)&pc );
 }
@@ -202,6 +204,7 @@ VectorEngine::printConfigInst(RiscvISA::VectorStaticInst& insn, uint64_t src1,ui
 void
 VectorEngine::printMemInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn)
 {
+#ifdef DEBUG
     uint64_t pc = insn.getPC();
     bool indexed = (insn.mop() ==3);
 
@@ -250,11 +253,13 @@ VectorEngine::printMemInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vecto
     } else {
         panic("Invalid Vector Instruction insn=%#h\n", insn.machInst);
     }
+#endif
 }
 
 void
 VectorEngine::printArithInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn)
 {
+#ifdef DEBUG
     uint64_t pc = insn.getPC();
     std::string masked;
     if(masked_op) {masked = "v0.m";} else {masked = "   ";}
@@ -306,11 +311,13 @@ VectorEngine::printArithInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vec
     } else {
         panic("Invalid Vector Instruction insn=%#h\n", insn.machInst);
     }
+#endif
 }
 
 void
 VectorEngine::printVectorRegisterMoveInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn)
 {
+#ifdef DEBUG
     uint64_t pc = insn.getPC();
     std::string masked;
     if(masked_op) {masked = "v0.m";} else {masked = "   ";}
@@ -343,6 +350,7 @@ VectorEngine::printVectorRegisterMoveInst(RiscvISA::VectorStaticInst& insn,Vecto
         "    PC 0x%X\n",insn.getName(),reg_type,PDst,Pvs2,mask_ren.str(),
         POldDst,*(uint64_t*)&pc);
     
+#endif
 }
 
 void
@@ -551,7 +559,9 @@ VectorEngine::issue(RiscvISA::VectorStaticInst& insn,VectorDynInst *dyn_insn,
     ExecContextPtr& xc ,uint64_t src1 ,uint64_t src2,uint64_t vtype,
     uint64_t vl, std::function<void(Fault fault)> done_callback) {
 
+#ifdef DEBUG
     uint64_t pc = insn.getPC();
+#endif
     
     if (insn.isVectorInstMem())
     {
@@ -655,9 +665,11 @@ VectorEngine::VectorMemPort::startTranslation(Addr addr, uint8_t *data,
     uint64_t size, BaseTLB::Mode mode, ThreadContext *tc, uint64_t req_id,
     uint8_t channel)
 {
+#ifdef DEBUG
     Process * p = tc->getProcessPtr();
     Addr page1 = p->pTable->pageAlign(addr);
     Addr page2 = p->pTable->pageAlign(addr+size-1);
+#endif
     assert(page1 == page2);
 
     //NOTE: need to make a buffer for reads so cache can write to it!
@@ -831,7 +843,10 @@ VectorEngine::recvTimingResp(VectorPacketPtr vector_pkt)
             break;
         }
     }
-    assert(found);
+
+    if (!found) {
+        assert(0);
+    }
 
     //commit each request in order they were issued
     while (vector_PendingReqQ.size() &&

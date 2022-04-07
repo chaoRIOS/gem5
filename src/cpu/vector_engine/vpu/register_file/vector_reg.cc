@@ -131,6 +131,7 @@ VectorRegister::handleTimingReq(PacketPtr pkt, VectorRegisterPort *port)
 {
     //need to make sure all accesses happen within a single line
     uint64_t start_addr = pkt->getAddr();
+#ifdef DEBUG
     uint64_t end_addr = pkt->getAddr() + pkt->getSize() -1;
     uint64_t start_line_addr = start_addr - (start_addr % lineSize);
     uint64_t end_line_addr = end_addr - (end_addr % lineSize);
@@ -140,15 +141,18 @@ VectorRegister::handleTimingReq(PacketPtr pkt, VectorRegisterPort *port)
     //need to make sure we are accessing full data from accessed banks
     assert(start_addr % bytesPerBankAccess == 0);
     assert((end_addr+1) % bytesPerBankAccess == 0);
+#endif
 
     // The memories for the VRF can be seen as num_entries*WORD_WIDTH.
     //The read/write accesses are counted for each 64-bit read/write operation.
     uint64_t WORD_WIDTH = 8;
 
+#ifdef DEBUG
     // Physical register size in bytes
     uint64_t phys_reg_size = mvl/8 ;
     // Corresponding physical register
     uint64_t phys_reg = pkt->getAddr() / phys_reg_size;
+#endif
 
     if (pkt->isRead())
     {
