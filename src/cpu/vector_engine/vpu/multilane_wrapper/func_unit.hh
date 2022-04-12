@@ -840,7 +840,7 @@ Datapath::compute_long_int_op(long int Aitem, long int Bitem,
 
     if ((operation == "vnsra_wv") || (operation == "vnsra_wx") || (operation == "vnsra_wi")) {
         Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ? 
-            (int128_t)(uint128_t)(uint64_t)Bitem >> (Aitem & (vsew * 2 -1)) :Dstitem;
+            (__int128_t)(__uint128_t)(uint64_t)Bitem >> (Aitem & (vsew * 2 -1)) :Dstitem;
         DPRINTF(Datapath,"WB Instruction = %d >> %d  = %d  \n",
             Bitem,Aitem & (vsew * 2 -1), Ditem);
     }
