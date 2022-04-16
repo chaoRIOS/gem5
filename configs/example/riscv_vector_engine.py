@@ -418,11 +418,14 @@ else:
 
 system.cpu.workload = process
 system.cpu.createThreads()
+end = time.clock()
+print("Duration:", end-begin)
 
 
 ###############################################################################
 # Run Simulation
 ###############################################################################
+begin = time.clock()
 
 # set up the root SimObject and start the simulation
 root = Root(full_system = False, system = system)

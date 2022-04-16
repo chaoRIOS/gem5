@@ -1,11 +1,13 @@
-GEM5_PATH=build/RISCV/gem5.opt
+# GEM5_PATH=build/RISCV/gem5.opt
+GEM5_PATH=build/RISC-V/gem5.perf
 GEM5_PERF_PATH=build/RISC-V/gem5.perf
 CONFIG_PATH=configs/example/riscv_vector_engine.py
 CPU_PROFILE_PATH=perf~
 CPU_PROFILE_DUMP_PATH=perf.pdf~
 
-WORKLOAD_PATH=$$HOME/work/talon-rvv/my_rvv.elf
+# WORKLOAD_PATH=$$HOME/work/talon-rvv/my_rvv.elf
 # WORKLOAD_PATH=/opt/cputest/rvv-test64/rv64uv-p-vadd
+WORKLOAD_PATH=$$HOME/work/rvv-intrinsic-doc/examples/profile.out
 workload=$(WORKLOAD_PATH)
 run:
 	$(GEM5_PATH) $(CONFIG_PATH) --cmd=$(workload)
