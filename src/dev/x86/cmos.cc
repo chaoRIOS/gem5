@@ -33,6 +33,9 @@
 #include "dev/x86/intdev.hh"
 #include "mem/packet_access.hh"
 
+namespace gem5
+{
+
 void
 X86ISA::Cmos::X86RTC::handleEvent()
 {
@@ -139,8 +142,4 @@ X86ISA::Cmos::unserialize(CheckpointIn &cp)
     rtc.unserialize("rtc", cp);
 }
 
-X86ISA::Cmos *
-CmosParams::create()
-{
-    return new X86ISA::Cmos(this);
-}
+} // namespace gem5

@@ -40,7 +40,8 @@
 #include "sim/sim_exit.hh"
 #include "sim/system.hh"
 
-using namespace std;
+namespace gem5
+{
 
 //
 // Debug event: place a breakpoint on the process function and
@@ -67,7 +68,7 @@ DebugBreakEvent::DebugBreakEvent(Tick when)
 void
 DebugBreakEvent::process()
 {
-    Debug::breakpoint();
+    debug::breakpoint();
 }
 
 
@@ -129,3 +130,4 @@ setRemoteGDBPort(int port)
     remote_gdb_base_port = port;
 }
 
+} // namespace gem5

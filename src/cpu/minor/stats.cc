@@ -37,14 +37,11 @@
 
 #include "cpu/minor/stats.hh"
 
-namespace Minor
+namespace gem5
 {
 
-MinorStats::MinorStats()
-{ }
-
-void
-MinorStats::regStats(const std::string &name, BaseCPU &baseCpu)
+GEM5_DEPRECATED_NAMESPACE(Minor, minor);
+namespace minor
 {
     numInsts
         .name(name + ".committedInsts")
@@ -67,34 +64,42 @@ MinorStats::regStats(const std::string &name, BaseCPU &baseCpu)
         .desc("Number of ops (including micro ops) which were discarded "
             "before commit");
 
-    numFetchSuspends
-        .name(name + ".numFetchSuspends")
-        .desc("Number of times Execute suspended instruction fetching");
+MinorStats::MinorStats(BaseCPU *base_cpu)
+    : statistics::Group(base_cpu),
+    ADD_STAT(numInsts, statistics::units::Count::get(),
+             "Number of instructions committed"),
+    ADD_STAT(numOps, statistics::units::Count::get(),
+             "Number of ops (including micro ops) committed"),
+    ADD_STAT(numDiscardedOps, statistics::units::Count::get(),
+             "Number of ops (including micro ops) which were discarded before "
+             "commit"),
+    ADD_STAT(numFetchSuspends, statistics::units::Count::get(),
+             "Number of times Execute suspended instruction fetching"),
+    ADD_STAT(quiesceCycles, statistics::units::Cycle::get(),
+             "Total number of cycles that CPU has spent quiesced or waiting "
+             "for an interrupt"),
+    ADD_STAT(cpi, statistics::units::Rate<
+                statistics::units::Cycle, statistics::units::Count>::get(),
+             "CPI: cycles per instruction"),
+    ADD_STAT(ipc, statistics::units::Rate<
+                statistics::units::Count, statistics::units::Cycle>::get(),
+             "IPC: instructions per cycle"),
+    ADD_STAT(committedInstType, statistics::units::Count::get(),
+             "Class of committed instruction")
+{
+    quiesceCycles.prereq(quiesceCycles);
 
-    quiesceCycles
-        .name(name + ".quiesceCycles")
-        .desc("Total number of cycles that CPU has spent quiesced or waiting "
-              "for an interrupt")
-        .prereq(quiesceCycles);
+    cpi.precision(6);
+    cpi = base_cpu->baseStats.numCycles / numInsts;
 
-    cpi
-        .name(name + ".cpi")
-        .desc("CPI: cycles per instruction")
-        .precision(6);
-    cpi = baseCpu.numCycles / numInsts;
-
-    ipc
-        .name(name + ".ipc")
-        .desc("IPC: instructions per cycle")
-        .precision(6);
-    ipc = numInsts / baseCpu.numCycles;
+    ipc.precision(6);
+    ipc = numInsts / base_cpu->baseStats.numCycles;
 
     committedInstType
-        .init(baseCpu.numThreads, Enums::Num_OpClass)
-        .name(name + ".op_class")
-        .desc("Class of committed instruction")
-        .flags(Stats::total | Stats::pdf | Stats::dist);
-    committedInstType.ysubnames(Enums::OpClassStrings);
+        .init(base_cpu->numThreads, enums::Num_OpClass)
+        .flags(statistics::total | statistics::pdf | statistics::dist);
+    committedInstType.ysubnames(enums::OpClassStrings);
 }
 
-};
+} // namespace minor
+} // namespace gem5
