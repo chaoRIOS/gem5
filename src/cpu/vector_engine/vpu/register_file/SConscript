@@ -31,8 +31,8 @@ Import('*')
 if not env['BUILD_VECTOR_ENGINE']:
     Return()
 
-SimObject('VectorRegister.py')
-SimObject('VectorValidBit.py')
+SimObject('VectorRegister.py', sim_objects=['VectorRegister'])
+SimObject('VectorValidBit.py', sim_objects=['VectorValidBit'])
 
 Source('vector_reg.cc')
 Source('vector_reg_valid_bit.cc')

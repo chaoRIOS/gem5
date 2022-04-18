@@ -31,7 +31,7 @@ Import('*')
 if not env['BUILD_VECTOR_ENGINE']:
     Return()
 
-SimObject('VectorConfig.py')
+SimObject('VectorConfig.py', sim_objects=['VectorConfig'])
 
 Source('vector_config.cc')
 

@@ -31,7 +31,7 @@ Import('*')
 if not env['BUILD_VECTOR_ENGINE']:
     Return()
 
-SimObject('ReorderBuffer.py')
+SimObject('ReorderBuffer.py', sim_objects=['ReorderBuffer'])
 
 Source('reorder_buffer.cc')
 

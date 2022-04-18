@@ -1,6 +1,8 @@
-# GEM5_PATH=build/RISCV/gem5.opt
-GEM5_PATH=build/RISC-V/gem5.perf
-GEM5_PERF_PATH=build/RISC-V/gem5.perf
+GEM5_OPT_PATH=build/RISCV/gem5.opt
+GEM5_PERF_PATH=build/RISCV/gem5.opt --pprof
+
+GEM5_PATH=$(GEM5_PERF_PATH)
+
 CONFIG_PATH=configs/example/riscv_vector_engine.py
 CPU_PROFILE_PATH=perf~
 CPU_PROFILE_DUMP_PATH=perf.pdf~
@@ -27,7 +29,7 @@ debug:
 
 rebuild:
 	# scons $(GEM5_PATH) -j16
-	scons $(GEM5_PATH) -j$$(nproc)
+	scons PYTHON_CONFIG=python3-config $(GEM5_PATH) -j$$(nproc)
 
 test:
 	python unittest.py

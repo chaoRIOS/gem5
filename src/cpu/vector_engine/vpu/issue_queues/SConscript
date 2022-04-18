@@ -31,7 +31,7 @@ Import('*')
 if not env['BUILD_VECTOR_ENGINE']:
     Return()
 
-SimObject('InstQueue.py')
+SimObject('InstQueue.py', sim_objects=['InstQueue'])
 
 Source('inst_queue.cc')
 

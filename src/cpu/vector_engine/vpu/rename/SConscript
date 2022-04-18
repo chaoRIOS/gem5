@@ -31,7 +31,7 @@ Import('*')
 if not env['BUILD_VECTOR_ENGINE']:
     Return()
 
-SimObject('VectorRename.py')
+SimObject('VectorRename.py', sim_objects=['VectorRename'])
 
 Source('vector_rename.cc')
 
