@@ -385,11 +385,14 @@ system.cpu.createInterruptController()
 # Connect the system up to the membus
 system.system_port = system.membus.cpu_side_ports
 
+
+system.mem_ctrl = MemCtrl()
+
 # Create a DDR3 memory controller (wtf is ddr5 and hbm slower than ddr3?)
-system.mem_ctrl = DDR3_1600_8x8(device_size = options.mem_size)
+system.mem_ctrl.dram = DDR3_1600_8x8(device_size = options.mem_size)
 #system.mem_ctrl = GDDR5_4000_x64(device_size = options.mem_size)
 #system.mem_ctrl = HBM_1000_4H_x64(device_size = options.mem_size)
-system.mem_ctrl.range = system.mem_ranges[0]
+system.mem_ctrl.dram.range = system.mem_ranges[0]
 system.mem_ctrl.port = system.membus.mem_side_ports
 
 ###############################################################################

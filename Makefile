@@ -1,7 +1,8 @@
+GEM5_DEBUG_PATH=build/RISCV/gem5.debug
 GEM5_OPT_PATH=build/RISCV/gem5.opt
 GEM5_PERF_PATH=build/RISCV/gem5.opt --pprof
 
-GEM5_BUILD_PATH=$(GEM5_PERF_PATH)
+GEM5_BUILD_PATH=$(GEM5_DEBUG_PATH)
 GEM5_RUN_PATH=$(GEM5_OPT_PATH)
 
 CONFIG_PATH=configs/example/riscv_vector_engine.py
@@ -26,7 +27,7 @@ vector_flag=VectorEngineInfo,VectorEngine,VectorLane,VectorInst,VectorEngineInte
 
 flag=$(scalar_flag),$(vector_flag)
 debug:
-	$(GEM5_PATH) --debug-flag=$(flag) $(CONFIG_PATH) --cmd=$(workload)
+	$(GEM5_RUN_PATH) --debug-flag=$(flag) $(CONFIG_PATH) --cmd=$(workload)
 
 rebuild:
 	# scons PYTHON_CONFIG=python3-config $(GEM5_BUILD_PATH) -j1
