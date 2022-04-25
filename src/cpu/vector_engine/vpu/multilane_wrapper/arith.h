@@ -7,6 +7,11 @@
 #include <cstdint>
 #include <climits>
 #include <cstddef>
+namespace gem5
+{
+
+namespace RiscvISA
+{
 
 inline uint64_t mulhu(uint64_t a, uint64_t b)
 {
@@ -213,4 +218,8 @@ static inline uint64_t xperm(uint64_t rs1, uint64_t rs2, size_t sz_log2, size_t 
   return r;
 }
 
+
+}
+
+}
 #endif

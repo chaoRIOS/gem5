@@ -51,6 +51,9 @@
 #include "cpu/minor/stats.hh"
 #include "cpu/simple_thread.hh"
 #include "enums/ThreadPolicy.hh"
+//#if TheISA == RiscvISA
+#include "cpu/vector_engine/vector_engine_interface.hh"
+//#endif TheISA == RiscvISA
 #include "params/MinorCPU.hh"
 
 namespace gem5
@@ -204,10 +207,10 @@ class MinorCPU : public BaseCPU
      *  enumeration Pipeline::StageId */
     void wakeupOnEvent(unsigned int stage_id);
 
-#if THE_ISA == RISCV_ISA
+//#if TheISA == RiscvISA
     /** The vector engine interface */
-    VectorEngineInterface *ve_interface;
-#endif
+    gem5::RiscvISA::VectorEngineInterface *ve_interface;
+//#endif TheISA == RiscvISA
     EventFunctionWrapper *fetchEventWrapper;
 };
 

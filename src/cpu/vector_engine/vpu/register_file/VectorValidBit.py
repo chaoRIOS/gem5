@@ -33,5 +33,6 @@ from m5.SimObject import SimObject
 class VectorValidBit(SimObject):
     type = 'VectorValidBit'
     cxx_header = "cpu/vector_engine/vpu/register_file/vector_reg_valid_bit.hh"
+    cxx_class = 'gem5::RiscvISA::VectorValidBit'
 
     PhysicalRegs = Param.Unsigned("Number of Vector Physical Registers")

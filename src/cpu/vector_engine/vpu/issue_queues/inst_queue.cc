@@ -39,9 +39,15 @@
 #include "debug/InstQueue.hh"
 #include "debug/InstQueueInst.hh"
 #include "debug/InstQueueRenInst.hh"
+namespace gem5
+{
 
-InstQueue::InstQueue(InstQueueParams *p) :
-TickedObject(p), occupied(false),
+namespace RiscvISA
+{
+
+
+InstQueue::InstQueue(const InstQueueParams *p) :
+TickedObject(TickedObjectParams(*p)), occupied(false),
 OoO_queues(p->OoO_queues),
 vector_mem_queue_size(p->vector_mem_queue_size),
 vector_arith_queue_size(p->vector_arith_queue_size)
@@ -518,9 +524,12 @@ InstQueue::printInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_
 }
 
 
-InstQueue *
-InstQueueParams::create()
-{
-    return new InstQueue(this);
 }
 
+gem5::RiscvISA::InstQueue *
+InstQueueParams::create() const
+{
+    return new gem5::RiscvISA::InstQueue(this);
+}
+
+}

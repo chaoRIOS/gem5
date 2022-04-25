@@ -37,12 +37,17 @@
 #include "arch/riscv/insts/vector_static_inst.hh"
 #include "base/types.hh"
 #include "debug/MemUnitReadTiming.hh"
+namespace gem5
+{
+
+namespace RiscvISA
+{
 
 /**
  * Memory Unit - Read
  */
-MemUnitReadTiming::MemUnitReadTiming(MemUnitReadTimingParams *p) :
-    TickedObject(p), channel(p->channel), cacheLineSize(p->cacheLineSize),
+MemUnitReadTiming::MemUnitReadTiming(const MemUnitReadTimingParams *p) :
+    TickedObject(TickedObjectParams(*p)), channel(p->channel), cacheLineSize(p->cacheLineSize),
     VRF_LineSize(p->VRF_LineSize), done(false)
 {
 }
@@ -255,8 +260,12 @@ MemUnitReadTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
     }
 }
 
-MemUnitReadTiming *
-MemUnitReadTimingParams::create()
+}
+
+gem5::RiscvISA::MemUnitReadTiming *
+MemUnitReadTimingParams::create() const
 {
-    return new MemUnitReadTiming(this);
+    return new gem5::RiscvISA::MemUnitReadTiming(this);
+}
+
 }

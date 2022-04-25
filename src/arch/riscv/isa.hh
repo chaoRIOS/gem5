@@ -36,8 +36,8 @@
 
 #include <vector>
 
-#include "arch/generic/isa.hh"
 #include "arch/riscv/pcstate.hh"
+#include "arch/generic/isa.hh"
 #include "arch/riscv/types.hh"
 #include "base/types.hh"
 
@@ -105,6 +105,7 @@ class ISA : public BaseISA
     void unserialize(CheckpointIn &cp) override;
 
     ISA(const Params &p);
+    ~ISA() {};
 
     void handleLockedRead(const RequestPtr &req) override;
 

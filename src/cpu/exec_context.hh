@@ -76,7 +76,7 @@ typedef std::shared_ptr<ExecContext> ExecContextPtr;
 
 class ExecContext {
   public:
-    typedef TheISA::PCState PCState;
+//     typedef TheISA::PCState PCState;
 
     using VecRegContainer = TheISA::VecRegContainer;
     using VecElem = TheISA::VecElem;

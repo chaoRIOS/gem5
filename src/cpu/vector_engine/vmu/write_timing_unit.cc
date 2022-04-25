@@ -37,9 +37,14 @@
 
 #include "base/types.hh"
 #include "debug/MemUnitWriteTiming.hh"
+namespace gem5
+{
 
-MemUnitWriteTiming::MemUnitWriteTiming(MemUnitWriteTimingParams *p):
-    TickedObject(p), channel(p->channel), cacheLineSize(p->cacheLineSize),
+namespace RiscvISA
+{
+
+MemUnitWriteTiming::MemUnitWriteTiming(const MemUnitWriteTimingParams *p):
+    TickedObject(TickedObjectParams(*p)), channel(p->channel), cacheLineSize(p->cacheLineSize),
     VRF_LineSize(p->VRF_LineSize), done(false)
 {
 }
@@ -274,8 +279,11 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
 }
 
 
-MemUnitWriteTiming *
-MemUnitWriteTimingParams::create()
+}
+
+gem5::RiscvISA::MemUnitWriteTiming *
+MemUnitWriteTimingParams::create() const
 {
-    return new MemUnitWriteTiming(this);
+    return new gem5::RiscvISA::MemUnitWriteTiming(this);
+}
 }

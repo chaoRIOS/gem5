@@ -39,9 +39,15 @@
 #include "debug/VectorEngineInterface.hh"
 #include "sim/faults.hh"
 #include "sim/sim_object.hh"
+namespace gem5
+{
 
-VectorEngineInterface::VectorEngineInterface(VectorEngineInterfaceParams *p) :
-SimObject(p),vector_engine(p->vector_engine)
+namespace RiscvISA
+{
+
+
+VectorEngineInterface::VectorEngineInterface(const VectorEngineInterfaceParams *p) :
+SimObject(SimObjectParams(*p)),vector_engine(p->vector_engine)
 {
 }
 
@@ -83,8 +89,12 @@ VectorEngineInterface::bussy()
     return bussy;
 }
 
-VectorEngineInterface *
-VectorEngineInterfaceParams::create()
+}
+
+gem5::RiscvISA::VectorEngineInterface *
+VectorEngineInterfaceParams::create() const
 {
-    return new VectorEngineInterface(this);
+    return new gem5::RiscvISA::VectorEngineInterface(this);
+}
+
 }

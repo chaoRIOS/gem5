@@ -33,8 +33,12 @@
 #include <sstream>
 
 #include "arch/riscv/utility.hh"
+#include "arch/riscv/insts/static_inst.hh"
 
 using namespace std;
+
+namespace gem5
+{
 
 namespace RiscvISA
 {
@@ -121,5 +125,7 @@ RiscvVectorIntegerWideningOp::generateDisassembly(Addr pc,
     return ss.str();
 }
 
+
+}
 
 }

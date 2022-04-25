@@ -38,11 +38,17 @@
 
 #include "base/logging.hh"
 #include "debug/VectorRegister.hh"
+namespace gem5
+{
+
+namespace RiscvISA
+{
+
 
 // vector_reg::VectorRegisterPort
 VectorRegister::VectorRegisterPort::VectorRegisterPort(
     const std::string &name, VectorRegister& vector_reg) :
-    QueuedSlavePort(name, &vector_reg, queue), queue(vector_reg, *this),
+    QueuedResponsePort(name, &vector_reg, queue), queue(vector_reg, *this),
     vector_reg(vector_reg)
 {
 }
@@ -101,7 +107,7 @@ VectorRegister::get_size()
 }
 
 VectorRegister::VectorRegister(const VectorRegisterParams* p) :
-    ClockedObject(p),num_lanes(p->num_lanes),
+    ClockedObject(ClockedObjectParams(*p)),num_lanes(p->num_lanes),
     num_regs(p->num_regs),mvl(p->mvl),
     size(p->size), lineSize(p->lineSize),
     numPorts(p->numPorts), accessLatency(p->accessLatency)
@@ -159,18 +165,22 @@ VectorRegister::handleTimingReq(PacketPtr pkt, VectorRegisterPort *port)
         numReads_64bit_elements = numReads_64bit_elements.value() + (pkt->getSize()/WORD_WIDTH); // 64-bit elements
         numReads_perLane_64bit_elements = numReads_perLane_64bit_elements.value() + ((pkt->getSize()/WORD_WIDTH) / num_lanes); // 64-bit elements
         memcpy(pkt->getPtr<uint8_t>(), data+start_addr, pkt->getSize());
+#ifdef DEBUG
         DPRINTF(VectorRegister,"Have been read %u bytes from addr 0x%lx (Physical Reg %d)\n"
             ,pkt->getSize(), pkt->getAddr(),phys_reg);
         DPRINTF(VectorRegister, "Reading vec reg %d (%d) as %#x\n"
             ,phys_reg, phys_reg, *(uint64_t*)(data+start_addr));
+#endif
     } else {
         numWritess_64bit_elements = numWritess_64bit_elements.value() + (pkt->getSize()/WORD_WIDTH); // 64-bit elements
         numWritess_perLane_64bit_elements = numWritess_perLane_64bit_elements.value() + ((pkt->getSize()/WORD_WIDTH) / num_lanes); // 64-bit elements
         memcpy(data+start_addr, pkt->getPtr<uint8_t>(), pkt->getSize());
+#ifdef DEBUG
         DPRINTF(VectorRegister,"Have been written %u bytes to addr 0x%lx (Physical Reg %d)\n"
             ,pkt->getSize(), pkt->getAddr(),phys_reg);
         DPRINTF(VectorRegister, "Setting vec reg %d (%d) to %#x\n"
             ,phys_reg, phys_reg, *(uint64_t*)(data+start_addr));
+#endif
     }
 
     pkt->makeTimingResponse();
@@ -192,8 +202,12 @@ VectorRegister::getPort(const std::string &if_name, PortID idx)
     //}
 }
 
-VectorRegister *
-VectorRegisterParams::create()
+}
+
+gem5::RiscvISA::VectorRegister *
+VectorRegisterParams::create() const
 {
-    return new VectorRegister(this);
+    return new gem5::RiscvISA::VectorRegister(this);
+}
+
 }

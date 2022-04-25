@@ -33,6 +33,7 @@ from m5.SimObject import SimObject
 class VectorLane(SimObject):
     type = 'VectorLane'
     cxx_header = "cpu/vector_engine/vpu/multilane_wrapper/vector_lane.hh"
+    cxx_class = 'gem5::RiscvISA::VectorLane'
 
     dataPath = Param.Datapath("This unit's datapath")
 

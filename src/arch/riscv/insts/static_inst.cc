@@ -27,11 +27,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "arch/riscv/insts/static_inst.hh"
 
 #include "arch/riscv/pcstate.hh"
 #include "arch/riscv/types.hh"
 #include "cpu/static_inst.hh"
+#include "arch/riscv/insts/static_inst.hh"
 
 namespace gem5
 {

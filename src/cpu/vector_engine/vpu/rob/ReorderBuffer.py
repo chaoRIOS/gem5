@@ -33,5 +33,6 @@ from m5.objects.TickedObject import TickedObject
 class ReorderBuffer(TickedObject):
     type = 'ReorderBuffer'
     cxx_header = "cpu/vector_engine/vpu/rob/reorder_buffer.hh"
+    cxx_class = 'gem5::RiscvISA::ReorderBuffer'
 
     ROB_Size = Param.Unsigned("Number of ROB entries")

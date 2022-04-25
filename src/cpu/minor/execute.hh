@@ -55,6 +55,9 @@
 #include "cpu/minor/lsq.hh"
 #include "cpu/minor/pipe_data.hh"
 #include "cpu/minor/scoreboard.hh"
+//#if TheISA == RiscvISA
+#include "cpu/vector_engine/vector_engine_interface.hh"
+//#endif TheISA == RiscvISA
 
 namespace gem5
 {

@@ -39,9 +39,14 @@
 #include "params/ReorderBuffer.hh"
 #include "sim/faults.hh"
 #include "sim/ticked_object.hh"
+namespace gem5
+{
 
-ReorderBuffer::ReorderBuffer(ReorderBufferParams *p):
-TickedObject(p),occupied(false), ROB_Size(p->ROB_Size)
+namespace RiscvISA
+{
+
+ReorderBuffer::ReorderBuffer(const ReorderBufferParams *p):
+TickedObject(TickedObjectParams(*p)),occupied(false), ROB_Size(p->ROB_Size)
 {
     for (int i=0 ; i<ROB_Size ; i++) {
         rob.push_back(new rob_entry(0,0));
@@ -165,8 +170,12 @@ ReorderBuffer::set_rob_entry_executed(uint32_t idx)
     rob[idx]->executed = 1;
 }
 
-ReorderBuffer *
-ReorderBufferParams::create()
+}
+
+gem5::RiscvISA::ReorderBuffer *
+ReorderBufferParams::create() const
 {
-    return new ReorderBuffer(this);
+    return new gem5::RiscvISA::ReorderBuffer(this);
+}
+
 }

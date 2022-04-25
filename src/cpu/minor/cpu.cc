@@ -36,6 +36,9 @@
  */
 
 #include "cpu/minor/cpu.hh"
+#include "params/MinorCPU.hh"
+//#if TheISA == RiscvISA
+#include "cpu/vector_engine/vector_engine_interface.hh"
 
 #include "cpu/minor/dyn_inst.hh"
 #include "cpu/minor/fetch1.hh"
@@ -49,11 +52,12 @@ namespace gem5
 
 MinorCPU::MinorCPU(const MinorCPUParams &params) :
     BaseCPU(params),
-    threadPolicy(params->threadPolicy),
-//#if THE_ISA == RISCV_ISA
-    ve_interface(params->ve_interface),
-//#endif
-    stats(this)
+    threadPolicy(params.threadPolicy),
+    stats(this),
+//#if TheISA == RiscvISA
+    ve_interface(params.ve_interface)
+//#endif TheISA == RiscvISA
+
 {
     /* This is only written for one thread at the moment */
     minor::MinorThread *thread;

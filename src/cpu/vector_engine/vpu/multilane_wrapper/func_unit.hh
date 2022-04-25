@@ -30,6 +30,11 @@
 
 #include "debug/Datapath.hh"
 #include "arith.h"
+namespace gem5
+{
+
+namespace RiscvISA
+{
 
 float
 Datapath::compute_float_fp_op(float Aitem, float Bitem, uint8_t Mitem,
@@ -3053,4 +3058,8 @@ Datapath::compute_cvt_f64_x32_op( int Bitem, uint8_t Mitem, int Dstitem,
     }
 
     return Ditem;
+}
+
+}
+
 }

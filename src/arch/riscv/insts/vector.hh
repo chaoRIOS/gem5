@@ -34,9 +34,19 @@
 
 #include <string>
 
-#include "arch/registers.hh"
+#include "arch/riscv/regs/float.hh"
+#include "arch/riscv/regs/int.hh"
+#include "arch/riscv/regs/misc.hh"
+#include "arch/riscv/types.hh"
+
 #include "arch/riscv/insts/vector_static_inst.hh"
 #include "cpu/static_inst.hh"
+
+#include "base/loader/symtab.hh"
+#include "cpu/reg_class.hh"
+
+namespace gem5
+{
 
 namespace RiscvISA
 {
@@ -58,11 +68,11 @@ class RiscvVectorDataOp : public RiscvVectorInsn
             if ((func3()==4) || (func3()==6)) {
                 _numSrcRegs = 1;
                 _numDestRegs = 0;
-                _srcRegIdx[0] = RegId(IntRegClass, vs1());
+                setSrcRegIdx(0, RegId(IntRegClass, vs1()));
             } else if ((func3()==5)) {
                 _numSrcRegs = 1;
                 _numDestRegs = 0;
-                _srcRegIdx[0] = RegId(FloatRegClass, vs1());
+                setSrcRegIdx(0, RegId(FloatRegClass, vs1()));
             } else {
                 _numSrcRegs = 0;
                 _numDestRegs = 0;
@@ -91,18 +101,18 @@ class RiscvVectorCfgOp : public RiscvVectorInsn
             if (getName() == "vsetivli") {
              _numSrcRegs =  0;
              _numDestRegs = 1;
-             _destRegIdx[0] = RegId(IntRegClass, vd());
+             setDestRegIdx(0, RegId(IntRegClass, vd()));
              } else if (getName() == "vsetvli"){
              _numSrcRegs =  1;
              _numDestRegs = 1;
-             _srcRegIdx[0] = RegId(IntRegClass, vs1());
-             _destRegIdx[0] = RegId(IntRegClass, vd());
+             setSrcRegIdx(0, RegId(IntRegClass, vs1()));
+             setDestRegIdx(0, RegId(IntRegClass, vd()));
              } else if (getName() == "vsetvl"){
              _numSrcRegs =  2;
              _numDestRegs = 1;
-             _srcRegIdx[0] = RegId(IntRegClass, vs1());
-             _srcRegIdx[1] = RegId(IntRegClass, vs2());
-             _destRegIdx[0] = RegId(IntRegClass, vd());
+             setSrcRegIdx(0, RegId(IntRegClass, vs1()));
+             setSrcRegIdx(1, RegId(IntRegClass, vs2()));
+             setDestRegIdx(0, RegId(IntRegClass, vd()));
              }
         }
 
@@ -129,12 +139,12 @@ class RiscvVectorMemOp : public RiscvVectorInsn
           if(mop()==2) { // Strided memory access
             _numSrcRegs =  2;
             _numDestRegs = 0;
-            _srcRegIdx[0] = RegId(IntRegClass, vs1());
-            _srcRegIdx[1] = RegId(IntRegClass, vs2());
+            setSrcRegIdx(0, RegId(IntRegClass, vs1()));
+            setSrcRegIdx(1, RegId(IntRegClass, vs2()));
           } else {
             _numSrcRegs =  1;
             _numDestRegs = 0;
-            _srcRegIdx[0] = RegId(IntRegClass, vs1());
+            setSrcRegIdx(0, RegId(IntRegClass, vs1()));
           }
         }
 
@@ -160,36 +170,36 @@ class RiscvVectorToScalarOp : public RiscvVectorInsn
             // vfmv_fs
             _numSrcRegs = 0;
             _numDestRegs = 1;
-            _destRegIdx[0] = RegId(FloatRegClass, vd());
+            setDestRegIdx(0, RegId(FloatRegClass, vd()));
           } else if (func3() == 2) {
             if (vs1() == 0) {
               // vmv_xs
             _numSrcRegs = 0;
             _numDestRegs = 1;
-            _destRegIdx[0] = RegId(IntRegClass, vd());
+            setDestRegIdx(0, RegId(IntRegClass, vd()));
             } else if (vs1() == 0x10) {
               // vcpop
             _numSrcRegs = 0;
             _numDestRegs = 1;
-            _destRegIdx[0] = RegId(IntRegClass, vd());
+            setDestRegIdx(0, RegId(IntRegClass, vd()));
 
             } else if (vs1() == 0x11) {
               // vfirst
             _numSrcRegs = 0;
             _numDestRegs = 1;
-            _destRegIdx[0] = RegId(IntRegClass, vd());
+            setDestRegIdx(0, RegId(IntRegClass, vd()));
 
             }
           } else if (func3() == 5) {
             // vfmv_sf
             _numSrcRegs = 1;
             _numDestRegs = 0;
-            _srcRegIdx[0] = RegId(FloatRegClass, vs1());
+            setSrcRegIdx(0, RegId(FloatRegClass, vs1()));
           } else if (func3() == 6) {
             // vmv_sx
             _numSrcRegs = 1;
             _numDestRegs = 0;
-            _srcRegIdx[0] = RegId(IntRegClass, vs1());
+            setSrcRegIdx(0, RegId(IntRegClass, vs1()));
           }
         }
         
@@ -236,7 +246,7 @@ class RiscvVectorIntegerWideningOp : public RiscvVectorInsn
            */
           if (func3()==0x6) {
             _numSrcRegs = 1;
-            _srcRegIdx[0] = RegId(IntRegClass, vs1());
+            setSrcRegIdx(0, RegId(IntRegClass, vs1()));
             _numDestRegs = 0;
           } else {
             _numSrcRegs = 0;
@@ -249,4 +259,7 @@ class RiscvVectorIntegerWideningOp : public RiscvVectorInsn
     };
 
 }
+
+}
+
 #endif // __ARCH_RISCV_VECTOR_INSTS_HH__

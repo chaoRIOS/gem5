@@ -37,11 +37,16 @@
 
 #include "arch/riscv/insts/vector_static_inst.hh"
 #include "base/statistics.hh"
-#include "cpu/minor/exec_context.hh"
+// #include "cpu/minor/exec_context.hh"
 #include "cpu/vector_engine/vector_engine.hh"
 #include "cpu/vector_engine/vpu/rob/reorder_buffer.hh"
 #include "params/InstQueue.hh"
 #include "sim/ticked_object.hh"
+namespace gem5
+{
+
+namespace RiscvISA
+{
 
 class VectorEngine;
 //class ExecContextPtr;
@@ -76,7 +81,7 @@ public:
         bool issued;
     };
 
-    InstQueue(InstQueueParams *p);
+    InstQueue(const InstQueueParams *p);
     ~InstQueue();
 
     void startTicking(VectorEngine& vector_wrapper/*,
@@ -114,4 +119,7 @@ public:
     Stats::Scalar VectorArithQueueSlotsUsed;
 };
 
+}
+
+}
 #endif //__CPU_INST_QUEUE_HH__

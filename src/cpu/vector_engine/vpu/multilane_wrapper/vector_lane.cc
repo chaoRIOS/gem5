@@ -45,9 +45,15 @@
 #include "params/VectorLane.hh"
 #include "sim/faults.hh"
 #include "sim/sim_object.hh"
+namespace gem5
+{
+
+namespace RiscvISA
+{
+
 
 VectorLane::VectorLane(const VectorLaneParams* p) :
-    SimObject(p), lane_id(p->lane_id), occupied(false),
+    SimObject(SimObjectParams(*p)), lane_id(p->lane_id), occupied(false),
     srcAReader(p->srcAReader), srcBReader(p->srcBReader),
     srcMReader(p->srcMReader), dstReader(p->dstReader), dstWriter(p->dstWriter),
     dataPath(p->dataPath)
@@ -508,9 +514,12 @@ VectorLane::issue(VectorEngine& vector_wrapper,
 }
 
 
-VectorLane*
-VectorLaneParams::create()
-{
-    return new VectorLane(this);
 }
 
+gem5::RiscvISA::VectorLane*
+VectorLaneParams::create() const
+{
+    return new gem5::RiscvISA::VectorLane(this);
+}
+
+}

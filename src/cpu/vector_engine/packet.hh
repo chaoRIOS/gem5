@@ -35,6 +35,12 @@
 #include "mem/packet.hh"
 #include "mem/request.hh"
 
+namespace gem5
+{
+
+namespace RiscvISA
+{
+
 class VectorPacket;
 
 typedef VectorPacket * VectorPacketPtr;
@@ -52,4 +58,6 @@ class VectorPacket : public Packet
     const uint8_t channel;
 };
 
+}
+}
 #endif // __CPU_VECTOR_PACKET_HH__

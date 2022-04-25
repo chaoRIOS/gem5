@@ -39,13 +39,17 @@
 #include "params/VectorConfig.hh"
 #include "sim/faults.hh"
 #include "sim/sim_object.hh"
+namespace gem5
+{
 
+namespace RiscvISA
+{
 /**
  * VPU local Configuration
  */
 
-VectorConfig::VectorConfig(VectorConfigParams *p) :
-SimObject(p) ,  max_vector_length(p->max_vl)
+VectorConfig::VectorConfig(const VectorConfigParams *p) :
+SimObject(SimObjectParams(*p)) ,  max_vector_length(p->max_vl)
 {
 }
 
@@ -151,9 +155,12 @@ VectorConfig::get_vtype_ediv(uint64_t vtype) {
     return EDIV;
 }
 
-VectorConfig *
-VectorConfigParams::create()
-{
-    return new VectorConfig(this);
 }
 
+gem5::RiscvISA::VectorConfig *
+VectorConfigParams::create() const
+{
+    return new gem5::RiscvISA::VectorConfig(this);
+}
+
+}

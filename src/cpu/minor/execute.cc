@@ -44,9 +44,9 @@
 #include "cpu/minor/fetch1.hh"
 #include "cpu/minor/lsq.hh"
 #include "cpu/op_class.hh"
-#if THE_ISA == RISCV_ISA
+//#if TheISA == RiscvISA
 #include "cpu/vector_engine/vector_engine_interface.hh"
-#endif
+//#endif TheISA == RiscvISA
 #include "debug/Activity.hh"
 #include "debug/Branch.hh"
 #include "debug/CpuVectorIssue.hh"
@@ -605,8 +605,8 @@ Execute::issue(ThreadID thread_id)
                 *inst, thread.streamSeqNum);
             issued = true;
             discarded = true;
-#if THE_ISA == RISCV_ISA
-        } else if (inst->staticInst->isMemBarrier() &&
+//#if TheISA == RiscvISA
+        } else if (inst->staticInst->isFullMemBarrier() &&
                     (cpu.ve_interface->bussy() ||
                     !thread.inFlightInsts->empty())) {
             DPRINTF(CpuVectorIssue,"Fence Inst blocked the pipeline: %s"
@@ -634,7 +634,7 @@ Execute::issue(ThreadID thread_id)
             //else {
             //    issued = false;
             //}
-#endif // THE_ISA == RISCV_ISA
+//#endif // TheISA == RiscvISA
         } else {
             /* Try and issue an instruction into an FU, assume we didn't and
              * fix that in the loop */
@@ -920,11 +920,11 @@ Execute::doInstCommitAccounting(MinorDynInstPtr inst)
     thread->numOp++;
     thread->threadStats.numOps++;
     cpu.stats.numOps++;
-#if THE_ISA == RISCV_ISA
+//#if TheISA == RiscvISA
     if (inst->staticInst->isVector()) {
         cpu.stats.numVectorInsts++;
     }
-#endif // THE_ISA == RISCV_ISA
+//#endif // TheISA == RiscvISA
     cpu.stats.committedInstType[inst->id.threadId]
                                [inst->staticInst->opClass()]++;
 
@@ -1205,7 +1205,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
 
             completed_mem_ref = true;
             completed_inst = true;
-#if THE_ISA == RISCV_ISA
+//#if TheISA == RiscvISA
         /*
          * The interface with the Vector Engine, only for RISC-V systems
          * The Vector Engine corresponds to a decoupled engine.
@@ -1258,9 +1258,9 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                 } else {
                     doInstCommitAccounting(inst);
                     ExecContextPtr xc = std::make_shared<ExecContext>(cpu,
-                        *cpu.threads[thread_id],*this, inst);
+                        *cpu.threads[thread_id],*this, inst, zeroReg);
 
-                    uint64_t  pc = inst->pc.instAddr();
+                    uint64_t  pc = inst->pc->instAddr();
                     vector_insn->setPC(pc);
                     uint64_t src1,src2;
 
@@ -1327,7 +1327,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                 /* Discard instruction */
                 completed_inst = true;
             }
-#endif // THE_ISA == RISCV_ISA
+//#endif // TheISA == RiscvISA
         } else if (can_commit_insts) {
             /* If true, this instruction will, subject to timing tweaks,
              *  be considered for completion.  try_to_commit flattens
@@ -1550,7 +1550,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                 lsq.completeMemBarrierInst(inst, committed_inst);
             }
 
-#if THE_ISA == RISCV_ISA
+//#if TheISA == RiscvISA
             scoreboard[thread_id].clearInstDests(inst, inst->isMemRef()
                 | inst->staticInst->isVector());
             // ExecContextPtr xc = std::make_shared<ExecContext>(cpu,
@@ -1559,9 +1559,9 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
             
             // xc->setMiscReg(RiscvISA::MISCREG_VLENB,vlenb);
             
-#else // !THE_ISA == RISCV_ISA
-            scoreboard[thread_id].clearInstDests(inst, inst->isMemRef());
-#endif // THE_ISA == RISCV_ISA
+//#else // !TheISA == RiscvISA
+            // scoreboard[thread_id].clearInstDests(inst, inst->isMemRef());
+//#endif // TheISA == RiscvISA
         }
 
         /* Handle per-cycle instruction counting */
@@ -1898,9 +1898,9 @@ Execute::getCommittingThread()
             MinorDynInstPtr inst = head_inflight_inst->inst;
 
             bool can_execute_vector_inst = false;
-#if THE_ISA == RISCV_ISA
+//#if TheISA == RiscvISA
             can_execute_vector_inst = inst->staticInst->isVector();
-#endif // THE_ISA == RISCV_ISA
+//#endif // TheISA == RiscvISA
             can_commit_insts = can_commit_insts &&
                 (!inst->inLSQ || (lsq.findResponse(inst) != NULL));
 

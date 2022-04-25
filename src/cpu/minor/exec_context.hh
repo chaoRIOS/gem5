@@ -56,6 +56,9 @@
 #include "mem/request.hh"
 #include "debug/MinorExecute.hh"
 
+//#if TheISA == RiscvISA
+#include "cpu/vector_engine/vector_engine_interface.hh"
+//#endif TheISA == RiscvISA
 namespace gem5
 {
 

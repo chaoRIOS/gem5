@@ -34,7 +34,7 @@
 #include <functional>
 
 #include "arch/riscv/insts/vector_static_inst.hh"
-#include "cpu/minor/exec_context.hh"
+// #include "cpu/minor/exec_context.hh"
 #include "cpu/vector_engine/vector_dyn_inst.hh"
 #include "cpu/vector_engine/vector_engine.hh"
 #include "cpu/vector_engine/vmu/read_timing_unit.hh"
@@ -42,6 +42,11 @@
 #include "params/VectorMemUnit.hh"
 #include "sim/faults.hh"
 #include "sim/sim_object.hh"
+namespace gem5
+{
+
+namespace RiscvISA
+{
 
 class VectorEngine;
 
@@ -70,4 +75,8 @@ class VectorMemUnit : public SimObject
     }
 };
 
+
+}
+
+}
 #endif // __CPU_MEM_UNIT_HH__

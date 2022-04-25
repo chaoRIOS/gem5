@@ -695,6 +695,7 @@ for variant_path in variant_paths:
                 ]
         else:
             default_vars_files = [os.path.join(opts_dir, variant_dir)]
+            print("default_vars_files = ", default_vars_files)
         existing_files = list(filter(isfile, default_vars_files))
         if existing_files:
             default_vars_file = existing_files[0]

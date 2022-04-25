@@ -42,11 +42,16 @@
 #include "sim/faults.hh"
 //#include "sim/ticked_object.hh"
 #include "sim/sim_object.hh"
+namespace gem5
+{
+
+namespace RiscvISA
+{
 
 class VectorValidBit : public SimObject
 {
 public:
-    VectorValidBit(VectorValidBitParams *p);
+    VectorValidBit(const VectorValidBitParams *p);
     ~VectorValidBit();
 
     //void startTicking();
@@ -79,6 +84,10 @@ public:
     void set_preg_valid_bit(int idx , int val);
     void print_valid_bit();
 };
+
+}
+
+}
 
 
 

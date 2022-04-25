@@ -40,6 +40,11 @@
 #include "params/VectorConfig.hh"
 #include "sim/faults.hh"
 #include "sim/sim_object.hh"
+namespace gem5
+{
+
+namespace RiscvISA
+{
 
 /**
  * The MVL is given in bits.
@@ -53,7 +58,7 @@ class VectorConfig : public SimObject
 {
 
 public:
-    VectorConfig(VectorConfigParams *p);
+    VectorConfig(const VectorConfigParams *p);
     ~VectorConfig();
 
     uint64_t reqAppVectorLength(uint64_t rvl, uint64_t vtype, bool r_mvl);
@@ -80,7 +85,8 @@ private:
 
 };
 
-
+}
+}
 #endif // __CPU_VECTOR_CSR_H__
 
 

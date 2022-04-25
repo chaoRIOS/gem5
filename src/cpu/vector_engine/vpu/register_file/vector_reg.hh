@@ -46,10 +46,16 @@
 #include "sim/faults.hh"
 #include "sim/sim_object.hh"
 
+namespace gem5
+{
+
+namespace RiscvISA
+{
+
 class VectorRegister : public ClockedObject
 {
 public:
-    class VectorRegisterPort : public QueuedSlavePort
+    class VectorRegisterPort : public QueuedResponsePort
     {
       public:
         VectorRegisterPort(const std::string& name,
@@ -93,7 +99,7 @@ private:
     uint64_t numBanks;
     uint64_t bytesPerBankAccess;
 
-    // the slave port to access the vector_reg
+    // the Response port to access the vector_reg
     std::vector<VectorRegisterPort *> ports;
 
     //the physical vector_reg storage
@@ -105,4 +111,6 @@ public:
     Stats::Scalar numWritess_perLane_64bit_elements;
 };
 
+}
+}
 #endif //__CPU_VECTOR_REG_HH__
