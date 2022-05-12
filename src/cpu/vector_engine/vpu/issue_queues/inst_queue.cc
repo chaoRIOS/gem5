@@ -244,10 +244,6 @@ InstQueue::evaluate()
                 this->occupied = false;
             });
         }
-        else
-        {
-            //DPRINTF(InstQueue,"Sources not ready\n");
-        }
     }
     // Stores are executed in order
     // however it is possible to advance loads OoO

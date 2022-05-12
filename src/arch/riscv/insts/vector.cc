@@ -44,7 +44,7 @@ namespace RiscvISA
 {
 
 string
-RiscvVectorDataOp::generateDisassembly(Addr pc,
+RiscvVectorArithOp::generateDisassembly(Addr pc,
     const Loader::SymbolTable *symtab) const
 {
     stringstream ss;

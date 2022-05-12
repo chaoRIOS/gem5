@@ -204,6 +204,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
          * the scalar reg,such as vfmv_fs and vmv_xs
          */
         if (insn.getName() == "vmv_xs") {
+            src1 = 0;
             addr_src2 = ((uint64_t)dyn_insn->get_renamed_src2() * mvl_bits / 8) + (src1 * DATA_SIZE);
             DPRINTF(VectorLane, "vmv_xs: base addrs 0x%x , element addrs 0x%x, src1 %d\n",
                         ((uint64_t)dyn_insn->get_renamed_src2() * mvl_bits / 8), addr_src2,src1);

@@ -53,31 +53,12 @@ namespace RiscvISA
 /*
  * Vector Arithmetic Instructions
  */
-class RiscvVectorDataOp : public RiscvVectorInsn
+class RiscvVectorArithOp : public RiscvVectorInsn
     {
       public:
-        RiscvVectorDataOp(const char *mnem, ExtMachInst _machInst,
+        RiscvVectorArithOp(const char *mnem, ExtMachInst _machInst,
             OpClass __opClass) :
-            RiscvVectorInsn(mnem, _machInst, __opClass)
-        {
-          /*
-           * Here is defined the scalar source registers and
-           * destination registers for those vector
-           * instructions that make use of it.
-           */
-            if ((func3()==4) || (func3()==6)) {
-                _numSrcRegs = 1;
-                _numDestRegs = 0;
-                setSrcRegIdx(0, RegId(IntRegClass, vs1()));
-            } else if ((func3()==5)) {
-                _numSrcRegs = 1;
-                _numDestRegs = 0;
-                setSrcRegIdx(0, RegId(FloatRegClass, vs1()));
-            } else {
-                _numSrcRegs = 0;
-                _numDestRegs = 0;
-            }
-        }
+            RiscvVectorInsn(mnem, _machInst, __opClass){}
 
         std::string generateDisassembly(Addr pc,
             const Loader::SymbolTable *symtab) const;
@@ -91,30 +72,7 @@ class RiscvVectorCfgOp : public RiscvVectorInsn
       public:
         RiscvVectorCfgOp(const char *mnem, ExtMachInst _machInst,
             OpClass __opClass) :
-            RiscvVectorInsn(mnem, _machInst, __opClass)
-        {
-          /*
-           * Here is defined the scalar source registers and
-           * destination registers for those vector
-           * instructions that make use of it.
-           */
-            if (getName() == "vsetivli") {
-             _numSrcRegs =  0;
-             _numDestRegs = 1;
-             setDestRegIdx(0, RegId(IntRegClass, vd()));
-             } else if (getName() == "vsetvli"){
-             _numSrcRegs =  1;
-             _numDestRegs = 1;
-             setSrcRegIdx(0, RegId(IntRegClass, vs1()));
-             setDestRegIdx(0, RegId(IntRegClass, vd()));
-             } else if (getName() == "vsetvl"){
-             _numSrcRegs =  2;
-             _numDestRegs = 1;
-             setSrcRegIdx(0, RegId(IntRegClass, vs1()));
-             setSrcRegIdx(1, RegId(IntRegClass, vs2()));
-             setDestRegIdx(0, RegId(IntRegClass, vd()));
-             }
-        }
+            RiscvVectorInsn(mnem, _machInst, __opClass){}
 
         std::string generateDisassembly(Addr pc,
             const Loader::SymbolTable *symtab) const;
@@ -127,26 +85,7 @@ class RiscvVectorMemOp : public RiscvVectorInsn
       public:
         RiscvVectorMemOp(const char *mnem, ExtMachInst _machInst,
             OpClass __opClass) :
-            RiscvVectorInsn(mnem, _machInst, __opClass)
-        {
-          /*
-           * Here is defined the scalar source registers and
-           * destination registers for those vector
-           * instructions that make use of it.
-           * TODO: is still pending strided which uses rs2 as
-           * second operand.
-           */
-          if(mop()==2) { // Strided memory access
-            _numSrcRegs =  2;
-            _numDestRegs = 0;
-            setSrcRegIdx(0, RegId(IntRegClass, vs1()));
-            setSrcRegIdx(1, RegId(IntRegClass, vs2()));
-          } else {
-            _numSrcRegs =  1;
-            _numDestRegs = 0;
-            setSrcRegIdx(0, RegId(IntRegClass, vs1()));
-          }
-        }
+            RiscvVectorInsn(mnem, _machInst, __opClass){}
 
         std::string generateDisassembly(Addr pc,
             const Loader::SymbolTable *symtab) const;
@@ -159,50 +98,8 @@ class RiscvVectorToScalarOp : public RiscvVectorInsn
       public:
         RiscvVectorToScalarOp(const char *mnem, ExtMachInst _machInst,
             OpClass __opClass) :
-            RiscvVectorInsn(mnem, _machInst, __opClass)
-        {
-          /*
-           * Here is defined the destination registers for those vector
-           * instructions that make use of it. These instructions writes
-           * in the integer or floating point register.
-           */
-          if (func3() == 1) {
-            // vfmv_fs
-            _numSrcRegs = 0;
-            _numDestRegs = 1;
-            setDestRegIdx(0, RegId(FloatRegClass, vd()));
-          } else if (func3() == 2) {
-            if (vs1() == 0) {
-              // vmv_xs
-            _numSrcRegs = 0;
-            _numDestRegs = 1;
-            setDestRegIdx(0, RegId(IntRegClass, vd()));
-            } else if (vs1() == 0x10) {
-              // vcpop
-            _numSrcRegs = 0;
-            _numDestRegs = 1;
-            setDestRegIdx(0, RegId(IntRegClass, vd()));
+            RiscvVectorInsn(mnem, _machInst, __opClass){}
 
-            } else if (vs1() == 0x11) {
-              // vfirst
-            _numSrcRegs = 0;
-            _numDestRegs = 1;
-            setDestRegIdx(0, RegId(IntRegClass, vd()));
-
-            }
-          } else if (func3() == 5) {
-            // vfmv_sf
-            _numSrcRegs = 1;
-            _numDestRegs = 0;
-            setSrcRegIdx(0, RegId(FloatRegClass, vs1()));
-          } else if (func3() == 6) {
-            // vmv_sx
-            _numSrcRegs = 1;
-            _numDestRegs = 0;
-            setSrcRegIdx(0, RegId(IntRegClass, vs1()));
-          }
-        }
-        
         std::string generateDisassembly(Addr pc,
             const Loader::SymbolTable *symtab) const;
     };
@@ -214,16 +111,7 @@ class RiscvVectorRegisterMoveOp : public RiscvVectorInsn
       public:
         RiscvVectorRegisterMoveOp(const char *mnem, ExtMachInst _machInst,
             OpClass __opClass) :
-            RiscvVectorInsn(mnem, _machInst, __opClass)
-        {
-          /*
-           * Here is defined the destination registers for those vector
-           * instructions that make use of it. These instructions writes
-           * in the integer or floating point register.
-           */
-          _numSrcRegs = 0;
-          _numDestRegs = 0;        
-        }
+            RiscvVectorInsn(mnem, _machInst, __opClass){}
 
         std::string generateDisassembly(Addr pc,
             const Loader::SymbolTable *symtab) const;
@@ -237,22 +125,7 @@ class RiscvVectorIntegerWideningOp : public RiscvVectorInsn
       public:
         RiscvVectorIntegerWideningOp(const char *mnem, ExtMachInst _machInst,
             OpClass __opClass) :
-            RiscvVectorInsn(mnem, _machInst, __opClass)
-        {
-          /*
-           * Here is defined the destination registers for those vector
-           * instructions that make use of it. These instructions writes
-           * in the integer or floating point register.
-           */
-          if (func3()==0x6) {
-            _numSrcRegs = 1;
-            setSrcRegIdx(0, RegId(IntRegClass, vs1()));
-            _numDestRegs = 0;
-          } else {
-            _numSrcRegs = 0;
-            _numDestRegs = 0;
-          }       
-        }
+            RiscvVectorInsn(mnem, _machInst, __opClass){}
 
         std::string generateDisassembly(Addr pc,
             const Loader::SymbolTable *symtab) const;

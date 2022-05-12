@@ -27,154 +27,19 @@
 // Author: Cristóbal Ramírez
 
 // Basic instruction class constructor template.
-def template VectorArith1SrcConstructor {{
+def template VectorArithConstructor {{
     %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorArith1SrcOp)
+        : %(base_class)s("%(mnemonic)s", machInst, %(op_class)s)
     {
-        flags[IsVector] = true;
-    }
-}};
+        %(set_reg_idx_arr)s;
+        %(constructor)s;
+        
+        if ((func3()==4) || (func3()==6)) {
+            setSrcRegIdx(_numSrcRegs++, RegId(IntRegClass, vs1()));
+        } else if ((func3()==5)) {
+            setSrcRegIdx(_numSrcRegs++, RegId(FloatRegClass, vs1()));
+        }
 
-def template VectorArith2SrcConstructor {{
-    %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorArith2SrcOp)
-    {
-        flags[IsVector] = true;
-    }
-}};
-
-def template VectorArith3SrcConstructor {{
-    %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorArith3SrcOp)
-    {
-        flags[IsVector] = true;
-    }
-}};
-
-def template VectorMaskLogicalConstructor {{
-    %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorMaskLogicalOp)
-    {
-        flags[IsVector] = true;
-    }
-}};
-
-def template VectorReductionConstructor {{
-    %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorReductionOp)
-    {
-        flags[IsVector] = true;
-    }
-}};
-
-def template VectorConvertIntToFPConstructor {{
-    %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorConvertIntToFPOp)
-    {
-        flags[IsVector] = true;
-    }
-}};
-
-def template VectorConvertFPToIntConstructor {{
-    %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorConvertFPToIntOp)
-    {
-        flags[IsVector] = true;
-    }
-}};
-
-def template VectorWConvertFPToIntConstructor {{
-    %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorWConvertFPToIntOp)
-    {
-        flags[IsVector] = true;
-    }
-}};
-
-def template VectorWConvertIntToFPConstructor {{
-    %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorWConvertIntToFPOp)
-    {
-        flags[IsVector] = true;
-    }
-}};
-
-def template VectorWConvertFPToFPConstructor {{
-    %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorWConvertFPToFPOp)
-    {
-        flags[IsVector] = true;
-    }
-}};
-
-def template VectorNConvertFPToIntConstructor {{
-    %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorNConvertFPToIntOp)
-    {
-        flags[IsVector] = true;
-    }
-}};
-
-def template VectorNConvertIntToFPConstructor {{
-    %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorNConvertIntToFPOp)
-    {
-        flags[IsVector] = true;
-    }
-}};
-
-def template VectorNConvertFPToFPConstructor {{
-    %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorNConvertFPToFPOp)
-    {
-        flags[IsVector] = true;
-    }
-}};
-
-def template VectorFPCompareConstructor {{
-    %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorFPCompareOp)
-    {
-        flags[IsVector] = true;
-    }
-}};
-
-def template VectorIntCompareConstructor {{
-    %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorIntCompareOp)
-    {
-        flags[IsVector] = true;
-    }
-}};
-
-def template VectorSlideUpConstructor {{
-    %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorSlideUpOp)
-    {
-        flags[IsVector] = true;
-    }
-}};
-
-def template VectorSlideDownConstructor {{
-    %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorSlideDownOp)
-    {
-        flags[IsVector] = true;
-    }
-}};
-
-def template VectorMemoryStoreConstructor {{
-    %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorMemoryStoreOp)
-    {
-        flags[IsVector] = true;
-    }
-}};
-
-def template VectorMemoryLoadConstructor {{
-    %(class_name)s::%(class_name)s(MachInst machInst)
-        : %(base_class)s("%(mnemonic)s", machInst, VectorMemoryLoadOp)
-    {
         flags[IsVector] = true;
     }
 }};
@@ -183,9 +48,44 @@ def template VectorConfigConstructor {{
     %(class_name)s::%(class_name)s(MachInst machInst)
         : %(base_class)s("%(mnemonic)s", machInst, VectorConfigOp)
     {
+        %(set_reg_idx_arr)s;
         %(constructor)s;
+
+        if (getName() == "vsetivli") {
+            setDestRegIdx(_numDestRegs++, RegId(IntRegClass, vd()));
+        } else if (getName() == "vsetvli"){
+            setSrcRegIdx(_numSrcRegs++, RegId(IntRegClass, vs1()));
+            setDestRegIdx(_numDestRegs++, RegId(IntRegClass, vd()));
+        } else if (getName() == "vsetvl"){
+            setSrcRegIdx(_numSrcRegs++, RegId(IntRegClass, vs1()));
+            setSrcRegIdx(_numSrcRegs++, RegId(IntRegClass, vs2()));
+            setDestRegIdx(_numDestRegs++, RegId(IntRegClass, vd()));
+        }
+
         flags[IsVector] = true;
-        //vecflags[IsVecConfigOp] = true;
+    }
+}};
+
+def template VectorMemoryConstructor {{
+    %(class_name)s::%(class_name)s(MachInst machInst)
+        : %(base_class)s("%(mnemonic)s", machInst, %(op_class)s)
+    {
+        %(set_reg_idx_arr)s;
+        %(constructor)s;
+
+        if(mop()==2) { 
+            // Strided memory access
+            /* 
+            * TODO: is still pending strided which uses rs2 as
+            * second operand.
+            */
+            setSrcRegIdx(_numSrcRegs++, RegId(IntRegClass, vs1()));
+            setSrcRegIdx(_numSrcRegs++, RegId(IntRegClass, vs2()));
+          } else {
+            setSrcRegIdx(_numSrcRegs++, RegId(IntRegClass, vs1()));
+          }
+
+        flags[IsVector] = true;
     }
 }};
 
@@ -193,6 +93,31 @@ def template VectorToScalarConstructor {{
     %(class_name)s::%(class_name)s(MachInst machInst)
         : %(base_class)s("%(mnemonic)s", machInst, VectorToScalarOp)
     {
+        %(set_reg_idx_arr)s;
+        %(constructor)s;
+        
+        if (func3() == 1) {
+            // vfmv_fs
+            setDestRegIdx(_numDestRegs++, RegId(FloatRegClass, vd()));
+        } else if (func3() == 2) {
+            if (vs1() == 0) {
+                // vmv_xs
+                setDestRegIdx(_numDestRegs++, RegId(IntRegClass, vd()));
+            } else if (vs1() == 0x10) {
+                // vcpop
+                setDestRegIdx(_numDestRegs++, RegId(IntRegClass, vd()));
+            } else if (vs1() == 0x11) {
+                // vfirst
+                setDestRegIdx(_numDestRegs++, RegId(IntRegClass, vd()));
+            }
+        } else if (func3() == 5) {
+            // vfmv_sf
+            setSrcRegIdx(_numSrcRegs++, RegId(FloatRegClass, vs1()));
+        } else if (func3() == 6) {
+            // vmv_sx
+            setSrcRegIdx(_numSrcRegs++, RegId(IntRegClass, vs1()));
+        }
+
         flags[IsVector] = true;
     }
 }};
@@ -201,6 +126,8 @@ def template VectorRegisterMoveConstructor {{
     %(class_name)s::%(class_name)s(MachInst machInst)
         : %(base_class)s("%(mnemonic)s", machInst, VectorRegisterMoveOp)
     {
+        %(set_reg_idx_arr)s;
+        %(constructor)s;
         flags[IsVector] = true;
     }
 }};
@@ -209,6 +136,13 @@ def template VectorIntegerWideningConstructor {{
     %(class_name)s::%(class_name)s(MachInst machInst)
         : %(base_class)s("%(mnemonic)s", machInst, VectorIntegerWideningOp)
     {
+        %(set_reg_idx_arr)s;
+        %(constructor)s;
+        
+        if (func3()==0x6) {
+            setSrcRegIdx(_numSrcRegs++, RegId(IntRegClass, vs1()));
+        }
+
         flags[IsVector] = true;
     }
 }};
@@ -226,138 +160,138 @@ def template VectorExecute {{
 
 
 // Generate the Code Blocks from templates/decoder
-def format VectorData1SrcOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+def format VectorArith1SrcOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorArithOp', '', ['VectorArith1SrcOp'])
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorArith1SrcConstructor.subst(iop)
+    decoder_output = VectorArithConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};
 
-def format VectorData2SrcOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+def format  VectorArith2SrcOp() {{
+    iop =InstObjParams(name, Name, 'RiscvVectorArithOp', '', ['VectorArith2SrcOp'])
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorArith2SrcConstructor.subst(iop)
+    decoder_output = VectorArithConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};
 
-def format VectorData3SrcOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+def format VectorArith3SrcOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorArithOp', '', ['VectorArith3SrcOp'])
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorArith3SrcConstructor.subst(iop)
+    decoder_output = VectorArithConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};
 
 def format VectorMaskLogicalOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    iop = InstObjParams(name, Name, 'RiscvVectorArithOp', '', ['VectorMaskLogicalOp'])
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorMaskLogicalConstructor.subst(iop)
+    decoder_output = VectorArithConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};
 
 def format VectorReductionOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    iop = InstObjParams(name, Name, 'RiscvVectorArithOp', '', ['VectorReductionOp'])
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorReductionConstructor.subst(iop)
+    decoder_output = VectorArithConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};
 
 def format VectorConvertIntToFPOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    iop = InstObjParams(name, Name, 'RiscvVectorArithOp', '', ['VectorConvertIntToFPOp'])
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorConvertIntToFPConstructor.subst(iop)
+    decoder_output = VectorArithConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};
 
 def format VectorConvertFPToIntOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    iop = InstObjParams(name, Name, 'RiscvVectorArithOp', '', ['VectorConvertFPToIntOp'])
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorConvertFPToIntConstructor.subst(iop)
+    decoder_output = VectorArithConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};
 
 def format VectorWConvertFPToIntOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    iop = InstObjParams(name, Name, 'RiscvVectorArithOp', '', ['VectorWConvertFPToIntOp'])
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorWConvertFPToIntConstructor.subst(iop)
+    decoder_output = VectorArithConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};
 
 def format VectorWConvertIntToFPOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    iop = InstObjParams(name, Name, 'RiscvVectorArithOp', '', ['VectorWConvertIntToFPOp'])
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorWConvertIntToFPConstructor.subst(iop)
+    decoder_output = VectorArithConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};
 
 def format VectorWConvertFPToFPOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    iop = InstObjParams(name, Name, 'RiscvVectorArithOp', '', ['VectorWConvertFPToFPOp'])
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorWConvertFPToFPConstructor.subst(iop)
+    decoder_output = VectorArithConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};
 
 def format VectorNConvertFPToIntOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    iop = InstObjParams(name, Name, 'RiscvVectorArithOp', '', ['VectorNConvertFPToIntOp'])
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorNConvertFPToIntConstructor.subst(iop)
+    decoder_output = VectorArithConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};
 
 def format VectorNConvertIntToFPOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    iop = InstObjParams(name, Name, 'RiscvVectorArithOp', '', ['VectorNConvertIntToFPOp'])
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorNConvertIntToFPConstructor.subst(iop)
+    decoder_output = VectorArithConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};
 
 def format VectorNConvertFPToFPOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    iop = InstObjParams(name, Name, 'RiscvVectorArithOp', '', ['VectorNConvertFPToFPOp'])
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorNConvertFPToFPConstructor.subst(iop)
+    decoder_output = VectorArithConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};
 
 def format VectorFPCompareOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    iop = InstObjParams(name, Name, 'RiscvVectorArithOp', '', ['VectorFPCompareOp'])
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorFPCompareConstructor.subst(iop)
+    decoder_output = VectorArithConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};
 
 def format VectorIntCompareOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    iop = InstObjParams(name, Name, 'RiscvVectorArithOp', '', ['VectorIntCompareOp'])
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorIntCompareConstructor.subst(iop)
+    decoder_output = VectorArithConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};
 
 def format VectorSlideDownOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    iop = InstObjParams(name, Name, 'RiscvVectorArithOp', '', ['VectorSlideDownOp'])
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorSlideDownConstructor.subst(iop)
+    decoder_output = VectorArithConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};
 
 def format VectorSlideUpOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorDataOp', '')
+    iop = InstObjParams(name, Name, 'RiscvVectorArithOp', '', ['VectorSlideUpOp'])
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorSlideUpConstructor.subst(iop)
+    decoder_output = VectorArithConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};
@@ -370,18 +304,18 @@ def format VectorConfigOp( *vecflags) {{
     exec_output = VectorExecute.subst(iop)
 }};
 
-def format VectorMemStoreOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorMemOp')
+def format VectorMemoryStoreOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorMemOp', '', ['VectorMemoryStoreOp'])
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorMemoryStoreConstructor.subst(iop)
+    decoder_output = VectorMemoryConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};
 
-def format VectorMemLoadOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorMemOp')
+def format VectorMemoryLoadOp() {{
+    iop = InstObjParams(name, Name, 'RiscvVectorMemOp', '', ['VectorMemoryLoadOp'])
     header_output = BasicDeclare.subst(iop)
-    decoder_output = VectorMemoryLoadConstructor.subst(iop)
+    decoder_output = VectorMemoryConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};

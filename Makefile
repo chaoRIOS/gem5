@@ -3,7 +3,7 @@ GEM5_OPT_PATH=build/RISCV/gem5.opt
 GEM5_PERF_PATH=build/RISCV/gem5.opt --pprof
 
 GEM5_BUILD_PATH=$(GEM5_DEBUG_PATH)
-GEM5_RUN_PATH=$(GEM5_OPT_PATH)
+GEM5_RUN_PATH=$(GEM5_DEBUG_PATH)
 
 CONFIG_PATH=configs/example/riscv_vector_engine.py
 CPU_PROFILE_PATH=perf~
@@ -22,8 +22,8 @@ perf:
 perf_dump:
 	pprof $(GEM5_RUN_PATH) $(CPU_PROFILE_PATH) --pdf > $(CPU_PROFILE_DUMP_PATH)
 
-scalar_flag=Exec,CpuVectorIssue,MMU,TLB,TLBVerbose,Registers,RiscvMisc
-vector_flag=VectorEngineInfo,VectorEngine,VectorLane,VectorInst,VectorEngineInterface,VectorRename,VectorMemUnit
+scalar_flag=Exec,CpuVectorIssue,MMU,TLB,TLBVerbose,Registers,RiscvMisc,MinorScoreboard
+vector_flag=VectorEngineInfo,VectorEngine,VectorLane,VectorInst,VectorEngineInterface,VectorRename,VectorMemUnit,InstQueue,Datapath,MemUnitReadTiming
 
 flag=$(scalar_flag),$(vector_flag)
 debug:
