@@ -202,11 +202,6 @@ namespace RiscvISA
 ISA::ISA(const Params &p) : BaseISA(p)
 {
 
-    // @TODO: Temp setting for vlenb
-    setMiscRegNoEffect(MISCREG_VLENB, 0x10);
-    // @TODO: Temp M-mode
-    setMiscRegNoEffect(MISCREG_PRV, 0x3);
-
     _regClasses.emplace_back(NumIntRegs, 0);
     _regClasses.emplace_back(NumFloatRegs);
     _regClasses.emplace_back(1); // Not applicable to RISCV
@@ -216,6 +211,11 @@ ISA::ISA(const Params &p) : BaseISA(p)
     _regClasses.emplace_back(NUM_MISCREGS);
 
     miscRegFile.resize(NUM_MISCREGS);
+    
+    // @TODO: Temp setting for vlenb
+    setMiscRegNoEffect(MISCREG_VLENB, 0x10);
+    // @TODO: Temp M-mode
+    setMiscRegNoEffect(MISCREG_PRV, 0x3);
     clear();
 }
 

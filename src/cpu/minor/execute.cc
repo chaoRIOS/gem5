@@ -1294,17 +1294,28 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                     else
                     {
 
-                    //bool vx_src = (vector_insn->func3()==4) || (vector_insn->func3()==6);
-                    bool vf_src = (vector_insn->func3()==5) && vector_insn->isVectorInstArith();
-                    //bool vi_src = (vector_insn->func3()==3);
-                    if ((vector_insn->func6()==0x10) && (vector_insn->vs2()==0) && vf_src) {
-                        DPRINTF(CpuVectorIssue,"%s\n", vector_insn->getName());
-                        src1 = xc->readFloatRegOperandBits(vector_insn,0);
-                    } else {
-                        src1 = (vf_src) ? xc->readFloatRegOperandBits(vector_insn,0) :
-                            xc->readIntRegOperand(vector_insn,0);
-                    }
-                    src2 = xc->readIntRegOperand(vector_insn,1);
+                        /*
+                        //bool vx_src = (vector_insn->func3()==4) || (vector_insn->func3()==6);
+                        bool vf_src = (vector_insn->func3()==5) && vector_insn->isVectorInstArith();
+                        //bool vi_src = (vector_insn->func3()==3);
+                        if ((vector_insn->func6()==0x10) && (vector_insn->vs2()==0) && vf_src) {
+                            DPRINTF(CpuVectorIssue,"%s\n", vector_insn->getName());
+                            src1 = xc->readFloatRegOperandBits(vector_insn,0);
+                        } else {
+                            src1 = (vf_src) ? xc->readFloatRegOperandBits(vector_insn,0) :
+                                xc->readIntRegOperand(vector_insn,0);
+                        }
+                        src2 = xc->readIntRegOperand(vector_insn,1);
+                        */
+                        if (vector_insn->numSrcRegs() >= 1)
+                        {                            
+                            src1 = xc->readIntRegOperand(vector_insn,0);
+                        }
+                        if (vector_insn->numSrcRegs() >= 2)
+                        {
+                            src2 = xc->readIntRegOperand(vector_insn,1);
+                        }
+                        
                     }
 
                     DPRINTF(CpuVectorIssue,"Sending vector isnt to the Vector"
@@ -1553,12 +1564,6 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
 //#if TheISA == RiscvISA
             scoreboard[thread_id].clearInstDests(inst, inst->isMemRef()
                 | inst->staticInst->isVector());
-            // ExecContextPtr xc = std::make_shared<ExecContext>(cpu,
-            //             *cpu.threads[thread_id],*this, inst);
-            // uint64_t vlenb = cpu.ve_interface->getVectorEngine()->vector_config->get_vlenb();
-            
-            // xc->setMiscReg(RiscvISA::MISCREG_VLENB,vlenb);
-            
 //#else // !TheISA == RiscvISA
             // scoreboard[thread_id].clearInstDests(inst, inst->isMemRef());
 //#endif // TheISA == RiscvISA
