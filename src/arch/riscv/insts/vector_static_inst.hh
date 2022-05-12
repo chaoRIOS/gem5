@@ -63,7 +63,7 @@ public:
       VectorStaticInst(const char *mnem, MachInst _machInst, OpClass __opClass):
         RiscvStaticInst(mnem, _machInst, __opClass){};
 
-      void advancePC(PCStateBase &pc) const override {}
+      void advancePC(PCStateBase &pc) const override { pc.as<PCState>().advance(); }
       void advancePC(PCState &pc) const { pc.advance();}
       /* vector instruction name*/
       virtual std::string getName() const = 0;
