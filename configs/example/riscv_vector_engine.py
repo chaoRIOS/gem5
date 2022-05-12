@@ -414,7 +414,7 @@ else:
       if len(s):
         filtered = filtered + [s]
 
-
+    system.workload = SEWorkload.init_compatible(filtered[0])
     process.executable = filtered[0]
     process.cmd = filtered
 #    process.output = output[0]
