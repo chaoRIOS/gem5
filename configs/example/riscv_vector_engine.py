@@ -43,7 +43,6 @@ from common import CacheConfig
 from common import CpuConfig
 from common import MemConfig
 from common.Caches import *
-import time
 
 # Parse options
 ps = OptionParser()
@@ -398,7 +397,6 @@ system.mem_ctrl.port = system.membus.mem_side_ports
 ###############################################################################
 # Create Workload
 ###############################################################################
-begin = time.clock()
 
 process = Process()
 
@@ -421,14 +419,11 @@ else:
 
 system.cpu.workload = process
 system.cpu.createThreads()
-end = time.clock()
-print("Duration:", end-begin)
 
 
 ###############################################################################
 # Run Simulation
 ###############################################################################
-begin = time.clock()
 
 # set up the root SimObject and start the simulation
 root = Root(full_system = False, system = system)
@@ -439,7 +434,5 @@ print("Beginning simulation!")
 
 
 exit_event = m5.simulate()
-end = time.clock()
 print('Exiting @ tick %i because %s' % (m5.curTick(), exit_event.getCause()))
-print("Duration:", end-begin)
 print("gem5 finished %s" % datetime.datetime.now().strftime("%b %e %Y %X"))
