@@ -109,9 +109,9 @@ VectorLane::issue(VectorEngine& vector_wrapper,
 
     std::string operation = insn.getName();
 
-    bool  move_to_core = (operation == "vfmv_fs") || (operation == "vmv_xs");
     bool  move_to_core_int = (operation == "vmv_xs");
     bool  move_to_core_float = (operation == "vfmv_fs");
+    bool  move_to_core = move_to_core_int || move_to_core_float;
 
     uint64_t i;
     // OPIVI, OPIVX , OPFVF and OPMVX formats

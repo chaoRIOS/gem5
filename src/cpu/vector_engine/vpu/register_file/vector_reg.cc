@@ -37,12 +37,17 @@
 #include <vector>
 
 #include "base/logging.hh"
+#include "base/trace.hh"
 #include "debug/VectorRegister.hh"
 namespace gem5
 {
 
 namespace RiscvISA
 {
+
+#ifdef DEBUG
+    using namespace gem5::Trace;
+#endif
 
 
 // vector_reg::VectorRegisterPort
