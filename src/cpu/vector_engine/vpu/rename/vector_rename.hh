@@ -53,7 +53,7 @@ namespace RiscvISA
 class VectorRename : public SimObject
 {
 public:
-    VectorRename(const VectorRenameParams *p);
+    VectorRename(const VectorRenameParams &params);
     ~VectorRename();
 
     const uint64_t PhysicalRegs;

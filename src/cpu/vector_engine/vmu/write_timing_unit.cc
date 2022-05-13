@@ -43,9 +43,9 @@ namespace gem5
 namespace RiscvISA
 {
 
-MemUnitWriteTiming::MemUnitWriteTiming(const MemUnitWriteTimingParams *p):
-    TickedObject(TickedObjectParams(*p)), channel(p->channel), cacheLineSize(p->cacheLineSize),
-    VRF_LineSize(p->VRF_LineSize), done(false)
+MemUnitWriteTiming::MemUnitWriteTiming(const MemUnitWriteTimingParams &params):
+    TickedObject(TickedObjectParams(params)), channel(params.channel), cacheLineSize(params.cacheLineSize),
+    VRF_LineSize(params.VRF_LineSize), done(false)
 {
 }
 
@@ -281,9 +281,4 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
 
 }
 
-gem5::RiscvISA::MemUnitWriteTiming *
-MemUnitWriteTimingParams::create() const
-{
-    return new gem5::RiscvISA::MemUnitWriteTiming(this);
-}
 }

@@ -152,7 +152,7 @@ public:
         const uint64_t channel;
     };
 public:
-    VectorEngine(const VectorEngineParams *p);
+    VectorEngine(const VectorEngineParams &params);
     ~VectorEngine();
 
     VectorConfig  *   vector_config;

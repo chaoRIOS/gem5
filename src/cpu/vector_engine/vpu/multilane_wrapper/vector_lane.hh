@@ -55,7 +55,7 @@ class VectorEngine;
 class VectorLane : public SimObject
 {
   public:
-    VectorLane(const VectorLaneParams *p);
+    VectorLane(const VectorLaneParams &params);
     ~VectorLane();
 
     bool isOccupied();

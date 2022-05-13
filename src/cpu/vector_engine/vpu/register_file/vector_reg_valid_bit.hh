@@ -51,7 +51,7 @@ namespace RiscvISA
 class VectorValidBit : public SimObject
 {
 public:
-    VectorValidBit(const VectorValidBitParams *p);
+    VectorValidBit(const VectorValidBitParams &params);
     ~VectorValidBit();
 
     //void startTicking();

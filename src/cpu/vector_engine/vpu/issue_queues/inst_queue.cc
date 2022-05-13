@@ -46,11 +46,11 @@ namespace RiscvISA
 {
 
 
-InstQueue::InstQueue(const InstQueueParams *p) :
-TickedObject(TickedObjectParams(*p)), occupied(false),
-OoO_queues(p->OoO_queues),
-vector_mem_queue_size(p->vector_mem_queue_size),
-vector_arith_queue_size(p->vector_arith_queue_size)
+InstQueue::InstQueue(const InstQueueParams &params) :
+TickedObject(TickedObjectParams(params)), occupied(false),
+OoO_queues(params.OoO_queues),
+vector_mem_queue_size(params.vector_mem_queue_size),
+vector_arith_queue_size(params.vector_arith_queue_size)
 {
 }
 
@@ -522,10 +522,5 @@ InstQueue::printInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_
 
 }
 
-gem5::RiscvISA::InstQueue *
-InstQueueParams::create() const
-{
-    return new gem5::RiscvISA::InstQueue(this);
-}
 
 }

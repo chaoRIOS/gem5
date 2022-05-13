@@ -51,7 +51,7 @@ class VectorEngine;
 class MemUnitReadTiming : public TickedObject
 {
 public:
-    MemUnitReadTiming(const MemUnitReadTimingParams *p);
+    MemUnitReadTiming(const MemUnitReadTimingParams &params);
     ~MemUnitReadTiming();
 
     // overrides

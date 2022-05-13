@@ -52,11 +52,11 @@ namespace RiscvISA
 {
 
 
-VectorLane::VectorLane(const VectorLaneParams* p) :
-    SimObject(SimObjectParams(*p)), lane_id(p->lane_id), occupied(false),
-    srcAReader(p->srcAReader), srcBReader(p->srcBReader),
-    srcMReader(p->srcMReader), dstReader(p->dstReader), dstWriter(p->dstWriter),
-    dataPath(p->dataPath)
+VectorLane::VectorLane(const VectorLaneParams &params) :
+    SimObject(SimObjectParams(params)), lane_id(params.lane_id), occupied(false),
+    srcAReader(params.srcAReader), srcBReader(params.srcBReader),
+    srcMReader(params.srcMReader), dstReader(params.dstReader), dstWriter(params.dstWriter),
+    dataPath(params.dataPath)
 {
     DPRINTF(VectorEngineInfo, "Created a new Cluster with id: %d\n", lane_id);
 }
@@ -517,10 +517,5 @@ VectorLane::issue(VectorEngine& vector_wrapper,
 
 }
 
-gem5::RiscvISA::VectorLane*
-VectorLaneParams::create() const
-{
-    return new gem5::RiscvISA::VectorLane(this);
-}
 
 }

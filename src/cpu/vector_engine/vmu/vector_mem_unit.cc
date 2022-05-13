@@ -46,12 +46,12 @@ namespace gem5
 namespace RiscvISA
 {
 
-VectorMemUnit::VectorMemUnit(const VectorMemUnitParams *p) :
-    SimObject(SimObjectParams(*p)),
+VectorMemUnit::VectorMemUnit(const VectorMemUnitParams &params) :
+    SimObject(SimObjectParams(params)),
     occupied(false),
-    memReader(p->memReader),
-    memReader_addr(p->memReader_addr),
-    memWriter(p->memWriter)
+    memReader(params.memReader),
+    memReader_addr(params.memReader_addr),
+    memWriter(params.memWriter)
 {
 }
 
@@ -347,10 +347,5 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
 
 }
 
-gem5::RiscvISA::VectorMemUnit *
-VectorMemUnitParams::create() const
-{
-    return new gem5::RiscvISA::VectorMemUnit(this);
-}
 
 }

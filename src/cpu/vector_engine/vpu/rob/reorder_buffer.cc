@@ -45,8 +45,8 @@ namespace gem5
 namespace RiscvISA
 {
 
-ReorderBuffer::ReorderBuffer(const ReorderBufferParams *p):
-TickedObject(TickedObjectParams(*p)),occupied(false), ROB_Size(p->ROB_Size)
+ReorderBuffer::ReorderBuffer(const ReorderBufferParams &params):
+TickedObject(TickedObjectParams(params)),occupied(false), ROB_Size(params.ROB_Size)
 {
     for (int i=0 ; i<ROB_Size ; i++) {
         rob.push_back(new rob_entry(0,0));
@@ -172,10 +172,5 @@ ReorderBuffer::set_rob_entry_executed(uint32_t idx)
 
 }
 
-gem5::RiscvISA::ReorderBuffer *
-ReorderBufferParams::create() const
-{
-    return new gem5::RiscvISA::ReorderBuffer(this);
-}
 
 }

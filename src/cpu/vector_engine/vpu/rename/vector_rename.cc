@@ -45,8 +45,8 @@ namespace RiscvISA
 /**
  *  Vector Renaming
  */
-VectorRename::VectorRename(const VectorRenameParams *p) :
-SimObject(SimObjectParams(*p)), PhysicalRegs(p->PhysicalRegs)
+VectorRename::VectorRename(const VectorRenameParams &params) :
+SimObject(SimObjectParams(params)), PhysicalRegs(params.PhysicalRegs)
 {
     DPRINTF(VectorRename, "Created the Renaming Unit object \n");
     for (uint64_t i=32; i<PhysicalRegs; i++) {
@@ -63,10 +63,5 @@ VectorRename::~VectorRename()
 
 }
 
-gem5::RiscvISA::VectorRename *
-VectorRenameParams::create() const
-{
-    return new gem5::RiscvISA::VectorRename(this);
-}
 
 }

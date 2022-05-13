@@ -46,9 +46,9 @@ namespace RiscvISA
 /**
  * Memory Unit - Read
  */
-MemUnitReadTiming::MemUnitReadTiming(const MemUnitReadTimingParams *p) :
-    TickedObject(TickedObjectParams(*p)), channel(p->channel), cacheLineSize(p->cacheLineSize),
-    VRF_LineSize(p->VRF_LineSize), done(false)
+MemUnitReadTiming::MemUnitReadTiming(const MemUnitReadTimingParams &params) :
+    TickedObject(TickedObjectParams(params)), channel(params.channel), cacheLineSize(params.cacheLineSize),
+    VRF_LineSize(params.VRF_LineSize), done(false)
 {
 }
 
@@ -262,10 +262,5 @@ MemUnitReadTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
 
 }
 
-gem5::RiscvISA::MemUnitReadTiming *
-MemUnitReadTimingParams::create() const
-{
-    return new gem5::RiscvISA::MemUnitReadTiming(this);
-}
 
 }

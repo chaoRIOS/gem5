@@ -48,8 +48,8 @@ namespace RiscvISA
  * VPU local Configuration
  */
 
-VectorConfig::VectorConfig(const VectorConfigParams *p) :
-SimObject(SimObjectParams(*p)) ,  max_vector_length(p->max_vl)
+VectorConfig::VectorConfig(const VectorConfigParams &params) :
+SimObject(SimObjectParams(params)) ,  max_vector_length(params.max_vl)
 {
 }
 
@@ -157,10 +157,5 @@ VectorConfig::get_vtype_ediv(uint64_t vtype) {
 
 }
 
-gem5::RiscvISA::VectorConfig *
-VectorConfigParams::create() const
-{
-    return new gem5::RiscvISA::VectorConfig(this);
-}
 
 }

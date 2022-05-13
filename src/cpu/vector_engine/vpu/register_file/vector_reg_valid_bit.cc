@@ -41,8 +41,8 @@ namespace RiscvISA
 /**
  * Valid bits
  */
-VectorValidBit::VectorValidBit(const VectorValidBitParams *p):
-SimObject(SimObjectParams(*p)), PhysicalRegs(p->PhysicalRegs)
+VectorValidBit::VectorValidBit(const VectorValidBitParams &params):
+SimObject(SimObjectParams(params)), PhysicalRegs(params.PhysicalRegs)
 {
     for (uint64_t i=0; i<32; i++)
         {
@@ -139,10 +139,5 @@ VectorValidBit::print_valid_bit() {
 
 }
 
-gem5::RiscvISA::VectorValidBit *
-VectorValidBitParams::create() const
-{
-    return new gem5::RiscvISA::VectorValidBit(this);
-}
 
 }

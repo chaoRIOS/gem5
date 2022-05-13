@@ -51,27 +51,27 @@ namespace RiscvISA
 {
 
 
-VectorEngine::VectorEngine(const VectorEngineParams *p) :
-SimObject(SimObjectParams(*p)),
-vector_config(p->vector_config),
-VectorCacheRequestorId(p->system->getRequestorId(this, name() + ".vector_cache")),
-vectormem_port(name() + ".vector_mem_port", this, p->vector_rf_ports),
-vector_reg(p->vector_reg),
+VectorEngine::VectorEngine(const VectorEngineParams &params) :
+SimObject(SimObjectParams(params)),
+vector_config(params.vector_config),
+VectorCacheRequestorId(params.system->getRequestorId(this, name() + ".vector_cache")),
+vectormem_port(name() + ".vector_mem_port", this, params.vector_rf_ports),
+vector_reg(params.vector_reg),
 uniqueReqId(0),
-num_clusters(p->num_clusters),
-num_lanes(p->num_lanes),
-vector_rob(p->vector_rob),
-vector_lane(p->vector_lane),
-vector_memory_unit(p->vector_memory_unit),
-vector_inst_queue(p->vector_inst_queue),
-vector_rename(p->vector_rename),
-vector_reg_validbit(p->vector_reg_validbit),
+num_clusters(params.num_clusters),
+num_lanes(params.num_lanes),
+vector_rob(params.vector_rob),
+vector_lane(params.vector_lane),
+vector_memory_unit(params.vector_memory_unit),
+vector_inst_queue(params.vector_inst_queue),
+vector_rename(params.vector_rename),
+vector_reg_validbit(params.vector_reg_validbit),
 last_vtype(0),
 last_vl(0)
 {
     //create independent ports
-    for (uint8_t i=0; i< p->vector_rf_ports; ++i) {
-        VectorRegRequestorIds.push_back(p->system->getRequestorId(this, name()
+    for (uint8_t i=0; i< params.vector_rf_ports; ++i) {
+        VectorRegRequestorIds.push_back(params.system->getRequestorId(this, name()
             + ".vector_reg" + std::to_string(i)));
         VectorRegPorts.push_back(VectorRegPort(name()
             + ".vector_reg_port", this, i));
@@ -676,9 +676,9 @@ VectorEngine::VectorMemPort::startTranslation(Addr addr, uint8_t *data,
     uint8_t channel)
 {
 #ifdef DEBUG
-    Process * p = tc->getProcessPtr();
-    Addr page1 = p->pTable->pageAlign(addr);
-    Addr page2 = p->pTable->pageAlign(addr+size-1);
+    Process * process = tc->getProcessPtr();
+    Addr page1 = process->pTable->pageAlign(addr);
+    Addr page2 = process->pTable->pageAlign(addr+size-1);
     assert(page1 == page2);
 #endif
 
@@ -938,10 +938,5 @@ VectorEngine::readVectorReg(Addr addr, uint32_t size,
 
 }
 
-gem5::RiscvISA::VectorEngine *
-VectorEngineParams::create() const
-{
-    return new gem5::RiscvISA::VectorEngine(this);
-}
 
 }

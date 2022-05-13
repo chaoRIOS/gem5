@@ -62,7 +62,7 @@ public:
         bool executed;
     };
 
-    ReorderBuffer(const ReorderBufferParams *p);
+    ReorderBuffer(const ReorderBufferParams &params);
     ~ReorderBuffer();
 
     void startTicking(VectorEngine& vector_wrapper);

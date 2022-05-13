@@ -111,11 +111,11 @@ VectorRegister::get_size()
     return size;
 }
 
-VectorRegister::VectorRegister(const VectorRegisterParams* p) :
-    ClockedObject(ClockedObjectParams(*p)),num_lanes(p->num_lanes),
-    num_regs(p->num_regs),mvl(p->mvl),
-    size(p->size), lineSize(p->lineSize),
-    numPorts(p->numPorts), accessLatency(p->accessLatency)
+VectorRegister::VectorRegister(const VectorRegisterParams &params) :
+    ClockedObject(ClockedObjectParams(params)),num_lanes(params.num_lanes),
+    num_regs(params.num_regs),mvl(params.mvl),
+    size(params.size), lineSize(params.lineSize),
+    numPorts(params.numPorts), accessLatency(params.accessLatency)
 {
     assert(size % lineSize == 0);
     assert(lineSize % sizeof(float) == 0);
@@ -209,10 +209,5 @@ VectorRegister::getPort(const std::string &if_name, PortID idx)
 
 }
 
-gem5::RiscvISA::VectorRegister *
-VectorRegisterParams::create() const
-{
-    return new gem5::RiscvISA::VectorRegister(this);
-}
 
 }

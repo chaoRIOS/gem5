@@ -46,8 +46,8 @@ namespace RiscvISA
 {
 
 
-VectorEngineInterface::VectorEngineInterface(const VectorEngineInterfaceParams *p) :
-SimObject(SimObjectParams(*p)),vector_engine(p->vector_engine)
+VectorEngineInterface::VectorEngineInterface(const VectorEngineInterfaceParams &params) :
+SimObject(SimObjectParams(params)),vector_engine(params.vector_engine)
 {
 }
 
@@ -91,10 +91,5 @@ VectorEngineInterface::bussy()
 
 }
 
-gem5::RiscvISA::VectorEngineInterface *
-VectorEngineInterfaceParams::create() const
-{
-    return new gem5::RiscvISA::VectorEngineInterface(this);
-}
 
 }

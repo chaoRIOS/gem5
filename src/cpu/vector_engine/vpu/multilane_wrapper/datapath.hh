@@ -66,7 +66,7 @@ private:
     };
 
 public:
-    Datapath(const DatapathParams *p);
+    Datapath(const DatapathParams &params);
     ~Datapath();
 
     void get_instruction_latency();

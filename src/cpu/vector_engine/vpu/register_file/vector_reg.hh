@@ -73,7 +73,7 @@ public:
     };
 
 public:
-    VectorRegister(const VectorRegisterParams *p);
+    VectorRegister(const VectorRegisterParams &params);
     ~VectorRegister();
 
     Port& getPort(const std::string& if_name,

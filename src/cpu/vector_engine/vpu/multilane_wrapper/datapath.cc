@@ -47,8 +47,8 @@ namespace RiscvISA
 {
 
 
-Datapath::Datapath(const DatapathParams *p) :
-    TickedObject(TickedObjectParams(*p)), VectorLanes(p->VectorLanes)
+Datapath::Datapath(const DatapathParams &params) :
+    TickedObject(TickedObjectParams(params)), VectorLanes(params.VectorLanes)
 {
 }
 
@@ -1012,10 +1012,5 @@ Datapath::evaluate()
 
 }
 
-gem5::RiscvISA::Datapath *
-DatapathParams::create() const
-{
-    return new gem5::RiscvISA::Datapath(this);
-}
 
 }
