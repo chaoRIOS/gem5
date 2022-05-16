@@ -2851,7 +2851,7 @@ Datapath::computeLongMaskLogicalOp(bool Aitem, bool Bitem,
             Bitem,Aitem, aux);
     }
 
-    if ((operation == "vmandnot_mm")) {
+    if ((operation == "vmandn_mm")) {
         aux = (Bitem & !Aitem);
         DPRINTF(Datapath,"WB Instruction = %d & !%d = %d  \n",
             Bitem,Aitem, aux);
@@ -2875,7 +2875,7 @@ Datapath::computeLongMaskLogicalOp(bool Aitem, bool Bitem,
             Bitem,Aitem, aux);
     }
 
-    if ((operation == "vmornot_mm")) {
+    if ((operation == "vmorn_mm")) {
         aux = (Bitem | !Aitem);
         DPRINTF(Datapath,"WB Instruction = %d | !%d = %d  \n",
             Bitem,Aitem, aux);
@@ -2911,7 +2911,7 @@ Datapath::computeIntMaskLogicalOp(bool Aitem, bool Bitem,
             Bitem,Aitem, aux);
     }
 
-    if ((operation == "vmandnot_mm")) {
+    if ((operation == "vmandn_mm")) {
         aux = (Bitem & !Aitem);
         DPRINTF(Datapath,"WB Instruction = %d & !%d = %d  \n",
             Bitem,Aitem, aux);
@@ -2935,7 +2935,7 @@ Datapath::computeIntMaskLogicalOp(bool Aitem, bool Bitem,
             Bitem,Aitem, aux);
     }
 
-    if ((operation == "vmornot_mm")) {
+    if ((operation == "vmorn_mm")) {
         aux = (Bitem | !Aitem);
         DPRINTF(Datapath,"WB Instruction = %d | !%d = %d  \n",
             Bitem,Aitem, aux);

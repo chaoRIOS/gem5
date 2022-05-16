@@ -60,20 +60,25 @@ main(int argc, char **argv)
     // It's probably not necessary, but is mostly harmless and might be useful.
     Py_SetProgramName(program.get());
 
-    py::scoped_interpreter guard(true, argc, argv);
+    // py::scoped_interpreter guard(true, argc, argv);
+    py::initialize_interpreter(true, argc, argv);
+    {
+        auto importer = py::module_::import("importer");
+        importer.attr("install")();
 
-    auto importer = py::module_::import("importer");
-    importer.attr("install")();
+        try {
+            py::module_::import("m5").attr("main")();
+        } catch (py::error_already_set &e) {
+            if (e.matches(PyExc_SystemExit))
+                return e.value().attr("code").cast<int>();
 
-    try {
-        py::module_::import("m5").attr("main")();
-    } catch (py::error_already_set &e) {
-        if (e.matches(PyExc_SystemExit))
-            return e.value().attr("code").cast<int>();
-
-        std::cerr << e.what();
-        return 1;
+            std::cerr << e.what();
+            return 1;
+        }
     }
+
+    py::finalize_interpreter();
+
 
     return 0;
 }
