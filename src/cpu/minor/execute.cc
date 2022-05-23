@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014,2018-2019 ARM Limited
+ * Copyright (c) 2013-2014,2018-2020 ARM Limited
  * All rights reserved
  *
  * The license below extends only to copyright in the software and shall
@@ -37,39 +37,45 @@
 
 #include "cpu/minor/execute.hh"
 
-#include "arch/locked_mem.hh"
-#include "arch/registers.hh"
-#include "arch/utility.hh"
+#include <functional>
+
 #include "cpu/minor/cpu.hh"
 #include "cpu/minor/exec_context.hh"
 #include "cpu/minor/fetch1.hh"
 #include "cpu/minor/lsq.hh"
 #include "cpu/op_class.hh"
-#if THE_ISA == RISCV_ISA
+//#if TheISA == RiscvISA
 #include "cpu/vector_engine/vector_engine_interface.hh"
-#endif
+//#endif TheISA == RiscvISA
 #include "debug/Activity.hh"
 #include "debug/Branch.hh"
 #include "debug/CpuVectorIssue.hh"
 #include "debug/Drain.hh"
+#include "debug/ExecFaulting.hh"
 #include "debug/MinorExecute.hh"
 #include "debug/MinorInterrupt.hh"
 #include "debug/MinorMem.hh"
 #include "debug/MinorTrace.hh"
 #include "debug/PCEvent.hh"
 
-namespace Minor
+namespace gem5
+{
+
+GEM5_DEPRECATED_NAMESPACE(Minor, minor);
+namespace minor
 {
 
 Execute::Execute(const std::string &name_,
     MinorCPU &cpu_,
-    MinorCPUParams &params,
+    const MinorCPUParams &params,
     Latch<ForwardInstData>::Output inp_,
     Latch<BranchData>::Input out_) :
     Named(name_),
     inp(inp_),
     out(out_),
     cpu(cpu_),
+    zeroReg(cpu.threads[0]->getIsaPtr()->regClasses().
+        at(IntRegClass).zeroReg()),
     issueLimit(params.executeIssueLimit),
     memoryIssueLimit(params.executeMemoryIssueLimit),
     commitLimit(params.executeCommitLimit),
@@ -88,8 +94,10 @@ Execute::Execute(const std::string &name_,
         params.executeLSQRequestsQueueSize,
         params.executeLSQTransfersQueueSize,
         params.executeLSQStoreBufferSize,
-        params.executeLSQMaxStoreBufferStoresPerCycle),
-    executeInfo(params.numThreads, ExecuteThreadInfo(params.executeCommitLimit)),
+        params.executeLSQMaxStoreBufferStoresPerCycle,
+        zeroReg),
+    executeInfo(params.numThreads,
+            ExecuteThreadInfo(params.executeCommitLimit)),
     interruptPriority(0),
     issuePriority(0),
     commitPriority(0)
@@ -162,10 +170,11 @@ Execute::Execute(const std::string &name_,
             fu_index++;
         }
 
-        // if (!found_fu) {
-        //     warn("No functional unit for OpClass %s\n",
-        //         Enums::OpClassStrings[op_class]);
-        // }
+
+        if (!found_fu) {
+            warn("No functional unit for OpClass %s\n",
+                enums::OpClassStrings[op_class]);
+        }
     }
 
     /* Per-thread structures */
@@ -178,8 +187,10 @@ Execute::Execute(const std::string &name_,
                 name_ + ".inputBuffer" + tid_str, "insts",
                 params.executeInputBufferSize));
 
+        const auto &regClasses = cpu.threads[tid]->getIsaPtr()->regClasses();
+
         /* Scoreboards */
-        scoreboard.push_back(Scoreboard(name_ + ".scoreboard" + tid_str));
+        scoreboard.emplace_back(name_ + ".scoreboard" + tid_str, regClasses);
 
         /* In-flight instruction records */
         executeInfo[tid].inFlightInsts =  new Queue<QueuedInst,
@@ -218,8 +229,8 @@ void
 Execute::tryToBranch(MinorDynInstPtr inst, Fault fault, BranchData &branch)
 {
     ThreadContext *thread = cpu.getContext(inst->id.threadId);
-    const TheISA::PCState &pc_before = inst->pc;
-    TheISA::PCState target = thread->pcState();
+    const std::unique_ptr<PCStateBase> pc_before(inst->pc->clone());
+    std::unique_ptr<PCStateBase> target(thread->pcState().clone());
 
     /* Force a branch for SerializeAfter/SquashAfter instructions
      * at the end of micro-op sequence when we're not suspended */
@@ -227,27 +238,25 @@ Execute::tryToBranch(MinorDynInstPtr inst, Fault fault, BranchData &branch)
         !inst->isFault() &&
         inst->isLastOpInInst() &&
         (inst->staticInst->isSerializeAfter() ||
-         inst->staticInst->isSquashAfter() ||
-         inst->staticInst->isIprAccess());
+         inst->staticInst->isSquashAfter());
 
     DPRINTF(Branch, "tryToBranch before: %s after: %s%s\n",
-        pc_before, target, (force_branch ? " (forcing)" : ""));
+        *pc_before, *target, (force_branch ? " (forcing)" : ""));
 
     /* Will we change the PC to something other than the next instruction? */
-    bool must_branch = pc_before != target ||
+    bool must_branch = *pc_before != *target ||
         fault != NoFault ||
         force_branch;
 
     /* The reason for the branch data we're about to generate, set below */
     BranchData::Reason reason = BranchData::NoBranch;
 
-    if (fault == NoFault)
-    {
-        TheISA::advancePC(target, inst->staticInst);
-        thread->pcState(target);
+    if (fault == NoFault) {
+        inst->staticInst->advancePC(*target);
+        thread->pcState(*target);
 
         DPRINTF(Branch, "Advancing current PC from: %s to: %s\n",
-            pc_before, target);
+            *pc_before, *target);
     }
 
     if (inst->predictedTaken && !force_branch) {
@@ -257,32 +266,34 @@ Execute::tryToBranch(MinorDynInstPtr inst, Fault fault, BranchData &branch)
              *  intended PC value */
             DPRINTF(Branch, "Predicted a branch from 0x%x to 0x%x but"
                 " none happened inst: %s\n",
-                inst->pc.instAddr(), inst->predictedTarget.instAddr(), *inst);
+                inst->pc->instAddr(), inst->predictedTarget->instAddr(),
+                *inst);
 
             reason = BranchData::BadlyPredictedBranch;
-        } else if (inst->predictedTarget == target) {
+        } else if (*inst->predictedTarget == *target) {
             /* Branch prediction got the right target, kill the branch and
              *  carry on.
              *  Note that this information to the branch predictor might get
              *  overwritten by a "real" branch during this cycle */
             DPRINTF(Branch, "Predicted a branch from 0x%x to 0x%x correctly"
                 " inst: %s\n",
-                inst->pc.instAddr(), inst->predictedTarget.instAddr(), *inst);
+                inst->pc->instAddr(), inst->predictedTarget->instAddr(),
+                *inst);
 
             reason = BranchData::CorrectlyPredictedBranch;
         } else {
             /* Branch prediction got the wrong target */
             DPRINTF(Branch, "Predicted a branch from 0x%x to 0x%x"
                     " but got the wrong target (actual: 0x%x) inst: %s\n",
-                    inst->pc.instAddr(), inst->predictedTarget.instAddr(),
-                    target.instAddr(), *inst);
+                    inst->pc->instAddr(), inst->predictedTarget->instAddr(),
+                    target->instAddr(), *inst);
 
             reason = BranchData::BadlyPredictedBranchTarget;
         }
     } else if (must_branch) {
         /* Unpredicted branch */
         DPRINTF(Branch, "Unpredicted branch from 0x%x to 0x%x inst: %s\n",
-            inst->pc.instAddr(), target.instAddr(), *inst);
+            inst->pc->instAddr(), target->instAddr(), *inst);
 
         reason = BranchData::UnpredictedBranch;
     } else {
@@ -290,14 +301,14 @@ Execute::tryToBranch(MinorDynInstPtr inst, Fault fault, BranchData &branch)
         reason = BranchData::NoBranch;
     }
 
-    updateBranchData(inst->id.threadId, reason, inst, target, branch);
+    updateBranchData(inst->id.threadId, reason, inst, *target, branch);
 }
 
 void
 Execute::updateBranchData(
     ThreadID tid,
     BranchData::Reason reason,
-    MinorDynInstPtr inst, const TheISA::PCState &target,
+    MinorDynInstPtr inst, const PCStateBase &target,
     BranchData &branch)
 {
     if (reason != BranchData::NoBranch) {
@@ -326,7 +337,7 @@ Execute::handleMemResponse(MinorDynInstPtr inst,
     ThreadID thread_id = inst->id.threadId;
     ThreadContext *thread = cpu.getContext(thread_id);
 
-    ExecContext context(cpu, *cpu.threads[thread_id], *this, inst);
+    ExecContext context(cpu, *cpu.threads[thread_id], *this, inst, zeroReg);
 
     PacketPtr packet = response->packet;
 
@@ -459,10 +470,10 @@ Execute::executeMemRefInst(MinorDynInstPtr inst, BranchData &branch,
         issued = false;
     } else {
         ThreadContext *thread = cpu.getContext(inst->id.threadId);
-        TheISA::PCState old_pc = thread->pcState();
+        std::unique_ptr<PCStateBase> old_pc(thread->pcState().clone());
 
         ExecContext context(cpu, *cpu.threads[inst->id.threadId],
-            *this, inst);
+            *this, inst, zeroReg);
 
         DPRINTF(MinorExecute, "Initiating memRef inst: %s\n", *inst);
 
@@ -511,7 +522,7 @@ Execute::executeMemRefInst(MinorDynInstPtr inst, BranchData &branch,
         }
 
         /* Restore thread PC */
-        thread->pcState(old_pc);
+        thread->pcState(*old_pc);
         issued = true;
     }
 
@@ -594,8 +605,8 @@ Execute::issue(ThreadID thread_id)
                 *inst, thread.streamSeqNum);
             issued = true;
             discarded = true;
-#if THE_ISA == RISCV_ISA
-        } else if (inst->staticInst->isMemBarrier() &&
+//#if TheISA == RiscvISA
+        } else if (inst->staticInst->isFullMemBarrier() &&
                     (cpu.ve_interface->bussy() ||
                     !thread.inFlightInsts->empty())) {
             DPRINTF(CpuVectorIssue,"Fence Inst blocked the pipeline: %s"
@@ -623,7 +634,7 @@ Execute::issue(ThreadID thread_id)
             //else {
             //    issued = false;
             //}
-#endif // THE_ISA == RISCV_ISA
+//#endif // TheISA == RiscvISA
         } else {
             /* Try and issue an instruction into an FU, assume we didn't and
              * fix that in the loop */
@@ -810,12 +821,14 @@ Execute::issue(ThreadID thread_id)
         if (issued) {
             /* Generate MinorTrace's MinorInst lines.  Do this at commit
              *  to allow better instruction annotation? */
-            if (DTRACE(MinorTrace) && !inst->isBubble())
-                inst->minorTraceInst(*this);
+            if (debug::MinorTrace && !inst->isBubble()) {
+                inst->minorTraceInst(*this,
+                        cpu.threads[0]->getIsaPtr()->regClasses());
+            }
 
             /* Mark up barriers in the LSQ */
             if (!discarded && inst->isInst() &&
-                inst->staticInst->isMemBarrier())
+                inst->staticInst->isFullMemBarrier())
             {
                 DPRINTF(MinorMem, "Issuing memory barrier inst: %s\n", *inst);
                 lsq.issuedMemBarrierInst(inst);
@@ -873,10 +886,10 @@ Execute::tryPCEvents(ThreadID thread_id)
     /* Handle PC events on instructions */
     Addr oldPC;
     do {
-        oldPC = thread->instAddr();
+        oldPC = thread->pcState().instAddr();
         cpu.threads[thread_id]->pcEventQueue.service(oldPC, thread);
         num_pc_event_checks++;
-    } while (oldPC != thread->instAddr());
+    } while (oldPC != thread->pcState().instAddr());
 
     if (num_pc_event_checks > 1) {
         DPRINTF(PCEvent, "Acting on PC Event to PC: %s\n",
@@ -898,21 +911,20 @@ Execute::doInstCommitAccounting(MinorDynInstPtr inst)
     if (!inst->staticInst->isMicroop() || inst->staticInst->isLastMicroop())
     {
         thread->numInst++;
-        thread->numInsts++;
+        thread->threadStats.numInsts++;
         cpu.stats.numInsts++;
-        cpu.system->totalNumInsts++;
 
         /* Act on events related to instruction counts */
         thread->comInstEventQueue.serviceEvents(thread->numInst);
     }
     thread->numOp++;
-    thread->numOps++;
+    thread->threadStats.numOps++;
     cpu.stats.numOps++;
-#if THE_ISA == RISCV_ISA
+//#if TheISA == RiscvISA
     if (inst->staticInst->isVector()) {
         cpu.stats.numVectorInsts++;
     }
-#endif // THE_ISA == RISCV_ISA
+//#endif // TheISA == RiscvISA
     cpu.stats.committedInstType[inst->id.threadId]
                                [inst->staticInst->opClass()]++;
 
@@ -920,7 +932,7 @@ Execute::doInstCommitAccounting(MinorDynInstPtr inst)
     if (inst->traceData)
         inst->traceData->setCPSeq(thread->numOp);
 
-    cpu.probeInstCommit(inst->staticInst, inst->pc.instAddr());
+    cpu.probeInstCommit(inst->staticInst, inst->pc->instAddr());
 }
 
 bool
@@ -942,7 +954,8 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
         panic("We should never hit the case where we try to commit from a "
               "suspended thread as the streamSeqNum should not match");
     } else if (inst->isFault()) {
-        ExecContext context(cpu, *cpu.threads[thread_id], *this, inst);
+        ExecContext context(cpu, *cpu.threads[thread_id], *this,
+                inst, zeroReg);
 
         DPRINTF(MinorExecute, "Fault inst reached Execute: %s\n",
             inst->fault->name());
@@ -990,7 +1003,7 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
             completed_inst = completed_mem_inst;
         }
         completed_mem_issue = completed_inst;
-    } else if (inst->isInst() && inst->staticInst->isMemBarrier() &&
+    } else if (inst->isInst() && inst->staticInst->isFullMemBarrier() &&
         !lsq.canPushIntoStoreBuffer())
     {
         DPRINTF(MinorExecute, "Can't commit data barrier inst: %s yet as"
@@ -1003,7 +1016,8 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
          * backwards, so no other branches may evaluate this cycle*/
         completed_inst = false;
     } else {
-        ExecContext context(cpu, *cpu.threads[thread_id], *this, inst);
+        ExecContext context(cpu, *cpu.threads[thread_id], *this,
+                inst, zeroReg);
 
         DPRINTF(MinorExecute, "Committing inst: %s\n", *inst);
 
@@ -1017,6 +1031,15 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
         committed = true;
 
         if (fault != NoFault) {
+            if (inst->traceData) {
+                if (debug::ExecFaulting) {
+                    inst->traceData->setFaulting(true);
+                } else {
+                    delete inst->traceData;
+                    inst->traceData = NULL;
+                }
+            }
+
             DPRINTF(MinorExecute, "Fault in execute of inst: %s fault: %s\n",
                 *inst, fault->name());
             fault->invoke(thread, inst->staticInst);
@@ -1039,7 +1062,7 @@ Execute::commitInst(MinorDynInstPtr inst, bool early_memory_issue,
             !isInterrupted(thread_id)) /* Don't suspend if we have
                 interrupts */
         {
-            TheISA::PCState resume_pc = cpu.getContext(thread_id)->pcState();
+            auto &resume_pc = cpu.getContext(thread_id)->pcState();
 
             assert(resume_pc.microPC() == 0);
 
@@ -1182,7 +1205,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
 
             completed_mem_ref = true;
             completed_inst = true;
-#if THE_ISA == RISCV_ISA
+//#if TheISA == RiscvISA
         /*
          * The interface with the Vector Engine, only for RISC-V systems
          * The Vector Engine corresponds to a decoupled engine.
@@ -1235,9 +1258,9 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                 } else {
                     doInstCommitAccounting(inst);
                     ExecContextPtr xc = std::make_shared<ExecContext>(cpu,
-                        *cpu.threads[thread_id],*this, inst);
+                        *cpu.threads[thread_id],*this, inst, zeroReg);
 
-                    uint64_t  pc = inst->pc.instAddr();
+                    uint64_t  pc = inst->pc->instAddr();
                     vector_insn->setPC(pc);
                     uint64_t src1,src2;
 
@@ -1271,17 +1294,28 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                     else
                     {
 
-                    //bool vx_src = (vector_insn->func3()==4) || (vector_insn->func3()==6);
-                    bool vf_src = (vector_insn->func3()==5) && vector_insn->isVectorInstArith();
-                    //bool vi_src = (vector_insn->func3()==3);
-                    if ((vector_insn->func6()==0x10) && (vector_insn->vs2()==0) && vf_src) {
-                        DPRINTF(CpuVectorIssue,"%s\n", vector_insn->getName());
-                        src1 = xc->readFloatRegOperandBits(vector_insn,0);
-                    } else {
-                        src1 = (vf_src) ? xc->readFloatRegOperandBits(vector_insn,0) :
-                            xc->readIntRegOperand(vector_insn,0);
-                    }
-                    src2 = xc->readIntRegOperand(vector_insn,1);
+                        /*
+                        //bool vx_src = (vector_insn->func3()==4) || (vector_insn->func3()==6);
+                        bool vf_src = (vector_insn->func3()==5) && vector_insn->isVectorInstArith();
+                        //bool vi_src = (vector_insn->func3()==3);
+                        if ((vector_insn->func6()==0x10) && (vector_insn->vs2()==0) && vf_src) {
+                            DPRINTF(CpuVectorIssue,"%s\n", vector_insn->getName());
+                            src1 = xc->readFloatRegOperandBits(vector_insn,0);
+                        } else {
+                            src1 = (vf_src) ? xc->readFloatRegOperandBits(vector_insn,0) :
+                                xc->readIntRegOperand(vector_insn,0);
+                        }
+                        src2 = xc->readIntRegOperand(vector_insn,1);
+                        */
+                        if (vector_insn->numSrcRegs() >= 1)
+                        {                            
+                            src1 = xc->readIntRegOperand(vector_insn,0);
+                        }
+                        if (vector_insn->numSrcRegs() >= 2)
+                        {
+                            src2 = xc->readIntRegOperand(vector_insn,1);
+                        }
+                        
                     }
 
                     DPRINTF(CpuVectorIssue,"Sending vector isnt to the Vector"
@@ -1304,7 +1338,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                 /* Discard instruction */
                 completed_inst = true;
             }
-#endif // THE_ISA == RISCV_ISA
+//#endif // TheISA == RiscvISA
         } else if (can_commit_insts) {
             /* If true, this instruction will, subject to timing tweaks,
              *  be considered for completion.  try_to_commit flattens
@@ -1521,24 +1555,18 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
             ex_info.inFlightInsts->pop();
 
             /* Complete barriers in the LSQ/move to store buffer */
-            if (inst->isInst() && inst->staticInst->isMemBarrier()) {
+            if (inst->isInst() && inst->staticInst->isFullMemBarrier()) {
                 DPRINTF(MinorMem, "Completing memory barrier"
                     " inst: %s committed: %d\n", *inst, committed_inst);
                 lsq.completeMemBarrierInst(inst, committed_inst);
             }
 
-#if THE_ISA == RISCV_ISA
+//#if TheISA == RiscvISA
             scoreboard[thread_id].clearInstDests(inst, inst->isMemRef()
                 | inst->staticInst->isVector());
-            // ExecContextPtr xc = std::make_shared<ExecContext>(cpu,
-            //             *cpu.threads[thread_id],*this, inst);
-            // uint64_t vlenb = cpu.ve_interface->getVectorEngine()->vector_config->get_vlenb();
-            
-            // xc->setMiscReg(RiscvISA::MISCREG_VLENB,vlenb);
-            
-#else // !THE_ISA == RISCV_ISA
-            scoreboard[thread_id].clearInstDests(inst, inst->isMemRef());
-#endif // THE_ISA == RISCV_ISA
+//#else // !TheISA == RiscvISA
+            // scoreboard[thread_id].clearInstDests(inst, inst->isMemRef());
+//#endif // TheISA == RiscvISA
         }
 
         /* Handle per-cycle instruction counting */
@@ -1547,7 +1575,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
 
             /* Don't show no cost instructions as having taken a commit
              *  slot */
-            if (DTRACE(MinorTrace) && !is_no_cost_inst)
+            if (debug::MinorTrace && !is_no_cost_inst)
                 ex_info.instsBeingCommitted.insts[num_insts_committed] = inst;
 
             if (!is_no_cost_inst)
@@ -1646,7 +1674,8 @@ Execute::evaluate()
              *  the bag */
             if (commit_info.drainState == DrainHaltFetch) {
                 updateBranchData(commit_tid, BranchData::HaltFetch,
-                        MinorDynInst::bubble(), TheISA::PCState(0), branch);
+                        MinorDynInst::bubble(),
+                        cpu.getContext(commit_tid)->pcState(), branch);
 
                 cpu.wakeupOnEvent(Pipeline::ExecuteStageId);
                 setDrainState(commit_tid, DrainAllInsts);
@@ -1836,13 +1865,13 @@ Execute::minorTrace() const
             stalled << ',';
     }
 
-    MINORTRACE("insts=%s inputIndex=%d streamSeqNum=%d"
+    minor::minorTrace("insts=%s inputIndex=%d streamSeqNum=%d"
         " stalled=%s drainState=%d isInbetweenInsts=%d\n",
         insts.str(), executeInfo[0].inputIndex, executeInfo[0].streamSeqNum,
         stalled.str(), executeInfo[0].drainState, isInbetweenInsts(0));
 
     std::for_each(funcUnits.begin(), funcUnits.end(),
-        std::mem_fun(&FUPipeline::minorTrace));
+        std::mem_fn(&FUPipeline::minorTrace));
 
     executeInfo[0].inFlightInsts->minorTrace();
     executeInfo[0].inFUMemInsts->minorTrace();
@@ -1854,12 +1883,12 @@ Execute::getCommittingThread()
     std::vector<ThreadID> priority_list;
 
     switch (cpu.threadPolicy) {
-      case Enums::SingleThreaded:
+      case enums::SingleThreaded:
           return 0;
-      case Enums::RoundRobin:
+      case enums::RoundRobin:
           priority_list = cpu.roundRobinPriority(commitPriority);
           break;
-      case Enums::Random:
+      case enums::Random:
           priority_list = cpu.randomPriority();
           break;
       default:
@@ -1874,9 +1903,9 @@ Execute::getCommittingThread()
             MinorDynInstPtr inst = head_inflight_inst->inst;
 
             bool can_execute_vector_inst = false;
-#if THE_ISA == RISCV_ISA
+//#if TheISA == RiscvISA
             can_execute_vector_inst = inst->staticInst->isVector();
-#endif // THE_ISA == RISCV_ISA
+//#endif // TheISA == RiscvISA
             can_commit_insts = can_commit_insts &&
                 (!inst->inLSQ || (lsq.findResponse(inst) != NULL));
 
@@ -1926,12 +1955,12 @@ Execute::getIssuingThread()
     std::vector<ThreadID> priority_list;
 
     switch (cpu.threadPolicy) {
-      case Enums::SingleThreaded:
+      case enums::SingleThreaded:
           return 0;
-      case Enums::RoundRobin:
+      case enums::RoundRobin:
           priority_list = cpu.roundRobinPriority(issuePriority);
           break;
-      case Enums::Random:
+      case enums::Random:
           priority_list = cpu.randomPriority();
           break;
       default:
@@ -2062,4 +2091,5 @@ Execute::getDcachePort()
     return lsq.getDcachePort();
 }
 
-}
+} // namespace minor
+} // namespace gem5

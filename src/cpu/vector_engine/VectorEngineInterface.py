@@ -35,6 +35,7 @@ from m5.SimObject import SimObject
 class VectorEngineInterface(SimObject):
     type = 'VectorEngineInterface'
     cxx_header = "cpu/vector_engine/vector_engine_interface.hh"
+    cxx_class = 'gem5::RiscvISA::VectorEngineInterface'
 
     vector_engine = Param.VectorEngine("RISC-V Vector Engine")
 

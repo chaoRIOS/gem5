@@ -2,8 +2,6 @@
  * Copyright (c) 2016-2017 Advanced Micro Devices, Inc.
  * All rights reserved.
  *
- * For use for simulation and test purposes only
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -29,8 +27,6 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
- * Authors: John Kalamatianos
  */
 
 #include "gpu-compute/scalar_memory_pipeline.hh"
@@ -43,17 +39,15 @@
 #include "gpu-compute/shader.hh"
 #include "gpu-compute/wavefront.hh"
 
-ScalarMemPipeline::ScalarMemPipeline(const ComputeUnitParams* p) :
-    computeUnit(nullptr), queueSize(p->scalar_mem_queue_size),
-    inflightStores(0), inflightLoads(0)
+namespace gem5
 {
-}
 
-void
-ScalarMemPipeline::init(ComputeUnit *cu)
+ScalarMemPipeline::ScalarMemPipeline(const ComputeUnitParams &p,
+                                     ComputeUnit &cu)
+    : computeUnit(cu), _name(cu.name() + ".ScalarMemPipeline"),
+      queueSize(p.scalar_mem_queue_size),
+      inflightStores(0), inflightLoads(0)
 {
-    computeUnit = cu;
-    _name = computeUnit->name() + ".ScalarMemPipeline";
 }
 
 void
@@ -77,10 +71,10 @@ ScalarMemPipeline::exec()
     }
 
     if ((!returnedStores.empty() || !returnedLoads.empty()) &&
-        m->latency.rdy() && computeUnit->scalarMemToSrfBus.rdy() &&
+        m->latency.rdy() && computeUnit.scalarMemToSrfBus.rdy() &&
         accessSrf &&
-        (computeUnit->shader->coissue_return ||
-         computeUnit->scalarMemUnit.rdy())) {
+        (computeUnit.shader->coissue_return ||
+         computeUnit.scalarMemUnit.rdy())) {
 
         w = m->wavefront();
 
@@ -90,6 +84,7 @@ ScalarMemPipeline::exec()
         }
 
         m->completeAcc(m);
+        w->decLGKMInstsIssued();
 
         if (m->isLoad() || m->isAtomic()) {
             returnedLoads.pop();
@@ -102,21 +97,21 @@ ScalarMemPipeline::exec()
         }
 
         // Decrement outstanding register count
-        computeUnit->shader->ScheduleAdd(&w->outstandingReqs, m->time, -1);
+        computeUnit.shader->ScheduleAdd(&w->outstandingReqs, m->time, -1);
 
         if (m->isStore() || m->isAtomic()) {
-            computeUnit->shader->ScheduleAdd(&w->scalarOutstandingReqsWrGm,
+            computeUnit.shader->ScheduleAdd(&w->scalarOutstandingReqsWrGm,
                                              m->time, -1);
         }
 
         if (m->isLoad() || m->isAtomic()) {
-            computeUnit->shader->ScheduleAdd(&w->scalarOutstandingReqsRdGm,
+            computeUnit.shader->ScheduleAdd(&w->scalarOutstandingReqsRdGm,
                                              m->time, -1);
         }
 
         // Mark write bus busy for appropriate amount of time
-        computeUnit->scalarMemToSrfBus.set(m->time);
-        if (!computeUnit->shader->coissue_return)
+        computeUnit.scalarMemToSrfBus.set(m->time);
+        if (!computeUnit.shader->coissue_return)
             w->computeUnit->scalarMemUnit.set(m->time);
     }
 
@@ -143,11 +138,26 @@ ScalarMemPipeline::exec()
         issuedRequests.pop();
 
         DPRINTF(GPUMem, "CU%d: WF[%d][%d] Popping scalar mem_op\n",
-                computeUnit->cu_id, mp->simdId, mp->wfSlotId);
+                computeUnit.cu_id, mp->simdId, mp->wfSlotId);
     }
 }
 
 void
-ScalarMemPipeline::regStats()
+ScalarMemPipeline::issueRequest(GPUDynInstPtr gpuDynInst)
 {
+    Wavefront *wf = gpuDynInst->wavefront();
+    if (gpuDynInst->isLoad()) {
+        wf->scalarRdGmReqsInPipe--;
+        wf->scalarOutstandingReqsRdGm++;
+    } else if (gpuDynInst->isStore()) {
+        wf->scalarWrGmReqsInPipe--;
+        wf->scalarOutstandingReqsWrGm++;
+    }
+
+    wf->outstandingReqs++;
+    wf->validateRequestCounters();
+
+    issuedRequests.push(gpuDynInst);
 }
+
+} // namespace gem5

@@ -37,10 +37,15 @@
 
 #include "arch/riscv/insts/vector_static_inst.hh"
 #include "base/statistics.hh"
-#include "cpu/minor/exec_context.hh"
+// #include "cpu/minor/exec_context.hh"
 #include "cpu/vector_engine/vector_engine.hh"
 #include "params/MemUnitWriteTiming.hh"
 #include "sim/ticked_object.hh"
+namespace gem5
+{
+
+namespace RiscvISA
+{
 
 class VectorEngine;
 //class ExecContextPtr;
@@ -49,7 +54,7 @@ class VectorEngine;
 class MemUnitWriteTiming : public TickedObject
 {
 public:
-    MemUnitWriteTiming(MemUnitWriteTimingParams *p);
+    MemUnitWriteTiming(const MemUnitWriteTimingParams &params);
     ~MemUnitWriteTiming();
 
     // overrides
@@ -83,4 +88,8 @@ public:
     Stats::Scalar Cache_line_w_req;
 };
 
+
+}
+
+}
 #endif //__CPU_MEM_UNIT_WRITE_TIMING__

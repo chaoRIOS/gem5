@@ -36,17 +36,22 @@
 #include <queue>
 
 #include "base/statistics.hh"
-#include "cpu/minor/exec_context.hh"
+// #include "cpu/minor/exec_context.hh"
 #include "cpu/vector_engine/vector_engine.hh"
 #include "params/MemUnitReadTiming.hh"
 #include "sim/ticked_object.hh"
+namespace gem5
+{
+
+namespace RiscvISA
+{
 
 class VectorEngine;
 
 class MemUnitReadTiming : public TickedObject
 {
 public:
-    MemUnitReadTiming(MemUnitReadTimingParams *p);
+    MemUnitReadTiming(const MemUnitReadTimingParams &params);
     ~MemUnitReadTiming();
 
     // overrides
@@ -78,4 +83,8 @@ public:
     Stats::Scalar Cache_line_r_req;
 };
 
+
+}
+
+}
 #endif //__CPU_MEM_UNIT_READ_TIMING__

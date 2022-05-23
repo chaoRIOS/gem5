@@ -44,7 +44,6 @@ from common import CpuConfig
 from common import MemConfig
 from common.Caches import *
 
-
 # Parse options
 ps = OptionParser()
 
@@ -320,8 +319,8 @@ system.membus = SystemXBar()
 # Connect CPU Ports and Vector Port
 ###############################################################################
 def connectCPUPorts1(cpu,vector_engine,l1bus,l2bus,membus):
-    cpu.icache.mem_side = l2bus.slave
-    cpu.dcache.mem_side = l2bus.slave
+    cpu.icache.mem_side = l2bus.cpu_side_ports
+    cpu.dcache.mem_side = l2bus.cpu_side_ports
     cpu.icache_port = cpu.icache.cpu_side
     cpu.dcache_port = l1bus.slave
 
@@ -333,22 +332,22 @@ def connectCPUPorts1(cpu,vector_engine,l1bus,l2bus,membus):
         vector_engine.vector_reg_port = vector_engine.vector_reg.port
 
 def connectCPUPorts2(cpu,vector_engine,l2bus,membus):
-    cpu.icache.mem_side = l2bus.slave
-    cpu.dcache.mem_side = l2bus.slave
+    cpu.icache.mem_side = l2bus.cpu_side_ports
+    cpu.dcache.mem_side = l2bus.cpu_side_ports
     cpu.icache_port = cpu.icache.cpu_side
     cpu.dcache_port = cpu.dcache.cpu_side
 
     if(connect_to_l1V):
         vector_engine.vector_mem_port = system.VectorCache.cpu_side
-        system.VectorCache.mem_side = l2bus.slave
+        system.VectorCache.mem_side = l2bus.cpu_side_ports
     else:
         if(connect_to_l2):
             vector_engine.vector_mem_port = system.VectorCache.cpu_side
-            system.VectorCache.mem_side = l2bus.slave
+            system.VectorCache.mem_side = l2bus.cpu_side_ports
         else:
             if(connect_to_dram):
                 vector_engine.vector_mem_port = system.VectorCache.cpu_side
-                system.VectorCache.mem_side = membus.slave
+                system.VectorCache.mem_side = membus.cpu_side_ports
 
     for channel in range(0, vector_rf_ports):
         vector_engine.vector_reg_port = vector_engine.vector_reg.port
@@ -376,21 +375,24 @@ system.l2cache = Cache(
     tgts_per_mshr = 12
 )
 
-system.l2cache.mem_side = system.membus.slave
-system.l2cache.cpu_side = system.l2bus.master
+system.l2cache.mem_side = system.membus.cpu_side_ports
+system.l2cache.cpu_side = system.l2bus.mem_side_ports
 
 #create interrupt controller
 system.cpu.createInterruptController()
 
 # Connect the system up to the membus
-system.system_port = system.membus.slave
+system.system_port = system.membus.cpu_side_ports
+
+
+system.mem_ctrl = MemCtrl()
 
 # Create a DDR3 memory controller (wtf is ddr5 and hbm slower than ddr3?)
-system.mem_ctrl = DDR3_1600_8x8(device_size = options.mem_size)
+system.mem_ctrl.dram = DDR3_1600_8x8(device_size = options.mem_size)
 #system.mem_ctrl = GDDR5_4000_x64(device_size = options.mem_size)
 #system.mem_ctrl = HBM_1000_4H_x64(device_size = options.mem_size)
-system.mem_ctrl.range = system.mem_ranges[0]
-system.mem_ctrl.port = system.membus.master
+system.mem_ctrl.dram.range = system.mem_ranges[0]
+system.mem_ctrl.port = system.membus.mem_side_ports
 
 ###############################################################################
 # Create Workload
@@ -410,7 +412,7 @@ else:
       if len(s):
         filtered = filtered + [s]
 
-
+    system.workload = SEWorkload.init_compatible(filtered[0])
     process.executable = filtered[0]
     process.cmd = filtered
 #    process.output = output[0]
@@ -429,6 +431,8 @@ root = Root(full_system = False, system = system)
 m5.instantiate()
 
 print("Beginning simulation!")
+
+
 exit_event = m5.simulate()
 print('Exiting @ tick %i because %s' % (m5.curTick(), exit_event.getCause()))
 print("gem5 finished %s" % datetime.datetime.now().strftime("%b %e %Y %X"))

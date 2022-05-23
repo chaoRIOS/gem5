@@ -38,10 +38,11 @@
 #include <vector>
 
 #include "arch/generic/tlb.hh"
+#include "arch/generic/mmu.hh"
 #include "arch/riscv/insts/vector_static_inst.hh"
 #include "base/statistics.hh"
 #include "base/types.hh"
-#include "cpu/minor/exec_context.hh"
+// #include "cpu/minor/exec_context.hh"
 #include "cpu/simple_thread.hh"
 #include "cpu/translation.hh"
 #include "cpu/vector_engine/packet.hh"
@@ -79,10 +80,17 @@
  * completes execution, the commit is done by retiring the instruction and
  * freeing up the hardware resources consumed.
  */
+
+namespace gem5
+{
+
+namespace RiscvISA
+{
+
 class VectorEngine : public SimObject
 {
 public:
-    class VectorMemPort : public MasterPort
+    class VectorMemPort : public RequestPort
     {
       public:
         VectorMemPort(const std::string& name, VectorEngine* owner,
@@ -93,7 +101,7 @@ public:
         void recvReqRetry() override;
 
         bool startTranslation(Addr addr, uint8_t *data, uint64_t size,
-            BaseTLB::Mode mode, ThreadContext *tc, uint64_t req_id,
+            BaseMMU::Mode mode, ThreadContext *tc, uint64_t req_id,
             uint8_t channel);
         bool sendTimingReadReq(Addr addr, uint64_t size, ThreadContext *tc,
             uint64_t req_id, uint8_t channel);
@@ -103,7 +111,7 @@ public:
         std::vector< std::deque<PacketPtr> > laCachePktQs;
         VectorEngine *owner;
 
-        class Tlb_Translation : public BaseTLB::Translation
+        class Tlb_Translation : public BaseMMU::Translation
         {
           public:
             Tlb_Translation(VectorEngine *owner);
@@ -112,7 +120,7 @@ public:
             void markDelayed() override;
             /** TLB interace */
             void finish(const Fault &_fault,const RequestPtr &_req,
-                ThreadContext *_tc, BaseTLB::Mode _mode) ;
+                ThreadContext *_tc, BaseMMU::Mode _mode) ;
 
             void finish(const Fault _fault, uint64_t latency);
             std::string name();
@@ -125,7 +133,7 @@ public:
         };
     };
 
-    class VectorRegPort : public MasterPort
+    class VectorRegPort : public RequestPort
     {
     public:
         VectorRegPort(const std::string& name, VectorEngine* owner,
@@ -144,23 +152,23 @@ public:
         const uint64_t channel;
     };
 public:
-    VectorEngine(VectorEngineParams *p);
+    VectorEngine(const VectorEngineParams &params);
     ~VectorEngine();
 
     VectorConfig  *   vector_config;
     //used to identify ports uniquely to whole memory system
-    MasterID VectorCacheMasterId;
+    RequestorID VectorCacheRequestorId;
     VectorMemPort vectormem_port;
     //used to identify ports uniquely to whole memory system
-    std::vector<MasterID> VectorRegMasterIds;
+    std::vector<RequestorID> VectorRegRequestorIds;
     std::vector<VectorRegPort> VectorRegPorts;
 
     VectorRegister * vector_reg;
-    //MasterPort &getMasterPort(const std::string &if_name,
+    //RequestPort &getRequestPort(const std::string &if_name,
     //                             PortID idx = InvalidPortID)/* override*/;
     Port& getPort(const std::string& if_name,
                                   PortID idx = InvalidPortID) override;
-    MasterPort &getVectorMemPort() { return vectormem_port; }
+    RequestPort &getVectorMemPort() { return vectormem_port; }
 
     void recvTimingResp(VectorPacketPtr pkt);
 
@@ -250,4 +258,7 @@ private:
     uint64_t PMask;
 };
 
+}
+
+}
 #endif // __CPU_VECTOR_ENGINE_HH__

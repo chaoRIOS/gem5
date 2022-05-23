@@ -36,14 +36,15 @@ from m5.SimObject import SimObject
 class VectorEngine(SimObject):
     type = 'VectorEngine'
     cxx_header = "cpu/vector_engine/vector_engine.hh"
+    cxx_class = 'gem5::RiscvISA::VectorEngine'
 
     vector_config = Param.VectorConfig("Vector CSR Copy")
 
     vector_reg = Param.VectorRegister("Vector Register");
-    vector_reg_port = VectorMasterPort("Vector Register Port")
+    vector_reg_port = VectorRequestPort("Vector Register Port")
     vector_rf_ports = Param.Unsigned(1,"number of VRF ports")
 
-    vector_mem_port = MasterPort("Vector Accelerator Memory Port")
+    vector_mem_port = RequestPort("Vector Accelerator Memory Port")
 
     vector_lane = VectorParam.VectorLane("Vector Lane")
     num_clusters = Param.Unsigned(1,"Number of independent execution clusters")

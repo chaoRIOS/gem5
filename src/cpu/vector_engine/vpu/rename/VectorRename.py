@@ -33,5 +33,6 @@ from m5.SimObject import SimObject
 class VectorRename(SimObject):
     type = 'VectorRename'
     cxx_header = "cpu/vector_engine/vpu/rename/vector_rename.hh"
+    cxx_class = 'gem5::RiscvISA::VectorRename'
 
     PhysicalRegs = Param.Unsigned("Number of Vector Physical Registers")

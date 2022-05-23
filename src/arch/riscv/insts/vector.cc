@@ -33,14 +33,18 @@
 #include <sstream>
 
 #include "arch/riscv/utility.hh"
+#include "arch/riscv/insts/static_inst.hh"
 
 using namespace std;
+
+namespace gem5
+{
 
 namespace RiscvISA
 {
 
 string
-RiscvVectorDataOp::generateDisassembly(Addr pc,
+RiscvVectorArithOp::generateDisassembly(Addr pc,
     const Loader::SymbolTable *symtab) const
 {
     stringstream ss;
@@ -121,5 +125,7 @@ RiscvVectorIntegerWideningOp::generateDisassembly(Addr pc,
     return ss.str();
 }
 
+
+}
 
 }

@@ -31,8 +31,8 @@ Import('*')
 if not env['BUILD_VECTOR_ENGINE']:
     Return()
 
-SimObject('VectorEngineInterface.py')
-SimObject('VectorEngine.py')
+SimObject('VectorEngineInterface.py', sim_objects=['VectorEngineInterface'])
+SimObject('VectorEngine.py', sim_objects=['VectorEngine'])
 
 Source('vector_engine_interface.cc')
 Source('vector_engine.cc')

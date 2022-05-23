@@ -45,12 +45,18 @@
 #include "params/VectorLane.hh"
 #include "sim/faults.hh"
 #include "sim/sim_object.hh"
+namespace gem5
+{
 
-VectorLane::VectorLane(const VectorLaneParams* p) :
-    SimObject(p), lane_id(p->lane_id), occupied(false),
-    srcAReader(p->srcAReader), srcBReader(p->srcBReader),
-    srcMReader(p->srcMReader), dstReader(p->dstReader), dstWriter(p->dstWriter),
-    dataPath(p->dataPath)
+namespace RiscvISA
+{
+
+
+VectorLane::VectorLane(const VectorLaneParams &params) :
+    SimObject(SimObjectParams(params)), lane_id(params.lane_id), occupied(false),
+    srcAReader(params.srcAReader), srcBReader(params.srcBReader),
+    srcMReader(params.srcMReader), dstReader(params.dstReader), dstWriter(params.dstWriter),
+    dataPath(params.dataPath)
 {
     DPRINTF(VectorEngineInfo, "Created a new Cluster with id: %d\n", lane_id);
 }
@@ -103,9 +109,9 @@ VectorLane::issue(VectorEngine& vector_wrapper,
 
     std::string operation = insn.getName();
 
-    bool  move_to_core = (operation == "vfmv_fs") || (operation == "vmv_xs");
     bool  move_to_core_int = (operation == "vmv_xs");
     bool  move_to_core_float = (operation == "vfmv_fs");
+    bool  move_to_core = move_to_core_int || move_to_core_float;
 
     uint64_t i;
     // OPIVI, OPIVX , OPFVF and OPMVX formats
@@ -198,6 +204,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
          * the scalar reg,such as vfmv_fs and vmv_xs
          */
         if (insn.getName() == "vmv_xs") {
+            src1 = 0;
             addr_src2 = ((uint64_t)dyn_insn->get_renamed_src2() * mvl_bits / 8) + (src1 * DATA_SIZE);
             DPRINTF(VectorLane, "vmv_xs: base addrs 0x%x , element addrs 0x%x, src1 %d\n",
                         ((uint64_t)dyn_insn->get_renamed_src2() * mvl_bits / 8), addr_src2,src1);
@@ -508,9 +515,7 @@ VectorLane::issue(VectorEngine& vector_wrapper,
 }
 
 
-VectorLane*
-VectorLaneParams::create()
-{
-    return new VectorLane(this);
 }
 
+
+}

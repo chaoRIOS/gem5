@@ -4,9 +4,9 @@ Import('*')
 if not env['BUILD_VECTOR_ENGINE']:
     Return()
 
-SimObject('MemUnitReadTiming.py')
-SimObject('MemUnitWriteTiming.py')
-SimObject('VectorMemUnit.py')
+SimObject('MemUnitReadTiming.py', sim_objects=['MemUnitReadTiming'])
+SimObject('MemUnitWriteTiming.py', sim_objects=['MemUnitWriteTiming'])
+SimObject('VectorMemUnit.py', sim_objects=['VectorMemUnit'])
 
 Source('write_timing_unit.cc')
 Source('read_timing_unit.cc')

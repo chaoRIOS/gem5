@@ -31,6 +31,12 @@
 #include "base/bitfield.hh"
 #include "mem/ruby/system/RubySystem.hh"
 
+namespace gem5
+{
+
+namespace ruby
+{
+
 Addr
 bitSelect(Addr addr, unsigned int small, unsigned int big)
 {
@@ -66,7 +72,8 @@ makeLineAddress(Addr addr, int cacheLineBits)
 Addr
 makeNextStrideAddress(Addr addr, int stride)
 {
-    return makeLineAddress(addr) + RubySystem::getBlockSizeBytes() * stride;
+    return makeLineAddress(addr) +
+        static_cast<int>(RubySystem::getBlockSizeBytes()) * stride;
 }
 
 std::string
@@ -77,3 +84,6 @@ printAddress(Addr addr)
        << makeLineAddress(addr) << std::dec << "]";
     return out.str();
 }
+
+} // namespace ruby
+} // namespace gem5

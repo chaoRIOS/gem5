@@ -33,5 +33,6 @@ from m5.SimObject import SimObject
 class VectorConfig(SimObject):
     type = 'VectorConfig'
     cxx_header = "cpu/vector_engine/vpu/vector_config/vector_config.hh"
+    cxx_class = 'gem5::RiscvISA::VectorConfig'
 
     max_vl 	= Param.Unsigned("Maximun VL")

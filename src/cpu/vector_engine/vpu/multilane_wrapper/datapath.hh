@@ -41,6 +41,11 @@
 #include "params/Datapath.hh"
 #include "sim/faults.hh"
 #include "sim/ticked_object.hh"
+namespace gem5
+{
+
+namespace RiscvISA
+{
 
 class VectorLane;
 
@@ -61,7 +66,7 @@ private:
     };
 
 public:
-    Datapath(DatapathParams *p);
+    Datapath(const DatapathParams &params);
     ~Datapath();
 
     void get_instruction_latency();
@@ -240,4 +245,8 @@ public:
     Stats::Scalar numMUL8_operations;
 };
 
+
+}
+
+}
 #endif //__CPU_VECTOR_LANE_DATAPATH_HH__

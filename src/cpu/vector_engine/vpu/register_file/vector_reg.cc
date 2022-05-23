@@ -37,12 +37,23 @@
 #include <vector>
 
 #include "base/logging.hh"
+#include "base/trace.hh"
 #include "debug/VectorRegister.hh"
+namespace gem5
+{
+
+namespace RiscvISA
+{
+
+#ifdef DEBUG
+    using namespace gem5::Trace;
+#endif
+
 
 // vector_reg::VectorRegisterPort
 VectorRegister::VectorRegisterPort::VectorRegisterPort(
     const std::string &name, VectorRegister& vector_reg) :
-    QueuedSlavePort(name, &vector_reg, queue), queue(vector_reg, *this),
+    QueuedResponsePort(name, &vector_reg, queue), queue(vector_reg, *this),
     vector_reg(vector_reg)
 {
 }
@@ -100,11 +111,11 @@ VectorRegister::get_size()
     return size;
 }
 
-VectorRegister::VectorRegister(const VectorRegisterParams* p) :
-    ClockedObject(p),num_lanes(p->num_lanes),
-    num_regs(p->num_regs),mvl(p->mvl),
-    size(p->size), lineSize(p->lineSize),
-    numPorts(p->numPorts), accessLatency(p->accessLatency)
+VectorRegister::VectorRegister(const VectorRegisterParams &params) :
+    ClockedObject(ClockedObjectParams(params)),num_lanes(params.num_lanes),
+    num_regs(params.num_regs),mvl(params.mvl),
+    size(params.size), lineSize(params.lineSize),
+    numPorts(params.numPorts), accessLatency(params.accessLatency)
 {
     assert(size % lineSize == 0);
     assert(lineSize % sizeof(float) == 0);
@@ -131,6 +142,7 @@ VectorRegister::handleTimingReq(PacketPtr pkt, VectorRegisterPort *port)
 {
     //need to make sure all accesses happen within a single line
     uint64_t start_addr = pkt->getAddr();
+#ifdef DEBUG
     uint64_t end_addr = pkt->getAddr() + pkt->getSize() -1;
     uint64_t start_line_addr = start_addr - (start_addr % lineSize);
     uint64_t end_line_addr = end_addr - (end_addr % lineSize);
@@ -140,33 +152,40 @@ VectorRegister::handleTimingReq(PacketPtr pkt, VectorRegisterPort *port)
     //need to make sure we are accessing full data from accessed banks
     assert(start_addr % bytesPerBankAccess == 0);
     assert((end_addr+1) % bytesPerBankAccess == 0);
+#endif
 
     // The memories for the VRF can be seen as num_entries*WORD_WIDTH.
     //The read/write accesses are counted for each 64-bit read/write operation.
     uint64_t WORD_WIDTH = 8;
 
+#ifdef DEBUG
     // Physical register size in bytes
     uint64_t phys_reg_size = mvl/8 ;
     // Corresponding physical register
     uint64_t phys_reg = pkt->getAddr() / phys_reg_size;
+#endif
 
     if (pkt->isRead())
     {
         numReads_64bit_elements = numReads_64bit_elements.value() + (pkt->getSize()/WORD_WIDTH); // 64-bit elements
         numReads_perLane_64bit_elements = numReads_perLane_64bit_elements.value() + ((pkt->getSize()/WORD_WIDTH) / num_lanes); // 64-bit elements
         memcpy(pkt->getPtr<uint8_t>(), data+start_addr, pkt->getSize());
+#ifdef DEBUG
         DPRINTF(VectorRegister,"Have been read %u bytes from addr 0x%lx (Physical Reg %d)\n"
             ,pkt->getSize(), pkt->getAddr(),phys_reg);
         DPRINTF(VectorRegister, "Reading vec reg %d (%d) as %#x\n"
             ,phys_reg, phys_reg, *(uint64_t*)(data+start_addr));
+#endif
     } else {
         numWritess_64bit_elements = numWritess_64bit_elements.value() + (pkt->getSize()/WORD_WIDTH); // 64-bit elements
         numWritess_perLane_64bit_elements = numWritess_perLane_64bit_elements.value() + ((pkt->getSize()/WORD_WIDTH) / num_lanes); // 64-bit elements
         memcpy(data+start_addr, pkt->getPtr<uint8_t>(), pkt->getSize());
+#ifdef DEBUG
         DPRINTF(VectorRegister,"Have been written %u bytes to addr 0x%lx (Physical Reg %d)\n"
             ,pkt->getSize(), pkt->getAddr(),phys_reg);
         DPRINTF(VectorRegister, "Setting vec reg %d (%d) to %#x\n"
             ,phys_reg, phys_reg, *(uint64_t*)(data+start_addr));
+#endif
     }
 
     pkt->makeTimingResponse();
@@ -188,8 +207,7 @@ VectorRegister::getPort(const std::string &if_name, PortID idx)
     //}
 }
 
-VectorRegister *
-VectorRegisterParams::create()
-{
-    return new VectorRegister(this);
+}
+
+
 }

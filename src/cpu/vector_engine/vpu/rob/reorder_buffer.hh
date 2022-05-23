@@ -40,6 +40,11 @@
 #include "cpu/vector_engine/vector_engine.hh"
 #include "params/ReorderBuffer.hh"
 #include "sim/ticked_object.hh"
+namespace gem5
+{
+
+namespace RiscvISA
+{
 
 class VectorEngine;
 
@@ -57,7 +62,7 @@ public:
         bool executed;
     };
 
-    ReorderBuffer(ReorderBufferParams *p);
+    ReorderBuffer(const ReorderBufferParams &params);
     ~ReorderBuffer();
 
     void startTicking(VectorEngine& vector_wrapper);
@@ -84,7 +89,9 @@ public:
     Stats::Scalar VectorROBentriesUsed;
 };
 
+}
 
+}
 
 #endif // __CPU_VECTOR_ROB_H__
 

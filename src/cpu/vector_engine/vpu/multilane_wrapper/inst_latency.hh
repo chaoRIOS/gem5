@@ -29,6 +29,11 @@
  */
 
 #include "debug/Datapath.hh"
+namespace gem5
+{
+
+namespace RiscvISA
+{
 
 // NOTA IMPORTANTE: ESTE ARCHIVO DEBERIA SER ELIMINADO Y ESTA INFORMACIÓN PODERSE 
 // PASAR DESDE DECODE, ASI NO TENEMOS QUE HACER UNA DECODIFICACION NUEVAMENTE PARA CADA CASO
@@ -240,4 +245,8 @@ Datapath::get_instruction_latency()
         Oplatency           = 1;
     }
     */
+}
+
+}
+
 }

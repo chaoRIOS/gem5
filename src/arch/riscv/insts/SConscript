@@ -27,10 +27,10 @@
 
 Import('*')
 
-if env['TARGET_ISA'] == 'riscv':
-    Source('vector.cc')
-    Source('amo.cc')
-    Source('compressed.cc')
-    Source('mem.cc')
-    Source('standard.cc')
-    Source('static_inst.cc')
+Source('amo.cc', tags='riscv isa')
+Source('compressed.cc', tags='riscv isa')
+Source('mem.cc', tags='riscv isa')
+Source('standard.cc', tags='riscv isa')
+Source('static_inst.cc', tags='riscv isa')
+
+Source('vector.cc', tags='riscv isa')

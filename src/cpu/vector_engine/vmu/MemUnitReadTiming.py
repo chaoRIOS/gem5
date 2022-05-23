@@ -32,6 +32,7 @@ from m5.objects.TickedObject import TickedObject
 class MemUnitReadTiming(TickedObject):
     type = 'MemUnitReadTiming'
     cxx_header = "cpu/vector_engine/vmu/read_timing_unit.hh"
+    cxx_class = 'gem5::RiscvISA::MemUnitReadTiming'
 
     channel = Param.Unsigned("Channel")
     cacheLineSize = Param.Unsigned("Cache Line Size")

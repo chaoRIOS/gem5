@@ -26,4 +26,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-const char *gem5Version = "[DEVELOP-FOR-V20.1]";
+namespace gem5
+{
+
+/**
+ * @ingroup api_base_utils
+ */
+const char *gem5Version = "21.2.1.1";
+
+} // namespace gem5

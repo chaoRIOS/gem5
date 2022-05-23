@@ -36,12 +36,17 @@
 #include <functional>
 
 #include "debug/VectorEngineInfo.hh"
+namespace gem5
+{
+
+namespace RiscvISA
+{
 
 /**
  *  Vector Renaming
  */
-VectorRename::VectorRename(VectorRenameParams *p) :
-SimObject(p), PhysicalRegs(p->PhysicalRegs)
+VectorRename::VectorRename(const VectorRenameParams &params) :
+SimObject(SimObjectParams(params)), PhysicalRegs(params.PhysicalRegs)
 {
     DPRINTF(VectorRename, "Created the Renaming Unit object \n");
     for (uint64_t i=32; i<PhysicalRegs; i++) {
@@ -56,8 +61,7 @@ VectorRename::~VectorRename()
 {
 }
 
-VectorRename *
-VectorRenameParams::create()
-{
-    return new VectorRename(this);
+}
+
+
 }

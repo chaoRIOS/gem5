@@ -44,6 +44,9 @@
 #include "debug/Interrupt.hh"
 #include "params/MuxingKvmGic.hh"
 
+namespace gem5
+{
+
 KvmKernelGicV2::KvmKernelGicV2(KvmVM &_vm, Addr cpu_addr, Addr dist_addr,
                                unsigned it_lines)
     : cpuRange(RangeSize(cpu_addr, KVM_VGIC_V2_CPU_SIZE)),
@@ -164,15 +167,16 @@ KvmKernelGicV2::writeCpu(ContextID ctx, Addr daddr, uint32_t data)
 
 
 
-MuxingKvmGic::MuxingKvmGic(const MuxingKvmGicParams *p)
+MuxingKvmGic::MuxingKvmGic(const MuxingKvmGicParams &p)
     : GicV2(p),
-      system(*p->system),
+      system(*p.system),
       kernelGic(nullptr),
       usingKvm(false)
 {
-    if (auto vm = system.getKvmVM()) {
-        kernelGic = new KvmKernelGicV2(*vm, p->cpu_addr, p->dist_addr,
-                                       p->it_lines);
+    auto vm = system.getKvmVM();
+    if (vm && !p.simulate_gic) {
+        kernelGic = new KvmKernelGicV2(*vm, p.cpu_addr, p.dist_addr,
+                                       p.it_lines);
     }
 }
 
@@ -426,8 +430,4 @@ MuxingKvmGic::fromKvmToGicV2()
     }
 }
 
-MuxingKvmGic *
-MuxingKvmGicParams::create()
-{
-    return new MuxingKvmGic(this);
-}
+} // namespace gem5

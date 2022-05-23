@@ -34,6 +34,7 @@ from m5.objects.TickedObject import TickedObject
 class Datapath(TickedObject):
     type = 'Datapath'
     cxx_header = "cpu/vector_engine/vpu/multilane_wrapper/datapath.hh"
+    cxx_class = 'gem5::RiscvISA::Datapath'
 
     VectorLanes = Param.Unsigned("Number of Vector Lanes")
 

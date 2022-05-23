@@ -31,8 +31,8 @@ Import('*')
 if not env['BUILD_VECTOR_ENGINE']:
     Return()
 
-SimObject('VectorLane.py')
-SimObject('Datapath.py')
+SimObject('VectorLane.py', sim_objects=['VectorLane'])
+SimObject('Datapath.py', sim_objects=['Datapath'])
 
 Source('vector_lane.cc')
 Source('datapath.cc')

@@ -33,37 +33,38 @@
 
 #include <string>
 
-#include "arch/registers.hh"
+#include "arch/riscv/pcstate.hh"
+#include "arch/riscv/regs/float.hh"
+#include "arch/riscv/regs/int.hh"
+#include "arch/riscv/regs/misc.hh"
 #include "arch/riscv/types.hh"
-#include "cpu/static_inst.hh"
+#include "arch/riscv/insts/static_inst.hh"
+// #include "cpu/static_inst.hh"
+
+namespace gem5
+{
 
 namespace RiscvISA
 {
-/*
-struct VecStaticInstFlags {
-  enum VecFlags {
-      IsVecArithmOp = 0,
-      IsVecMemOp = 1,
-      IsVecConfigOp = 2,
-      IsVecFP = 3,
-      IsVecInt = 4,
-      IsVecOneSrc = 5,
-      IsVecTwoSrc = 6,
-      IsVecThreeSrc = 7,
-      NumVecFlags = 8
-  };
-  static const char *FlagsStrings[NumVecFlags];
-};
-*/
+
 /* VectorStaticInst holds the info of all vector instructions */
-class VectorStaticInst : public StaticInst//, public VecStaticInstFlags
+// class VectorStaticInst : public StaticInst
+class VectorStaticInst : public RiscvStaticInst
 {
 protected:
-    using StaticInst::StaticInst;
-    //std::bitset<NumVecFlags> vecflags;
+    // using StaticInst::StaticInst;
+    using RiscvStaticInst::RiscvStaticInst;
+
 
 public:
-      void advancePC(PCState &pc) const override { pc.advance(); }
+      // VectorStaticInst(const char *mnem, MachInst _machInst, gem5::enums::OpClass __opClass):
+      //   StaticInst(mnem, __opClass){};
+
+      VectorStaticInst(const char *mnem, MachInst _machInst, OpClass __opClass):
+        RiscvStaticInst(mnem, _machInst, __opClass){};
+
+      void advancePC(PCStateBase &pc) const override { pc.as<PCState>().advance(); }
+      void advancePC(PCState &pc) const { pc.advance();}
       /* vector instruction name*/
       virtual std::string getName() const = 0;
 
@@ -171,7 +172,7 @@ private:
 class RiscvVectorInsn : public VectorStaticInst
 {
   protected:
-  RiscvVectorInsn(const char *mnem, MachInst _machInst, OpClass __opClass):
+  RiscvVectorInsn(const char *mnem, MachInst _machInst, gem5::enums::OpClass __opClass):
       VectorStaticInst(mnem, _machInst, __opClass),
       b(_machInst),mnemo(mnem){}
   ~RiscvVectorInsn() {}
@@ -285,4 +286,5 @@ private:
 
 }
 
+}
 #endif // __ARCH_RISCV_VECTOR_STATIC_INSTS_HH__

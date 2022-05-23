@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2009 The Regents of The University of Michigan
  * Copyright (c) 2009 The University of Edinburgh
+ * Copyright (c) 2021 IBM Corporation
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,11 +32,15 @@
 #define __ARCH_POWER_ISA_HH__
 
 #include "arch/generic/isa.hh"
-#include "arch/power/registers.hh"
+#include "arch/power/pcstate.hh"
+#include "arch/power/regs/misc.hh"
 #include "arch/power/types.hh"
 #include "base/logging.hh"
 #include "cpu/reg_class.hh"
 #include "sim/sim_object.hh"
+
+namespace gem5
+{
 
 struct PowerISAParams;
 class ThreadContext;
@@ -49,12 +54,16 @@ class ISA : public BaseISA
 {
   protected:
     RegVal dummy;
-    RegVal miscRegs[NumMiscRegs];
+    RegVal miscRegs[NUM_MISCREGS];
 
   public:
-    typedef PowerISAParams Params;
-
     void clear() {}
+
+    PCStateBase *
+    newPCState(Addr new_inst_addr=0) const override
+    {
+        return new PCState(new_inst_addr);
+    }
 
   public:
     RegVal
@@ -128,11 +137,20 @@ class ISA : public BaseISA
         return reg;
     }
 
-    const Params *params() const;
+    bool
+    inUserMode() const override
+    {
+        return false;
+    }
 
-    ISA(Params *p);
+    void copyRegsFrom(ThreadContext *src) override;
+
+    using Params = PowerISAParams;
+
+    ISA(const Params &p);
 };
 
 } // namespace PowerISA
+} // namespace gem5
 
 #endif // __ARCH_POWER_ISA_HH__

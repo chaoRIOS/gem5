@@ -40,10 +40,15 @@
 #include "arch/riscv/insts/vector_static_inst.hh"
 #include "base/statistics.hh"
 #include "base/types.hh"
-#include "cpu/minor/exec_context.hh"
+// #include "cpu/minor/exec_context.hh"
 #include "cpu/vector_engine/vector_engine.hh"
 #include "params/VectorEngineInterface.hh"
 #include "sim/sim_object.hh"
+namespace gem5
+{
+
+namespace RiscvISA
+{
 
 /**
  * The VectorEngineInterface is a custom interface for the RISC-V Vector Engine
@@ -53,7 +58,7 @@ class VectorEngine;
 class VectorEngineInterface : public SimObject
 {
 public:
-    VectorEngineInterface(VectorEngineInterfaceParams *p);
+    VectorEngineInterface(const VectorEngineInterfaceParams &params);
     ~VectorEngineInterface();
 
     /**
@@ -101,4 +106,8 @@ private:
     */
     VectorEngine *vector_engine;
 };
+
+}
+
+}
 #endif // __CPU_VECTOR_ENGINE_INTERFACE_HH__

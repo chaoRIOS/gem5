@@ -44,13 +44,18 @@
 #include "params/VectorLane.hh"
 #include "sim/faults.hh"
 #include "sim/sim_object.hh"
+namespace gem5
+{
+
+namespace RiscvISA
+{
 
 class VectorEngine;
 
 class VectorLane : public SimObject
 {
   public:
-    VectorLane(const VectorLaneParams *p);
+    VectorLane(const VectorLaneParams &params);
     ~VectorLane();
 
     bool isOccupied();
@@ -101,4 +106,7 @@ class VectorLane : public SimObject
     bool vi_op;
 };
 
+}
+
+}
 #endif // __CPU_VECTOR_EXE_UNIT_HH__

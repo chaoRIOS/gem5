@@ -40,10 +40,15 @@
 #include "cpu/vector_engine/vpu/multilane_wrapper/inst_latency.hh"
 #include "debug/Datapath.hh"
 #include "debug/VectorEngine.hh"
+namespace gem5
+{
 
-Datapath::Datapath(
-    DatapathParams *p) :
-    TickedObject(p), VectorLanes(p->VectorLanes)
+namespace RiscvISA
+{
+
+
+Datapath::Datapath(const DatapathParams &params) :
+    TickedObject(TickedObjectParams(params)), VectorLanes(params.VectorLanes)
 {
 }
 
@@ -171,11 +176,12 @@ Datapath::startTicking(
     first_set_mask = -1;
 
     
-
+#ifdef DEBUG
     uint64_t pc = this->insn->getPC();
     DPRINTF(Datapath,"Executing inst %s, pc 0x%lx, Oplatency = %d,"
         " DataType = %d-bit\n" , this->insn->getName(),*(uint64_t*)&pc,
         Oplatency , DATA_SIZE*8);
+#endif
     start();
 }
 
@@ -1004,10 +1010,7 @@ Datapath::evaluate()
     }));
 }
 
-Datapath *
-DatapathParams::create()
-{
-    return new Datapath(this);
 }
 
 
+}

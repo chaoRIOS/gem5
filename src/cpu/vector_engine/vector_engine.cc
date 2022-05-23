@@ -44,28 +44,34 @@
 #include "debug/VectorInst.hh"
 #include "sim/faults.hh"
 #include "sim/sim_object.hh"
+namespace gem5
+{
 
-VectorEngine::VectorEngine(VectorEngineParams *p) :
-SimObject(p),
-vector_config(p->vector_config),
-VectorCacheMasterId(p->system->getMasterId(this, name() + ".vector_cache")),
-vectormem_port(name() + ".vector_mem_port", this, p->vector_rf_ports),
-vector_reg(p->vector_reg),
+namespace RiscvISA
+{
+
+
+VectorEngine::VectorEngine(const VectorEngineParams &params) :
+SimObject(SimObjectParams(params)),
+vector_config(params.vector_config),
+VectorCacheRequestorId(params.system->getRequestorId(this, name() + ".vector_cache")),
+vectormem_port(name() + ".vector_mem_port", this, params.vector_rf_ports),
+vector_reg(params.vector_reg),
 uniqueReqId(0),
-num_clusters(p->num_clusters),
-num_lanes(p->num_lanes),
-vector_rob(p->vector_rob),
-vector_lane(p->vector_lane),
-vector_memory_unit(p->vector_memory_unit),
-vector_inst_queue(p->vector_inst_queue),
-vector_rename(p->vector_rename),
-vector_reg_validbit(p->vector_reg_validbit),
+num_clusters(params.num_clusters),
+num_lanes(params.num_lanes),
+vector_rob(params.vector_rob),
+vector_lane(params.vector_lane),
+vector_memory_unit(params.vector_memory_unit),
+vector_inst_queue(params.vector_inst_queue),
+vector_rename(params.vector_rename),
+vector_reg_validbit(params.vector_reg_validbit),
 last_vtype(0),
 last_vl(0)
 {
     //create independent ports
-    for (uint8_t i=0; i< p->vector_rf_ports; ++i) {
-        VectorRegMasterIds.push_back(p->system->getMasterId(this, name()
+    for (uint8_t i=0; i< params.vector_rf_ports; ++i) {
+        VectorRegRequestorIds.push_back(params.system->getRequestorId(this, name()
             + ".vector_reg" + std::to_string(i)));
         VectorRegPorts.push_back(VectorRegPort(name()
             + ".vector_reg_port", this, i));
@@ -194,14 +200,17 @@ VectorEngine::cluster_available()
 void
 VectorEngine::printConfigInst(RiscvISA::VectorStaticInst& insn, uint64_t src1,uint64_t src2)
 {
+#ifdef DEBUG
     uint64_t pc = insn.getPC();
     DPRINTF(VectorInst,"inst: %s vl:%d, vtype:%d       PC 0x%X\n"
         ,insn.getName(),src1,src2,*(uint64_t*)&pc );
+#endif
 }
 
 void
 VectorEngine::printMemInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn)
 {
+#ifdef DEBUG
     uint64_t pc = insn.getPC();
     bool indexed = (insn.mop() ==3);
 
@@ -250,11 +259,13 @@ VectorEngine::printMemInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vecto
     } else {
         panic("Invalid Vector Instruction insn=%#h\n", insn.machInst);
     }
+#endif
 }
 
 void
 VectorEngine::printArithInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn)
 {
+#ifdef DEBUG
     uint64_t pc = insn.getPC();
     std::string masked;
     if(masked_op) {masked = "v0.m";} else {masked = "   ";}
@@ -306,11 +317,13 @@ VectorEngine::printArithInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vec
     } else {
         panic("Invalid Vector Instruction insn=%#h\n", insn.machInst);
     }
+#endif
 }
 
 void
 VectorEngine::printVectorRegisterMoveInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn)
 {
+#ifdef DEBUG
     uint64_t pc = insn.getPC();
     std::string masked;
     if(masked_op) {masked = "v0.m";} else {masked = "   ";}
@@ -343,6 +356,7 @@ VectorEngine::printVectorRegisterMoveInst(RiscvISA::VectorStaticInst& insn,Vecto
         "    PC 0x%X\n",insn.getName(),reg_type,PDst,Pvs2,mask_ren.str(),
         POldDst,*(uint64_t*)&pc);
     
+#endif
 }
 
 void
@@ -551,13 +565,17 @@ VectorEngine::issue(RiscvISA::VectorStaticInst& insn,VectorDynInst *dyn_insn,
     ExecContextPtr& xc ,uint64_t src1 ,uint64_t src2,uint64_t vtype,
     uint64_t vl, std::function<void(Fault fault)> done_callback) {
 
+#ifdef DEBUG
     uint64_t pc = insn.getPC();
+#endif
     
     if (insn.isVectorInstMem())
     {
         VectorMemIns++;
+#ifdef DEBUG
         DPRINTF(VectorEngine,"Sending instruction %s to VMU, pc 0x%lx\n"
             ,insn.getName() , *(uint64_t*)&pc );
+#endif
         vector_memory_unit->issue(*this,insn,dyn_insn, xc,src1,src2,vtype,
             vl, done_callback);
 
@@ -572,8 +590,10 @@ VectorEngine::issue(RiscvISA::VectorStaticInst& insn,VectorDynInst *dyn_insn,
         for (int i=0 ; i< num_clusters ; i++) {
             if (!vector_lane[i]->isOccupied()) { lane_id_available = i; }
         }
+#ifdef DEBUG
         DPRINTF(VectorEngine,"Sending instruction %s to Lane[%d], pc 0x%lx\n",
             insn.getName(), lane_id_available, *(uint64_t*)&pc);
+#endif
         vector_lane[lane_id_available]->issue(*this,insn,dyn_insn, xc, src1,
             vtype, vl,done_callback);
     } else {
@@ -594,7 +614,7 @@ VectorEngine::getPort(const std::string &if_name, PortID idx)
 
 VectorEngine::VectorMemPort::VectorMemPort(const std::string& name,
     VectorEngine* owner, uint8_t channels) :
-    MasterPort(name, owner), owner(owner)
+    RequestPort(name, owner), owner(owner)
 {
     //create the queues for each of the channels to the Vector Cache
     for (uint8_t i=0; i<channels; ++i) {
@@ -618,7 +638,7 @@ VectorEngine::VectorMemPort::Tlb_Translation::~Tlb_Translation()
 
 void
 VectorEngine::VectorMemPort::Tlb_Translation::finish(const Fault &_fault,
-    const RequestPtr &_req, ThreadContext *_tc, BaseTLB::Mode _mode)
+    const RequestPtr &_req, ThreadContext *_tc, BaseMMU::Mode _mode)
 {
     fault = _fault;
 }
@@ -652,33 +672,35 @@ VectorEngine::VectorMemPort::Tlb_Translation::translated()
 // MEMCPY data if present, so caller must deallocate it himself!
 bool
 VectorEngine::VectorMemPort::startTranslation(Addr addr, uint8_t *data,
-    uint64_t size, BaseTLB::Mode mode, ThreadContext *tc, uint64_t req_id,
+    uint64_t size, BaseMMU::Mode mode, ThreadContext *tc, uint64_t req_id,
     uint8_t channel)
 {
-    Process * p = tc->getProcessPtr();
-    Addr page1 = p->pTable->pageAlign(addr);
-    Addr page2 = p->pTable->pageAlign(addr+size-1);
+#ifdef DEBUG
+    Process * process = tc->getProcessPtr();
+    Addr page1 = process->pTable->pageAlign(addr);
+    Addr page2 = process->pTable->pageAlign(addr+size-1);
     assert(page1 == page2);
+#endif
 
     //NOTE: need to make a buffer for reads so cache can write to it!
     uint8_t *ndata = new uint8_t[size];
     if (data != nullptr) {
-        assert(mode == BaseTLB::Write);
+        assert(mode == BaseMMU::Write);
         memcpy(ndata, data, size);
     } else {
       //put a pattern here for debugging
       memset(ndata, 'Z', size);
     }
-    MemCmd cmd = (mode==BaseTLB::Write) ? MemCmd::WriteReq :
+    MemCmd cmd = (mode==BaseMMU::Write) ? MemCmd::WriteReq :
         MemCmd::ReadReq;
     
     DPRINTF(VectorInst, "Query TLB for vaddr 0x%x size %d TLBMode %d\n", addr, size, mode);
 
     //virtual address request constructor (copied the data port request)
     //const int asid = 0;
-    const Addr pc = tc->instAddr();
+    const Addr pc = tc->pcState().instAddr();
     RequestPtr req = std::make_shared<Request>(addr, size, 0,
-        owner->VectorCacheMasterId, pc, tc->contextId());
+        owner->VectorCacheRequestorId, pc, tc->contextId());
 
     BaseCPU *cpu = tc->getCpuPtr();
 
@@ -687,7 +709,7 @@ VectorEngine::VectorMemPort::startTranslation(Addr addr, uint8_t *data,
     //start translation
     Tlb_Translation *translation = new Tlb_Translation(owner);
 
-    tc->getDTBPtr()->translateTiming(req, tc, translation , mode);
+    tc->getMMUPtr()->translateTiming(req, tc, translation , mode);
 
     if (translation->fault == NoFault){
         PacketPtr pkt = new VectorPacket(req, cmd, req_id, channel);
@@ -710,7 +732,7 @@ bool
 VectorEngine::VectorMemPort::sendTimingReadReq(Addr addr, uint64_t size,
     ThreadContext *tc, uint64_t req_id, uint8_t channel)
 {
-    return startTranslation(addr, nullptr, size, BaseTLB::Read, tc, req_id,
+    return startTranslation(addr, nullptr, size, BaseMMU::Read, tc, req_id,
         channel);
 }
 
@@ -719,7 +741,7 @@ VectorEngine::VectorMemPort::sendTimingWriteReq(Addr addr,
     uint8_t *data, uint64_t size, ThreadContext *tc, uint64_t req_id,
     uint8_t channel)
 {
-    return startTranslation(addr, data, size, BaseTLB::Write, tc, req_id,
+    return startTranslation(addr, data, size, BaseMMU::Write, tc, req_id,
         channel);
 }
 
@@ -748,7 +770,7 @@ VectorEngine::VectorMemPort::recvReqRetry()
 
 VectorEngine::VectorRegPort::VectorRegPort(const std::string& name,
     VectorEngine* owner, uint64_t channel) :
-    MasterPort(name, owner), owner(owner), channel(channel)
+    RequestPort(name, owner), owner(owner), channel(channel)
 {
 }
 
@@ -762,7 +784,7 @@ VectorEngine::VectorRegPort::sendTimingReadReq(Addr addr, uint64_t size,
 {
     //physical addressing
     RequestPtr req = std::make_shared<Request>
-        (addr,size,0,owner->VectorRegMasterIds[channel]);
+        (addr,size,0,owner->VectorRegRequestorIds[channel]);
     PacketPtr pkt = new VectorPacket(req, MemCmd::ReadReq, req_id);
 
     //make data for cache to put data into
@@ -786,7 +808,7 @@ VectorEngine::VectorRegPort::sendTimingWriteReq(Addr addr, uint8_t *data,
 {
     //physical addressing
     RequestPtr req = std::make_shared<Request>
-        (addr,size,0,owner->VectorRegMasterIds[channel]);
+        (addr,size,0,owner->VectorRegRequestorIds[channel]);
     VectorPacketPtr pkt = new VectorPacket(req, MemCmd::WriteReq, req_id);
 
     //make copy of data here
@@ -831,7 +853,10 @@ VectorEngine::recvTimingResp(VectorPacketPtr vector_pkt)
             break;
         }
     }
-    assert(found);
+
+    if (!found) {
+        assert(0);
+    }
 
     //commit each request in order they were issued
     while (vector_PendingReqQ.size() &&
@@ -911,8 +936,7 @@ VectorEngine::readVectorReg(Addr addr, uint32_t size,
     return true;
 }
 
-VectorEngine *
-VectorEngineParams::create()
-{
-    return new VectorEngine(this);
+}
+
+
 }

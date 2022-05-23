@@ -30,6 +30,11 @@
 
 #include "debug/Datapath.hh"
 #include "arith.h"
+namespace gem5
+{
+
+namespace RiscvISA
+{
 
 float
 Datapath::compute_float_fp_op(float Aitem, float Bitem, uint8_t Mitem,
@@ -264,7 +269,7 @@ Datapath::compute_double_fp_op(double Aitem, double Bitem,
 double 
 Datapath::computeDoubleFPReduction(double accumDp,double Bitem,uint8_t Mitem)
 {
-    double reduction;
+    double reduction = 0;
     std::string operation = insn->getName();
     numFP64_operations = numFP64_operations.value() + 1; // number of 64-bit FP operations
 
@@ -291,7 +296,7 @@ Datapath::computeDoubleFPReduction(double accumDp,double Bitem,uint8_t Mitem)
 float
 Datapath::computeSingleFPReduction(float accumSp,float Bitem,uint8_t Mitem)
 {
-    float reduction;
+    float reduction = 0;
     std::string operation = insn->getName();
     numFP32_operations = numFP32_operations.value() + 1; // number of 32-bit FP operations
 
@@ -2591,7 +2596,7 @@ Datapath::compute_widening_op(WT Aitem, WT Bitem,  uint8_t Mitem, WT Dstitem,
 int
 Datapath::computeIntReduction(int accumInt,int Bitem,uint8_t Mitem)
 {
-    int reduction;
+    int reduction = 0;
     std::string operation = insn->getName();
     numALU32_operations = numALU32_operations.value() + 1; // number of 32-bit ALU operations
 
@@ -2651,7 +2656,7 @@ Datapath::computeIntReduction(int accumInt,int Bitem,uint8_t Mitem)
 int8_t
 Datapath::computeInt8Reduction(int8_t accumInt,int8_t Bitem,uint8_t Mitem)
 {
-    int8_t reduction;
+    int8_t reduction = 0;
     std::string operation = insn->getName();
     numALU8_operations = numALU8_operations.value() + 1; // number of 8-bit ALU operations
 
@@ -2711,7 +2716,7 @@ Datapath::computeInt8Reduction(int8_t accumInt,int8_t Bitem,uint8_t Mitem)
 int16_t
 Datapath::computeInt16Reduction(int16_t accumInt,int16_t Bitem,uint8_t Mitem)
 {
-    int16_t reduction;
+    int16_t reduction = 0;
     std::string operation = insn->getName();
     numALU16_operations = numALU16_operations.value() + 1; // number of 316bit ALU operations
 
@@ -2772,7 +2777,7 @@ Datapath::computeInt16Reduction(int16_t accumInt,int16_t Bitem,uint8_t Mitem)
 long int
 Datapath::computeLongIntReduction(long int accumInt,long int Bitem,uint8_t Mitem)
 {
-    long int reduction;
+    long int reduction = 0;
     std::string operation = insn->getName();
     numALU64_operations = numALU64_operations.value() + 1; // number of 64-bit ALU operations
 
@@ -2835,7 +2840,7 @@ Datapath::computeLongMaskLogicalOp(bool Aitem, bool Bitem,
         RiscvISA::VectorStaticInst* insn)
 {
     long int Ditem=0;
-    bool aux;
+    bool aux = 0;
     std::string operation = insn->getName();
 
     if ((operation == "vmand_mm")) {
@@ -2850,7 +2855,7 @@ Datapath::computeLongMaskLogicalOp(bool Aitem, bool Bitem,
             Bitem,Aitem, aux);
     }
 
-    if ((operation == "vmandnot_mm")) {
+    if ((operation == "vmandn_mm")) {
         aux = (Bitem & !Aitem);
         DPRINTF(Datapath,"WB Instruction = %d & !%d = %d  \n",
             Bitem,Aitem, aux);
@@ -2874,7 +2879,7 @@ Datapath::computeLongMaskLogicalOp(bool Aitem, bool Bitem,
             Bitem,Aitem, aux);
     }
 
-    if ((operation == "vmornot_mm")) {
+    if ((operation == "vmorn_mm")) {
         aux = (Bitem | !Aitem);
         DPRINTF(Datapath,"WB Instruction = %d | !%d = %d  \n",
             Bitem,Aitem, aux);
@@ -2895,7 +2900,7 @@ Datapath::computeIntMaskLogicalOp(bool Aitem, bool Bitem,
         RiscvISA::VectorStaticInst* insn)
 {
     int Ditem=0;
-    bool aux;
+    bool aux = 0;
     std::string operation = insn->getName();
 
     if ((operation == "vmand_mm")) {
@@ -2910,7 +2915,7 @@ Datapath::computeIntMaskLogicalOp(bool Aitem, bool Bitem,
             Bitem,Aitem, aux);
     }
 
-    if ((operation == "vmandnot_mm")) {
+    if ((operation == "vmandn_mm")) {
         aux = (Bitem & !Aitem);
         DPRINTF(Datapath,"WB Instruction = %d & !%d = %d  \n",
             Bitem,Aitem, aux);
@@ -2934,7 +2939,7 @@ Datapath::computeIntMaskLogicalOp(bool Aitem, bool Bitem,
             Bitem,Aitem, aux);
     }
 
-    if ((operation == "vmornot_mm")) {
+    if ((operation == "vmorn_mm")) {
         aux = (Bitem | !Aitem);
         DPRINTF(Datapath,"WB Instruction = %d | !%d = %d  \n",
             Bitem,Aitem, aux);
@@ -3057,4 +3062,8 @@ Datapath::compute_cvt_f64_x32_op( int Bitem, uint8_t Mitem, int Dstitem,
     }
 
     return Ditem;
+}
+
+}
+
 }

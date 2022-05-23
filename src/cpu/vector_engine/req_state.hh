@@ -36,6 +36,11 @@
 
 #include "mem/packet.hh"
 #include "mem/request.hh"
+namespace gem5
+{
+
+namespace RiscvISA
+{
 
 // basic state for a request to either the vector_reg or vector_mem. uniquely
 // identifies any read/write with a unique reqId. A callback must be executed
@@ -105,4 +110,7 @@ class Vector_W_ReqState : public Vector_ReqState
     std::function<void(void)> callback;
 };
 
+}
+
+}
 #endif // __CPU_VECTOR_REQ_STATE_HH__

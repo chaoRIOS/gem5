@@ -33,10 +33,16 @@
 #include <string>
 
 #include "arch/generic/isa.hh"
-#include "arch/sparc/registers.hh"
+#include "arch/sparc/pcstate.hh"
+#include "arch/sparc/regs/int.hh"
+#include "arch/sparc/regs/misc.hh"
+#include "arch/sparc/sparc_traits.hh"
 #include "arch/sparc/types.hh"
 #include "cpu/reg_class.hh"
 #include "sim/sim_object.hh"
+
+namespace gem5
+{
 
 class Checkpoint;
 class EventManager;
@@ -143,7 +149,8 @@ class ISA : public BaseISA
     static const int RegsPerWindow = NumWindowedRegs - WindowOverlap;
     static const int TotalWindowed = NWindows * RegsPerWindow;
 
-    enum InstIntRegOffsets {
+    enum InstIntRegOffsets
+    {
         CurrentGlobalsOffset = 0,
         CurrentWindowOffset = CurrentGlobalsOffset + NumGlobalRegs,
         MicroIntOffset = CurrentWindowOffset + NumWindowedRegs,
@@ -160,8 +167,13 @@ class ISA : public BaseISA
     void reloadRegMap();
 
   public:
-
     void clear();
+
+    PCStateBase *
+    newPCState(Addr new_inst_addr=0) const override
+    {
+        return new PCState(new_inst_addr);
+    }
 
     void serialize(CheckpointOut &cp) const override;
     void unserialize(CheckpointIn &cp) override;
@@ -215,12 +227,28 @@ class ISA : public BaseISA
     int flattenCCIndex(int reg) const { return reg; }
     int flattenMiscIndex(int reg) const { return reg; }
 
+    uint64_t
+    getExecutingAsid() const override
+    {
+        return readMiscRegNoEffect(MISCREG_MMU_P_CONTEXT);
+    }
 
-    typedef SparcISAParams Params;
-    const Params *params() const;
+    using Params = SparcISAParams;
 
-    ISA(Params *p);
+    bool
+    inUserMode() const override
+    {
+        PSTATE pstate = readMiscRegNoEffect(MISCREG_PSTATE);
+        HPSTATE hpstate = readMiscRegNoEffect(MISCREG_HPSTATE);
+        return !(pstate.priv || hpstate.hpriv);
+    }
+
+    void copyRegsFrom(ThreadContext *src) override;
+
+    ISA(const Params &p);
 };
-}
+
+} // namespace SparcISA
+} // namespace gem5
 
 #endif

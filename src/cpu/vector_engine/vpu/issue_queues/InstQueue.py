@@ -33,6 +33,7 @@ from m5.objects.TickedObject import TickedObject
 class InstQueue(TickedObject):
     type = 'InstQueue'
     cxx_header = "cpu/vector_engine/vpu/issue_queues/inst_queue.hh"
+    cxx_class = 'gem5::RiscvISA::InstQueue'
 
     OoO_queues = Param.Bool("Out-of-Order/In-Order Queues")
     vector_mem_queue_size = Param.Unsigned("memory queue entries")

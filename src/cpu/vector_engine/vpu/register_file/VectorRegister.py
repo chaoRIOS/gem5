@@ -33,6 +33,7 @@ from m5.objects.ClockedObject import *
 class VectorRegister(ClockedObject):
     type = 'VectorRegister'
     cxx_header = "cpu/vector_engine/vpu/register_file/vector_reg.hh"
+    cxx_class = 'gem5::RiscvISA::VectorRegister'
 
     num_lanes = Param.Unsigned("Number of vector lanes")
     num_regs = Param.Unsigned("Number of vector registers")

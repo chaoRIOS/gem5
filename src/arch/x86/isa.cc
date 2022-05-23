@@ -29,11 +29,18 @@
 #include "arch/x86/isa.hh"
 
 #include "arch/x86/decoder.hh"
-#include "arch/x86/tlb.hh"
+#include "arch/x86/mmu.hh"
+#include "arch/x86/regs/ccr.hh"
+#include "arch/x86/regs/int.hh"
+#include "arch/x86/regs/misc.hh"
+#include "base/compiler.hh"
 #include "cpu/base.hh"
 #include "cpu/thread_context.hh"
 #include "params/X86ISA.hh"
 #include "sim/serialize.hh"
+
+namespace gem5
+{
 
 namespace X86ISA
 {
@@ -96,7 +103,7 @@ ISA::updateHandyM5Reg(Efer efer, CR0 cr0,
 
     regVal[MISCREG_M5_REG] = m5reg;
     if (tc)
-        tc->getDecoderPtr()->setM5Reg(m5reg);
+        tc->getDecoderPtr()->as<Decoder>().setM5Reg(m5reg);
 }
 
 void
@@ -104,7 +111,7 @@ ISA::clear()
 {
     // Blank everything. 0 might not be an appropriate value for some things,
     // but it is for most.
-    memset(regVal, 0, NumMiscRegs * sizeof(RegVal));
+    memset(regVal, 0, NUM_MISCREGS * sizeof(RegVal));
 
     // If some state should be non-zero after a reset, set those values here.
     regVal[MISCREG_CR0] = 0x0000000060000010ULL;
@@ -130,15 +137,56 @@ ISA::clear()
     regVal[MISCREG_APIC_BASE] = lApicBase;
 }
 
-ISA::ISA(Params *p) : BaseISA(p)
+ISA::ISA(const X86ISAParams &p) : BaseISA(p), vendorString(p.vendor_string)
 {
+    fatal_if(vendorString.size() != 12,
+             "CPUID vendor string must be 12 characters\n");
+
+    _regClasses.emplace_back(NumIntRegs, INTREG_T0);
+    _regClasses.emplace_back(NumFloatRegs);
+    _regClasses.emplace_back(1); // Not applicable to X86
+    _regClasses.emplace_back(2); // Not applicable to X86
+    _regClasses.emplace_back(1); // Not applicable to X86
+    _regClasses.emplace_back(NUM_CCREGS);
+    _regClasses.emplace_back(NUM_MISCREGS);
+
     clear();
 }
 
-const X86ISAParams *
-ISA::params() const
+static void
+copyMiscRegs(ThreadContext *src, ThreadContext *dest)
 {
-    return dynamic_cast<const Params *>(_params);
+    // This function assumes no side effects other than TLB invalidation
+    // need to be considered while copying state. That will likely not be
+    // true in the future.
+    for (int i = 0; i < NUM_MISCREGS; ++i) {
+        if (!isValidMiscReg(i))
+             continue;
+
+        dest->setMiscRegNoEffect(i, src->readMiscRegNoEffect(i));
+    }
+
+    // The TSC has to be updated with side-effects if the CPUs in a
+    // CPU switch have different frequencies.
+    dest->setMiscReg(MISCREG_TSC, src->readMiscReg(MISCREG_TSC));
+
+    dest->getMMUPtr()->flushAll();
+}
+
+void
+ISA::copyRegsFrom(ThreadContext *src)
+{
+    //copy int regs
+    for (int i = 0; i < NumIntRegs; ++i)
+         tc->setIntRegFlat(i, src->readIntRegFlat(i));
+    //copy float regs
+    for (int i = 0; i < NumFloatRegs; ++i)
+         tc->setFloatRegFlat(i, src->readFloatRegFlat(i));
+    //copy condition-code regs
+    for (int i = 0; i < NUM_CCREGS; ++i)
+         tc->setCCRegFlat(i, src->readCCRegFlat(i));
+    copyMiscRegs(src, tc);
+    tc->pcState(src->pcState());
 }
 
 RegVal
@@ -239,8 +287,7 @@ ISA::setMiscReg(int miscReg, RegVal val)
                 }
             }
             if (toggled.pg) {
-                dynamic_cast<TLB *>(tc->getITBPtr())->flushAll();
-                dynamic_cast<TLB *>(tc->getDTBPtr())->flushAll();
+                tc->getMMUPtr()->flushAll();
             }
             //This must always be 1.
             newCR0.et = 1;
@@ -255,15 +302,13 @@ ISA::setMiscReg(int miscReg, RegVal val)
       case MISCREG_CR2:
         break;
       case MISCREG_CR3:
-        dynamic_cast<TLB *>(tc->getITBPtr())->flushNonGlobal();
-        dynamic_cast<TLB *>(tc->getDTBPtr())->flushNonGlobal();
+        static_cast<MMU *>(tc->getMMUPtr())->flushNonGlobal();
         break;
       case MISCREG_CR4:
         {
             CR4 toggled = regVal[miscReg] ^ val;
             if (toggled.pae || toggled.pse || toggled.pge) {
-                dynamic_cast<TLB *>(tc->getITBPtr())->flushAll();
-                dynamic_cast<TLB *>(tc->getDTBPtr())->flushAll();
+                tc->getMMUPtr()->flushAll();
             }
         }
         break;
@@ -336,7 +381,7 @@ ISA::setMiscReg(int miscReg, RegVal val)
         break;
       case MISCREG_DR4:
         miscReg = MISCREG_DR6;
-        M5_FALLTHROUGH;
+        [[fallthrough]];
       case MISCREG_DR6:
         {
             DR6 dr6 = regVal[MISCREG_DR6];
@@ -353,7 +398,7 @@ ISA::setMiscReg(int miscReg, RegVal val)
         break;
       case MISCREG_DR5:
         miscReg = MISCREG_DR7;
-        M5_FALLTHROUGH;
+        [[fallthrough]];
       case MISCREG_DR7:
         {
             DR7 dr7 = regVal[MISCREG_DR7];
@@ -416,13 +461,13 @@ ISA::setMiscReg(int miscReg, RegVal val)
 void
 ISA::serialize(CheckpointOut &cp) const
 {
-    SERIALIZE_ARRAY(regVal, NumMiscRegs);
+    SERIALIZE_ARRAY(regVal, NUM_MISCREGS);
 }
 
 void
 ISA::unserialize(CheckpointIn &cp)
 {
-    UNSERIALIZE_ARRAY(regVal, NumMiscRegs);
+    UNSERIALIZE_ARRAY(regVal, NUM_MISCREGS);
     updateHandyM5Reg(regVal[MISCREG_EFER],
                      regVal[MISCREG_CR0],
                      regVal[MISCREG_CS_ATTR],
@@ -434,13 +479,14 @@ void
 ISA::setThreadContext(ThreadContext *_tc)
 {
     BaseISA::setThreadContext(_tc);
-    tc->getDecoderPtr()->setM5Reg(regVal[MISCREG_M5_REG]);
+    tc->getDecoderPtr()->as<Decoder>().setM5Reg(regVal[MISCREG_M5_REG]);
 }
 
-}
-
-X86ISA::ISA *
-X86ISAParams::create()
+std::string
+ISA::getVendorString() const
 {
-    return new X86ISA::ISA(this);
+    return vendorString;
 }
+
+} // namespace X86ISA
+} // namespace gem5

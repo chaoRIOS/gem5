@@ -41,6 +41,11 @@
 #include "params/VectorRename.hh"
 #include "sim/faults.hh"
 #include "sim/sim_object.hh"
+namespace gem5
+{
+
+namespace RiscvISA
+{
 
 /**
  *  Vector Renaming
@@ -48,7 +53,7 @@
 class VectorRename : public SimObject
 {
 public:
-    VectorRename(VectorRenameParams *p);
+    VectorRename(const VectorRenameParams &params);
     ~VectorRename();
 
     const uint64_t PhysicalRegs;
@@ -121,7 +126,9 @@ public:
     }
 };
 
+}
 
+}
 
 #endif // __CPU_VECTOR_RENAME_H__
 

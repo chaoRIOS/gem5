@@ -34,6 +34,11 @@
 #include <string>
 
 #include "arch/riscv/insts/vector_static_inst.hh"
+namespace gem5
+{
+
+namespace RiscvISA
+{
 
 class VectorStaticInst;
 
@@ -91,4 +96,7 @@ private:
   uint16_t  rob_entry;
 };
 
+}
+
+}
 #endif // __ARCH_RISCV_VECTOR_DYN_INSTS_HH__

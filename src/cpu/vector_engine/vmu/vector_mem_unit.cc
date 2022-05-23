@@ -40,13 +40,18 @@
 #include "debug/VectorMemUnit.hh"
 #include "sim/faults.hh"
 #include "sim/sim_object.hh"
+namespace gem5
+{
 
-VectorMemUnit::VectorMemUnit(const VectorMemUnitParams *p) :
-    SimObject(p),
+namespace RiscvISA
+{
+
+VectorMemUnit::VectorMemUnit(const VectorMemUnitParams &params) :
+    SimObject(SimObjectParams(params)),
     occupied(false),
-    memReader(p->memReader),
-    memReader_addr(p->memReader_addr),
-    memWriter(p->memWriter)
+    memReader(params.memReader),
+    memReader_addr(params.memReader_addr),
+    memWriter(params.memWriter)
 {
 }
 
@@ -340,9 +345,7 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
 }
 
 
-VectorMemUnit *
-VectorMemUnitParams::create()
-{
-    return new VectorMemUnit(this);
 }
 
+
+}
