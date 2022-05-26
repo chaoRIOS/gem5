@@ -229,8 +229,9 @@ MinorDynInst::minorTraceInst(const Named &named_object,
 
 MinorDynInst::~MinorDynInst()
 {
-    if (traceData)
-        delete traceData;
+    // @TODO: fix traceData
+    // if (traceData)
+    //     delete traceData;
 }
 
 } // namespace minor

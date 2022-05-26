@@ -11,6 +11,28 @@ tests = [test for test in tests if '-v-' not in test and '-vf' not in test and '
 # Fail tests: 65
 tests = [
 
+    # load/store
+
+    # 'rv64uv-p-vle',
+    # 'rv64uv-p-vle8ff',
+    # 'rv64uv-p-vle16ff',
+    # 'rv64uv-p-vle32ff',
+    # 'rv64uv-p-vle64ff',
+    # 'rv64uv-p-vlre',
+    # 'rv64uv-p-vlse',
+    # 'rv64uv-p-vlseg',
+    # 'rv64uv-p-vlsseg',
+    # 'rv64uv-p-vlxseg',
+    # 'rv64uv-p-vlxei',
+
+    # 'rv64uv-p-vse',
+    # 'rv64uv-p-vsre',
+    # 'rv64uv-p-vsse',
+    # 'rv64uv-p-vsseg',
+    # 'rv64uv-p-vssseg',
+    # 'rv64uv-p-vsxseg',
+    # 'rv64uv-p-vsxei',
+
     # 15 mask
     # 'rv64uv-p-viota', # chap 15, mask instruction
     # 'rv64uv-p-vsfmb',
@@ -23,12 +45,6 @@ tests = [
     # 12
     # 'rv64uv-p-vnclip',# test_2 ?
     # 'rv64uv-p-vnclipu',
-
-    # 7 load/store
-
-    # 'rv64uv-p-vlse',
-    
-    # 'rv64uv-p-vsxei',
 
     # Seg
     # 'rv64uv-p-vlseg',
@@ -43,8 +59,8 @@ tests = [
     # 'rv64uv-p-vsre',
 
     # 11 widening
-    'rv64uv-p-vwredsum',
-    'rv64uv-p-vwredsumu',
+    # 'rv64uv-p-vwredsum',
+    # 'rv64uv-p-vwredsumu',
 ]
 # Done tests: 25
 # tests = ['rv64uv-p-vmin', 'rv64uv-p-vmaxu', 'rv64uv-p-vredmax', 'rv64uv-p-vand', 'rv64uv-p-vredmin', 'rv64uv-p-vredand', 'rv64uv-p-vxor', 'rv64uv-p-vle8ff', 'rv64uv-p-vredsum', 'rv64uv-p-vmul', 'rv64uv-p-vsll', 'rv64uv-p-vlxei', 'rv64uv-p-vredor', 'rv64uv-p-vadd', 'rv64uv-p-vle32ff', 'rv64uv-p-vle16ff', 'rv64uv-p-vredxor', 'rv64uv-p-vle64ff', 'rv64uv-p-vredminu', 'rv64uv-p-vmax', 'rv64uv-p-vor', 'rv64uv-p-vminu', 'rv64uv-p-vredmaxu', 'rv64uv-p-vle', 'rv64uv-p-vsub']

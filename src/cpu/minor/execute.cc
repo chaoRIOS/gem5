@@ -614,7 +614,7 @@ Execute::issue(ThreadID thread_id)
             issued = false;
         } else if (inst->staticInst->isVector()) {
             if (!scoreboard[thread_id].canInstIssue(inst, NULL, NULL,
-                cpu.curCycle(), cpu.getContext(thread_id))) {
+                cpu.curCycle() + Cycles(1), cpu.getContext(thread_id))) {
                 DPRINTF(CpuVectorIssue,"Vector Ins blocked by scoreboard: %s"
                     "for thread %d\n",*inst, thread.streamSeqNum);
                 issued = false;
@@ -624,8 +624,9 @@ Execute::issue(ThreadID thread_id)
             else {
                 DPRINTF(CpuVectorIssue,"Vector Instruction Issue to exec:"
                     "%s \n",*inst);
+                // @TODO: fix vector engine timing
                 scoreboard[thread_id].markupInstDests(inst, cpu.curCycle() +
-                    Cycles(0), cpu.getContext(thread_id), true);
+                    Cycles(4), cpu.getContext(thread_id), true);
 
                 QueuedInst fu_inst(inst);
                 thread.inFlightInsts->push(fu_inst);

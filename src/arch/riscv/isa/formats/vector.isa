@@ -84,8 +84,6 @@ def template VectorMemoryConstructor {{
           } else {
             setSrcRegIdx(_numSrcRegs++, RegId(IntRegClass, vs1()));
           }
-
-        flags[IsVector] = true;
     }
 }};
 
@@ -305,7 +303,8 @@ def format VectorConfigOp( *vecflags) {{
 }};
 
 def format VectorMemoryStoreOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorMemOp', '', ['VectorMemoryStoreOp'])
+    iop = InstObjParams(name, Name, 'RiscvVectorMemOp', '',
+    ['VectorMemoryStoreOp', 'IsStore', 'IsVector'])
     header_output = BasicDeclare.subst(iop)
     decoder_output = VectorMemoryConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
@@ -313,7 +312,8 @@ def format VectorMemoryStoreOp() {{
 }};
 
 def format VectorMemoryLoadOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorMemOp', '', ['VectorMemoryLoadOp'])
+    iop = InstObjParams(name, Name, 'RiscvVectorMemOp', '',
+    ['VectorMemoryLoadOp', 'IsLoad', 'IsVector'])
     header_output = BasicDeclare.subst(iop)
     decoder_output = VectorMemoryConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
