@@ -72,18 +72,6 @@ def template VectorMemoryConstructor {{
     {
         %(set_reg_idx_arr)s;
         %(constructor)s;
-
-        if(mop()==2) { 
-            // Strided memory access
-            /* 
-            * TODO: is still pending strided which uses rs2 as
-            * second operand.
-            */
-            setSrcRegIdx(_numSrcRegs++, RegId(IntRegClass, vs1()));
-            setSrcRegIdx(_numSrcRegs++, RegId(IntRegClass, vs2()));
-          } else {
-            setSrcRegIdx(_numSrcRegs++, RegId(IntRegClass, vs1()));
-          }
     }
 }};
 
@@ -302,18 +290,18 @@ def format VectorConfigOp( *vecflags) {{
     exec_output = VectorExecute.subst(iop)
 }};
 
-def format VectorMemoryStoreOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorMemOp', '',
-    ['VectorMemoryStoreOp', 'IsStore', 'IsVector'])
+def format VectorMemoryStoreOp(code, *opt_flags) {{
+    iop = InstObjParams(name, Name, 'RiscvVectorMemOp',
+    {'code': code}, opt_flags)
     header_output = BasicDeclare.subst(iop)
     decoder_output = VectorMemoryConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)
     exec_output = VectorExecute.subst(iop)
 }};
 
-def format VectorMemoryLoadOp() {{
-    iop = InstObjParams(name, Name, 'RiscvVectorMemOp', '',
-    ['VectorMemoryLoadOp', 'IsLoad', 'IsVector'])
+def format VectorMemoryLoadOp(code, *opt_flags) {{
+    iop = InstObjParams(name, Name, 'RiscvVectorMemOp',
+    {'code': code}, opt_flags)
     header_output = BasicDeclare.subst(iop)
     decoder_output = VectorMemoryConstructor.subst(iop)
     decode_block = BasicDecode.subst(iop)

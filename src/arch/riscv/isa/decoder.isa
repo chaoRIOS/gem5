@@ -419,172 +419,302 @@ decode QUADRANT default Unknown::unknown() {
                     Fd_bits = fd.v;
                 }}, inst_flags=FloatMemReadOp);
             }
-            0x0: decode MOP {
-                0x0: decode NF {
-                    0x0: VectorMemoryLoadOp::vle8_v();
-                    0x1: VectorMemoryLoadOp::vlseg2e8_v();
-                    0x2: VectorMemoryLoadOp::vlseg3e8_v();
-                    0x3: VectorMemoryLoadOp::vlseg4e8_v();
-                    0x4: VectorMemoryLoadOp::vlseg5e8_v();
-                    0x5: VectorMemoryLoadOp::vlseg6e8_v();
-                    0x6: VectorMemoryLoadOp::vlseg7e8_v();
-                    0x7: VectorMemoryLoadOp::vlseg8e8_v();
+            format VectorMemoryLoadOp {
+                0x0: decode MOP {
+                    0x0: decode NF {
+                        0x0: vle8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x1: vlseg2e8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x2: vlseg3e8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x3: vlseg4e8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x4: vlseg5e8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x5: vlseg6e8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x6: vlseg7e8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x7: vlseg8e8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                    }
+                    0x1: decode NF {
+                        0x0: vluxei8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x1: vluxseg2ei8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x2: vluxseg3ei8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x3: vluxseg4ei8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x4: vluxseg5ei8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x5: vluxseg6ei8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x6: vluxseg7ei8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x7: vluxseg8ei8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                    }
+                    0x2: decode NF {
+                        0x0: vlse8_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x1: vlsseg2e8_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x2: vlsseg3e8_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x3: vlsseg4e8_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x4: vlsseg5e8_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x5: vlsseg6e8_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x6: vlsseg7e8_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x7: vlsseg8e8_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                    }
+                    0x3: decode NF {
+                        0x0: vloxei8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x1: vloxseg2ei8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x2: vloxseg3ei8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x3: vloxseg4ei8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x4: vloxseg5ei8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x5: vloxseg6ei8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x6: vloxseg7ei8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x7: vloxseg8ei8_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                    }
                 }
-                0x1: decode NF {
-                    0x0: VectorMemoryLoadOp::vluxei8_v();
-                    0x1: VectorMemoryLoadOp::vluxseg2ei8_v();
-                    0x2: VectorMemoryLoadOp::vluxseg3ei8_v();
-                    0x3: VectorMemoryLoadOp::vluxseg4ei8_v();
-                    0x4: VectorMemoryLoadOp::vluxseg5ei8_v();
-                    0x5: VectorMemoryLoadOp::vluxseg6ei8_v();
-                    0x6: VectorMemoryLoadOp::vluxseg7ei8_v();
-                    0x7: VectorMemoryLoadOp::vluxseg8ei8_v();
+                0x5: decode MOP {
+                    0x0: decode NF {
+                        0x0: vle16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x1: vlseg2e16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x2: vlseg3e16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x3: vlseg4e16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x4: vlseg5e16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x5: vlseg6e16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x6: vlseg7e16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x7: vlseg8e16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                    }
+                    0x1: decode NF {
+                        0x0: vluxei16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x1: vluxseg2ei16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x2: vluxseg3ei16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x3: vluxseg4ei16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x4: vluxseg5ei16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x5: vluxseg6ei16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x6: vluxseg7ei16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x7: vluxseg8ei16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                    }
+                    0x2: decode NF {
+                        0x0: vlse16_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x1: vlsseg2e16_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x2: vlsseg3e16_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x3: vlsseg4e16_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x4: vlsseg5e16_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x5: vlsseg6e16_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x6: vlsseg7e16_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x7: vlsseg8e16_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                    }
+                    0x3: decode NF {
+                        0x0: vloxei16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x1: vloxseg2ei16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x2: vloxseg3ei16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x3: vloxseg4ei16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x4: vloxseg5ei16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x5: vloxseg6ei16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x6: vloxseg7ei16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x7: vloxseg8ei16_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                    }
                 }
-                0x2: decode NF {
-                    0x0: VectorMemoryLoadOp::vlse8_v();
-                    0x1: VectorMemoryLoadOp::vlsseg2e8_v();
-                    0x2: VectorMemoryLoadOp::vlsseg3e8_v();
-                    0x3: VectorMemoryLoadOp::vlsseg4e8_v();
-                    0x4: VectorMemoryLoadOp::vlsseg5e8_v();
-                    0x5: VectorMemoryLoadOp::vlsseg6e8_v();
-                    0x6: VectorMemoryLoadOp::vlsseg7e8_v();
-                    0x7: VectorMemoryLoadOp::vlsseg8e8_v();
+                0x6: decode MOP {
+                    0x0: decode NF {
+                        0x0: vle32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x1: vlseg2e32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x2: vlseg3e32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x3: vlseg4e32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x4: vlseg5e32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x5: vlseg6e32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x6: vlseg7e32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x7: vlseg8e32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                    }
+                    0x1: decode NF {
+                        0x0: vluxei32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x1: vluxseg2ei32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x2: vluxseg3ei32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x3: vluxseg4ei32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x4: vluxseg5ei32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x5: vluxseg6ei32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x6: vluxseg7ei32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x7: vluxseg8ei32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                    }
+                    0x2: decode NF {
+                        0x0: vlse32_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x1: vlsseg2e32_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x2: vlsseg3e32_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x3: vlsseg4e32_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x4: vlsseg5e32_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x5: vlsseg6e32_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x6: vlsseg7e32_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x7: vlsseg8e32_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                    }
+                    0x3: decode NF {
+                        0x0: vloxei32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x1: vloxseg2ei32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x2: vloxseg3ei32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x3: vloxseg4ei32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x4: vloxseg5ei32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x5: vloxseg6ei32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x6: vloxseg7ei32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x7: vloxseg8ei32_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                    }
                 }
-                0x3: decode NF {
-                    0x0: VectorMemoryLoadOp::vloxei8_v();
-                    0x1: VectorMemoryLoadOp::vloxseg2ei8_v();
-                    0x2: VectorMemoryLoadOp::vloxseg3ei8_v();
-                    0x3: VectorMemoryLoadOp::vloxseg4ei8_v();
-                    0x4: VectorMemoryLoadOp::vloxseg5ei8_v();
-                    0x5: VectorMemoryLoadOp::vloxseg6ei8_v();
-                    0x6: VectorMemoryLoadOp::vloxseg7ei8_v();
-                    0x7: VectorMemoryLoadOp::vloxseg8ei8_v();
-                }
-            }
-            0x5: decode MOP {
-                0x0: decode NF {
-                    0x0: VectorMemoryLoadOp::vle16_v();
-                    0x1: VectorMemoryLoadOp::vlseg2e16_v();
-                    0x2: VectorMemoryLoadOp::vlseg3e16_v();
-                    0x3: VectorMemoryLoadOp::vlseg4e16_v();
-                    0x4: VectorMemoryLoadOp::vlseg5e16_v();
-                    0x5: VectorMemoryLoadOp::vlseg6e16_v();
-                    0x6: VectorMemoryLoadOp::vlseg7e16_v();
-                    0x7: VectorMemoryLoadOp::vlseg8e16_v();
-                }
-                0x1: decode NF {
-                    0x0: VectorMemoryLoadOp::vluxei16_v();
-                    0x1: VectorMemoryLoadOp::vluxseg2ei16_v();
-                    0x2: VectorMemoryLoadOp::vluxseg3ei16_v();
-                    0x3: VectorMemoryLoadOp::vluxseg4ei16_v();
-                    0x4: VectorMemoryLoadOp::vluxseg5ei16_v();
-                    0x5: VectorMemoryLoadOp::vluxseg6ei16_v();
-                    0x6: VectorMemoryLoadOp::vluxseg7ei16_v();
-                    0x7: VectorMemoryLoadOp::vluxseg8ei16_v();
-                }
-                0x2: decode NF {
-                    0x0: VectorMemoryLoadOp::vlse16_v();
-                    0x1: VectorMemoryLoadOp::vlsseg2e16_v();
-                    0x2: VectorMemoryLoadOp::vlsseg3e16_v();
-                    0x3: VectorMemoryLoadOp::vlsseg4e16_v();
-                    0x4: VectorMemoryLoadOp::vlsseg5e16_v();
-                    0x5: VectorMemoryLoadOp::vlsseg6e16_v();
-                    0x6: VectorMemoryLoadOp::vlsseg7e16_v();
-                    0x7: VectorMemoryLoadOp::vlsseg8e16_v();
-                }
-                0x3: decode NF {
-                    0x0: VectorMemoryLoadOp::vloxei16_v();
-                    0x1: VectorMemoryLoadOp::vloxseg2ei16_v();
-                    0x2: VectorMemoryLoadOp::vloxseg3ei16_v();
-                    0x3: VectorMemoryLoadOp::vloxseg4ei16_v();
-                    0x4: VectorMemoryLoadOp::vloxseg5ei16_v();
-                    0x5: VectorMemoryLoadOp::vloxseg6ei16_v();
-                    0x6: VectorMemoryLoadOp::vloxseg7ei16_v();
-                    0x7: VectorMemoryLoadOp::vloxseg8ei16_v();
-                }
-            }
-            0x6: decode MOP {
-                0x0: decode NF {
-                    0x0: VectorMemoryLoadOp::vle32_v();
-                    0x1: VectorMemoryLoadOp::vlseg2e32_v();
-                    0x2: VectorMemoryLoadOp::vlseg3e32_v();
-                    0x3: VectorMemoryLoadOp::vlseg4e32_v();
-                    0x4: VectorMemoryLoadOp::vlseg5e32_v();
-                    0x5: VectorMemoryLoadOp::vlseg6e32_v();
-                    0x6: VectorMemoryLoadOp::vlseg7e32_v();
-                    0x7: VectorMemoryLoadOp::vlseg8e32_v();
-                }
-                0x1: decode NF {
-                    0x0: VectorMemoryLoadOp::vluxei32_v();
-                    0x1: VectorMemoryLoadOp::vluxseg2ei32_v();
-                    0x2: VectorMemoryLoadOp::vluxseg3ei32_v();
-                    0x3: VectorMemoryLoadOp::vluxseg4ei32_v();
-                    0x4: VectorMemoryLoadOp::vluxseg5ei32_v();
-                    0x5: VectorMemoryLoadOp::vluxseg6ei32_v();
-                    0x6: VectorMemoryLoadOp::vluxseg7ei32_v();
-                    0x7: VectorMemoryLoadOp::vluxseg8ei32_v();
-                }
-                0x2: decode NF {
-                    0x0: VectorMemoryLoadOp::vlse32_v();
-                    0x1: VectorMemoryLoadOp::vlsseg2e32_v();
-                    0x2: VectorMemoryLoadOp::vlsseg3e32_v();
-                    0x3: VectorMemoryLoadOp::vlsseg4e32_v();
-                    0x4: VectorMemoryLoadOp::vlsseg5e32_v();
-                    0x5: VectorMemoryLoadOp::vlsseg6e32_v();
-                    0x6: VectorMemoryLoadOp::vlsseg7e32_v();
-                    0x7: VectorMemoryLoadOp::vlsseg8e32_v();
-                }
-                0x3: decode NF {
-                    0x0: VectorMemoryLoadOp::vloxei32_v();
-                    0x1: VectorMemoryLoadOp::vloxseg2ei32_v();
-                    0x2: VectorMemoryLoadOp::vloxseg3ei32_v();
-                    0x3: VectorMemoryLoadOp::vloxseg4ei32_v();
-                    0x4: VectorMemoryLoadOp::vloxseg5ei32_v();
-                    0x5: VectorMemoryLoadOp::vloxseg6ei32_v();
-                    0x6: VectorMemoryLoadOp::vloxseg7ei32_v();
-                    0x7: VectorMemoryLoadOp::vloxseg8ei32_v();
-                }
-            }
-            0x7: decode MOP {
-                0x0: decode NF {
-                    0x0: VectorMemoryLoadOp::vle64_v();
-                    0x1: VectorMemoryLoadOp::vlseg2e64_v();
-                    0x2: VectorMemoryLoadOp::vlseg3e64_v();
-                    0x3: VectorMemoryLoadOp::vlseg4e64_v();
-                    0x4: VectorMemoryLoadOp::vlseg5e64_v();
-                    0x5: VectorMemoryLoadOp::vlseg6e64_v();
-                    0x6: VectorMemoryLoadOp::vlseg7e64_v();
-                    0x7: VectorMemoryLoadOp::vlseg8e64_v();
-                }
-                0x1: decode NF {
-                    0x0: VectorMemoryLoadOp::vluxei64_v();
-                    0x1: VectorMemoryLoadOp::vluxseg2ei64_v();
-                    0x2: VectorMemoryLoadOp::vluxseg3ei64_v();
-                    0x3: VectorMemoryLoadOp::vluxseg4ei64_v();
-                    0x4: VectorMemoryLoadOp::vluxseg5ei64_v();
-                    0x5: VectorMemoryLoadOp::vluxseg6ei64_v();
-                    0x6: VectorMemoryLoadOp::vluxseg7ei64_v();
-                    0x7: VectorMemoryLoadOp::vluxseg8ei64_v();
-                }
-                0x2: decode NF {
-                    0x0: VectorMemoryLoadOp::vlse64_v();
-                    0x1: VectorMemoryLoadOp::vlsseg2e64_v();
-                    0x2: VectorMemoryLoadOp::vlsseg3e64_v();
-                    0x3: VectorMemoryLoadOp::vlsseg4e64_v();
-                    0x4: VectorMemoryLoadOp::vlsseg5e64_v();
-                    0x5: VectorMemoryLoadOp::vlsseg6e64_v();
-                    0x6: VectorMemoryLoadOp::vlsseg7e64_v();
-                    0x7: VectorMemoryLoadOp::vlsseg8e64_v();
-                }
-                0x3: decode NF {
-                    0x0: VectorMemoryLoadOp::vloxei64_v();
-                    0x1: VectorMemoryLoadOp::vloxseg2ei64_v();
-                    0x2: VectorMemoryLoadOp::vloxseg3ei64_v();
-                    0x3: VectorMemoryLoadOp::vloxseg4ei64_v();
-                    0x4: VectorMemoryLoadOp::vloxseg5ei64_v();
-                    0x5: VectorMemoryLoadOp::vloxseg6ei64_v();
-                    0x6: VectorMemoryLoadOp::vloxseg7ei64_v();
-                    0x7: VectorMemoryLoadOp::vloxseg8ei64_v();
+                0x7: decode MOP {
+                    0x0: decode NF {
+                        0x0: vle64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x1: vlseg2e64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x2: vlseg3e64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x3: vlseg4e64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x4: vlseg5e64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x5: vlseg6e64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x6: vlseg7e64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x7: vlseg8e64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                    }
+                    0x1: decode NF {
+                        0x0: vluxei64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x1: vluxseg2ei64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x2: vluxseg3ei64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x3: vluxseg4ei64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x4: vluxseg5ei64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x5: vluxseg6ei64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x6: vluxseg7ei64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x7: vluxseg8ei64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                    }
+                    0x2: decode NF {
+                        0x0: vlse64_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x1: vlsseg2e64_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x2: vlsseg3e64_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x3: vlsseg4e64_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x4: vlsseg5e64_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x5: vlsseg6e64_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x6: vlsseg7e64_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x7: vlsseg8e64_v({{Rs1,Rs2}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                    }
+                    0x3: decode NF {
+                        0x0: vloxei64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x1: vloxseg2ei64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x2: vloxseg3ei64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x3: vloxseg4ei64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x4: vloxseg5ei64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x5: vloxseg6ei64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x6: vloxseg7ei64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                        0x7: vloxseg8ei64_v({{Rs1}},
+                            VectorMemoryLoadOp, IsLoad, IsVector);
+                    }
                 }
             }
         }
@@ -691,172 +821,302 @@ decode QUADRANT default Unknown::unknown() {
                     Mem_ud = Fs2_bits;
                 }}, inst_flags=FloatMemWriteOp);
             }
-            0x0: decode MOP {
-                0x0: decode NF {
-                    0x0: VectorMemoryStoreOp::vse8_v();
-                    0x1: VectorMemoryStoreOp::vsseg2e8_v();
-                    0x2: VectorMemoryStoreOp::vsseg3e8_v();
-                    0x3: VectorMemoryStoreOp::vsseg4e8_v();
-                    0x4: VectorMemoryStoreOp::vsseg5e8_v();
-                    0x5: VectorMemoryStoreOp::vsseg6e8_v();
-                    0x6: VectorMemoryStoreOp::vsseg7e8_v();
-                    0x7: VectorMemoryStoreOp::vsseg8e8_v();
+            format VectorMemoryStoreOp {
+                0x0: decode MOP {
+                    0x0: decode NF {
+                        0x0: vse8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x1: vsseg2e8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x2: vsseg3e8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x3: vsseg4e8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x4: vsseg5e8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x5: vsseg6e8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x6: vsseg7e8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x7: vsseg8e8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                    }
+                    0x1: decode NF {
+                        0x0: vsuxei8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x1: vsuxseg2ei8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x2: vsuxseg3ei8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x3: vsuxseg4ei8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x4: vsuxseg5ei8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x5: vsuxseg6ei8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x6: vsuxseg7ei8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x7: vsuxseg8ei8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                    }
+                    0x2: decode NF {
+                        0x0: vsse8_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x1: vssseg2e8_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x2: vssseg3e8_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x3: vssseg4e8_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x4: vssseg5e8_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x5: vssseg6e8_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x6: vssseg7e8_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x7: vssseg8e8_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                    }
+                    0x3: decode NF {
+                        0x0: vsoxei8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x1: vsoxseg2ei8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x2: vsoxseg3ei8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x3: vsoxseg4ei8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x4: vsoxseg5ei8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x5: vsoxseg6ei8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x6: vsoxseg7ei8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x7: vsoxseg8ei8_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                    }
                 }
-                0x1: decode NF {
-                    0x0: VectorMemoryStoreOp::vsuxei8_v();
-                    0x1: VectorMemoryStoreOp::vsuxseg2ei8_v();
-                    0x2: VectorMemoryStoreOp::vsuxseg3ei8_v();
-                    0x3: VectorMemoryStoreOp::vsuxseg4ei8_v();
-                    0x4: VectorMemoryStoreOp::vsuxseg5ei8_v();
-                    0x5: VectorMemoryStoreOp::vsuxseg6ei8_v();
-                    0x6: VectorMemoryStoreOp::vsuxseg7ei8_v();
-                    0x7: VectorMemoryStoreOp::vsuxseg8ei8_v();
+                0x5: decode MOP {
+                    0x0: decode NF {
+                        0x0: vse16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x1: vsseg2e16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x2: vsseg3e16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x3: vsseg4e16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x4: vsseg5e16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x5: vsseg6e16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x6: vsseg7e16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x7: vsseg8e16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                    }
+                    0x1: decode NF {
+                        0x0: vsuxei16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x1: vsuxseg2ei16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x2: vsuxseg3ei16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x3: vsuxseg4ei16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x4: vsuxseg5ei16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x5: vsuxseg6ei16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x6: vsuxseg7ei16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x7: vsuxseg8ei16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                    }
+                    0x2: decode NF {
+                        0x0: vsse16_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x1: vssseg2e16_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x2: vssseg3e16_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x3: vssseg4e16_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x4: vssseg5e16_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x5: vssseg6e16_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x6: vssseg7e16_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x7: vssseg8e16_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                    }
+                    0x3: decode NF {
+                        0x0: vsoxei16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x1: vsoxseg2ei16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x2: vsoxseg3ei16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x3: vsoxseg4ei16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x4: vsoxseg5ei16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x5: vsoxseg6ei16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x6: vsoxseg7ei16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x7: vsoxseg8ei16_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                    }
                 }
-                0x2: decode NF {
-                    0x0: VectorMemoryStoreOp::vsse8_v();
-                    0x1: VectorMemoryStoreOp::vssseg2e8_v();
-                    0x2: VectorMemoryStoreOp::vssseg3e8_v();
-                    0x3: VectorMemoryStoreOp::vssseg4e8_v();
-                    0x4: VectorMemoryStoreOp::vssseg5e8_v();
-                    0x5: VectorMemoryStoreOp::vssseg6e8_v();
-                    0x6: VectorMemoryStoreOp::vssseg7e8_v();
-                    0x7: VectorMemoryStoreOp::vssseg8e8_v();
+                0x6: decode MOP {
+                    0x0: decode NF {
+                        0x0: vse32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x1: vsseg2e32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x2: vsseg3e32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x3: vsseg4e32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x4: vsseg5e32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x5: vsseg6e32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x6: vsseg7e32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x7: vsseg8e32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                    }
+                    0x1: decode NF {
+                        0x0: vsuxei32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x1: vsuxseg2ei32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x2: vsuxseg3ei32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x3: vsuxseg4ei32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x4: vsuxseg5ei32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x5: vsuxseg6ei32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x6: vsuxseg7ei32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x7: vsuxseg8ei32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                    }
+                    0x2: decode NF {
+                        0x0: vsse32_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x1: vssseg2e32_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x2: vssseg3e32_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x3: vssseg4e32_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x4: vssseg5e32_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x5: vssseg6e32_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x6: vssseg7e32_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x7: vssseg8e32_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                    }
+                    0x3: decode NF {
+                        0x0: vsoxei32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x1: vsoxseg2ei32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x2: vsoxseg3ei32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x3: vsoxseg4ei32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x4: vsoxseg5ei32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x5: vsoxseg6ei32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x6: vsoxseg7ei32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x7: vsoxseg8ei32_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                    }
                 }
-                0x3: decode NF {
-                    0x0: VectorMemoryStoreOp::vsoxei8_v();
-                    0x1: VectorMemoryStoreOp::vsoxseg2ei8_v();
-                    0x2: VectorMemoryStoreOp::vsoxseg3ei8_v();
-                    0x3: VectorMemoryStoreOp::vsoxseg4ei8_v();
-                    0x4: VectorMemoryStoreOp::vsoxseg5ei8_v();
-                    0x5: VectorMemoryStoreOp::vsoxseg6ei8_v();
-                    0x6: VectorMemoryStoreOp::vsoxseg7ei8_v();
-                    0x7: VectorMemoryStoreOp::vsoxseg8ei8_v();
-                }
-            }
-            0x5: decode MOP {
-                0x0: decode NF {
-                    0x0: VectorMemoryStoreOp::vse16_v();
-                    0x1: VectorMemoryStoreOp::vsseg2e16_v();
-                    0x2: VectorMemoryStoreOp::vsseg3e16_v();
-                    0x3: VectorMemoryStoreOp::vsseg4e16_v();
-                    0x4: VectorMemoryStoreOp::vsseg5e16_v();
-                    0x5: VectorMemoryStoreOp::vsseg6e16_v();
-                    0x6: VectorMemoryStoreOp::vsseg7e16_v();
-                    0x7: VectorMemoryStoreOp::vsseg8e16_v();
-                }
-                0x1: decode NF {
-                    0x0: VectorMemoryStoreOp::vsuxei16_v();
-                    0x1: VectorMemoryStoreOp::vsuxseg2ei16_v();
-                    0x2: VectorMemoryStoreOp::vsuxseg3ei16_v();
-                    0x3: VectorMemoryStoreOp::vsuxseg4ei16_v();
-                    0x4: VectorMemoryStoreOp::vsuxseg5ei16_v();
-                    0x5: VectorMemoryStoreOp::vsuxseg6ei16_v();
-                    0x6: VectorMemoryStoreOp::vsuxseg7ei16_v();
-                    0x7: VectorMemoryStoreOp::vsuxseg8ei16_v();
-                }
-                0x2: decode NF {
-                    0x0: VectorMemoryStoreOp::vsse16_v();
-                    0x1: VectorMemoryStoreOp::vssseg2e16_v();
-                    0x2: VectorMemoryStoreOp::vssseg3e16_v();
-                    0x3: VectorMemoryStoreOp::vssseg4e16_v();
-                    0x4: VectorMemoryStoreOp::vssseg5e16_v();
-                    0x5: VectorMemoryStoreOp::vssseg6e16_v();
-                    0x6: VectorMemoryStoreOp::vssseg7e16_v();
-                    0x7: VectorMemoryStoreOp::vssseg8e16_v();
-                }
-                0x3: decode NF {
-                    0x0: VectorMemoryStoreOp::vsoxei16_v();
-                    0x1: VectorMemoryStoreOp::vsoxseg2ei16_v();
-                    0x2: VectorMemoryStoreOp::vsoxseg3ei16_v();
-                    0x3: VectorMemoryStoreOp::vsoxseg4ei16_v();
-                    0x4: VectorMemoryStoreOp::vsoxseg5ei16_v();
-                    0x5: VectorMemoryStoreOp::vsoxseg6ei16_v();
-                    0x6: VectorMemoryStoreOp::vsoxseg7ei16_v();
-                    0x7: VectorMemoryStoreOp::vsoxseg8ei16_v();
-                }
-            }
-            0x6: decode MOP {
-                0x0: decode NF {
-                    0x0: VectorMemoryStoreOp::vse32_v();
-                    0x1: VectorMemoryStoreOp::vsseg2e32_v();
-                    0x2: VectorMemoryStoreOp::vsseg3e32_v();
-                    0x3: VectorMemoryStoreOp::vsseg4e32_v();
-                    0x4: VectorMemoryStoreOp::vsseg5e32_v();
-                    0x5: VectorMemoryStoreOp::vsseg6e32_v();
-                    0x6: VectorMemoryStoreOp::vsseg7e32_v();
-                    0x7: VectorMemoryStoreOp::vsseg8e32_v();
-                }
-                0x1: decode NF {
-                    0x0: VectorMemoryStoreOp::vsuxei32_v();
-                    0x1: VectorMemoryStoreOp::vsuxseg2ei32_v();
-                    0x2: VectorMemoryStoreOp::vsuxseg3ei32_v();
-                    0x3: VectorMemoryStoreOp::vsuxseg4ei32_v();
-                    0x4: VectorMemoryStoreOp::vsuxseg5ei32_v();
-                    0x5: VectorMemoryStoreOp::vsuxseg6ei32_v();
-                    0x6: VectorMemoryStoreOp::vsuxseg7ei32_v();
-                    0x7: VectorMemoryStoreOp::vsuxseg8ei32_v();
-                }
-                0x2: decode NF {
-                    0x0: VectorMemoryStoreOp::vsse32_v();
-                    0x1: VectorMemoryStoreOp::vssseg2e32_v();
-                    0x2: VectorMemoryStoreOp::vssseg3e32_v();
-                    0x3: VectorMemoryStoreOp::vssseg4e32_v();
-                    0x4: VectorMemoryStoreOp::vssseg5e32_v();
-                    0x5: VectorMemoryStoreOp::vssseg6e32_v();
-                    0x6: VectorMemoryStoreOp::vssseg7e32_v();
-                    0x7: VectorMemoryStoreOp::vssseg8e32_v();
-                }
-                0x3: decode NF {
-                    0x0: VectorMemoryStoreOp::vsoxei32_v();
-                    0x1: VectorMemoryStoreOp::vsoxseg2ei32_v();
-                    0x2: VectorMemoryStoreOp::vsoxseg3ei32_v();
-                    0x3: VectorMemoryStoreOp::vsoxseg4ei32_v();
-                    0x4: VectorMemoryStoreOp::vsoxseg5ei32_v();
-                    0x5: VectorMemoryStoreOp::vsoxseg6ei32_v();
-                    0x6: VectorMemoryStoreOp::vsoxseg7ei32_v();
-                    0x7: VectorMemoryStoreOp::vsoxseg8ei32_v();
-                }
-            }
-            0x7: decode MOP {
-                0x0: decode NF {
-                    0x0: VectorMemoryStoreOp::vse64_v();
-                    0x1: VectorMemoryStoreOp::vsseg2e64_v();
-                    0x2: VectorMemoryStoreOp::vsseg3e64_v();
-                    0x3: VectorMemoryStoreOp::vsseg4e64_v();
-                    0x4: VectorMemoryStoreOp::vsseg5e64_v();
-                    0x5: VectorMemoryStoreOp::vsseg6e64_v();
-                    0x6: VectorMemoryStoreOp::vsseg7e64_v();
-                    0x7: VectorMemoryStoreOp::vsseg8e64_v();
-                }
-                0x1: decode NF {
-                    0x0: VectorMemoryStoreOp::vsuxei64_v();
-                    0x1: VectorMemoryStoreOp::vsuxseg2ei64_v();
-                    0x2: VectorMemoryStoreOp::vsuxseg3ei64_v();
-                    0x3: VectorMemoryStoreOp::vsuxseg4ei64_v();
-                    0x4: VectorMemoryStoreOp::vsuxseg5ei64_v();
-                    0x5: VectorMemoryStoreOp::vsuxseg6ei64_v();
-                    0x6: VectorMemoryStoreOp::vsuxseg7ei64_v();
-                    0x7: VectorMemoryStoreOp::vsuxseg8ei64_v();
-                }
-                0x2: decode NF {
-                    0x0: VectorMemoryStoreOp::vsse64_v();
-                    0x1: VectorMemoryStoreOp::vssseg2e64_v();
-                    0x2: VectorMemoryStoreOp::vssseg3e64_v();
-                    0x3: VectorMemoryStoreOp::vssseg4e64_v();
-                    0x4: VectorMemoryStoreOp::vssseg5e64_v();
-                    0x5: VectorMemoryStoreOp::vssseg6e64_v();
-                    0x6: VectorMemoryStoreOp::vssseg7e64_v();
-                    0x7: VectorMemoryStoreOp::vssseg8e64_v();
-                }
-                0x3: decode NF {
-                    0x0: VectorMemoryStoreOp::vsoxei64_v();
-                    0x1: VectorMemoryStoreOp::vsoxseg2ei64_v();
-                    0x2: VectorMemoryStoreOp::vsoxseg3ei64_v();
-                    0x3: VectorMemoryStoreOp::vsoxseg4ei64_v();
-                    0x4: VectorMemoryStoreOp::vsoxseg5ei64_v();
-                    0x5: VectorMemoryStoreOp::vsoxseg6ei64_v();
-                    0x6: VectorMemoryStoreOp::vsoxseg7ei64_v();
-                    0x7: VectorMemoryStoreOp::vsoxseg8ei64_v();
+                0x7: decode MOP {
+                    0x0: decode NF {
+                        0x0: vse64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x1: vsseg2e64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x2: vsseg3e64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x3: vsseg4e64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x4: vsseg5e64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x5: vsseg6e64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x6: vsseg7e64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x7: vsseg8e64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                    }
+                    0x1: decode NF {
+                        0x0: vsuxei64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x1: vsuxseg2ei64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x2: vsuxseg3ei64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x3: vsuxseg4ei64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x4: vsuxseg5ei64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x5: vsuxseg6ei64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x6: vsuxseg7ei64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x7: vsuxseg8ei64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                    }
+                    0x2: decode NF {
+                        0x0: vsse64_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x1: vssseg2e64_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x2: vssseg3e64_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x3: vssseg4e64_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x4: vssseg5e64_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x5: vssseg6e64_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x6: vssseg7e64_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x7: vssseg8e64_v({{Rs1,Rs2}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                    }
+                    0x3: decode NF {
+                        0x0: vsoxei64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x1: vsoxseg2ei64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x2: vsoxseg3ei64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x3: vsoxseg4ei64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x4: vsoxseg5ei64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x5: vsoxseg6ei64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x6: vsoxseg7ei64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                        0x7: vsoxseg8ei64_v({{Rs1}},
+                            VectorMemoryStoreOp, IsStore, IsVector);
+                    }
                 }
             }
         }

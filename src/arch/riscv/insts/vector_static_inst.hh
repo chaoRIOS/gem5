@@ -39,6 +39,8 @@
 #include "arch/riscv/regs/misc.hh"
 #include "arch/riscv/types.hh"
 #include "arch/riscv/insts/static_inst.hh"
+#include "base/bitfield.hh"
+
 // #include "cpu/static_inst.hh"
 
 namespace gem5
@@ -151,6 +153,17 @@ public:
       virtual bool vm() const = 0;
       /* mop field - indicates the memory addressing mode*/
       virtual uint8_t mop() const = 0;
+      /* lumop field - additional fields encoding variants
+       of unit-stride load instructions */
+      virtual uint8_t lumop() const = 0;
+      /* sumop field - additional fields encoding variants
+       of unit-stride store instructions */
+      virtual uint8_t sumop() const = 0;
+      /* mew field - extended memory element width */
+      virtual uint8_t mew() const = 0;
+      /* nf field - specifies the number of fields in each
+       segment, for segment load/stores */
+      virtual uint8_t nf() const = 0;
       /* width field - specifies size of memory elements,
       and distinguishes from FP scalar*/
       virtual uint32_t width() const = 0;
@@ -184,7 +197,7 @@ class RiscvVectorInsn : public VectorStaticInst
   virtual std::string generateDisassembly(Addr pc,
           const Loader::SymbolTable *symtab) const = 0;
 
-  uint32_t bits() { return b; }
+  // uint32_t bits() { return b; }
 
   uint32_t opcode()          const { return x(0, 7); }
 
@@ -198,7 +211,13 @@ class RiscvVectorInsn : public VectorStaticInst
 
   bool vm()                  const  override   { return x(25, 1); }
 
-  uint8_t mop()              const override { return x(26, 3); }
+  uint8_t mop()              const override { return x(26, 2); }
+  uint8_t lumop()              const override { return x(20, 5); }
+  uint8_t sumop()              const override { return x(20, 5); }
+  uint8_t mew()              const override { return x(28, 1); }
+  uint8_t nf()              const override { return x(29, 3); }
+  uint32_t width()           const override { return x(12, 3); }
+
 
   RegIndex vs1()             const override { return (RegIndex)x(15, 5); }
   RegIndex vs2()             const override { return (RegIndex)x(20, 5); }
@@ -274,7 +293,6 @@ class RiscvVectorInsn : public VectorStaticInst
 
   bool isVectorInst()        const { return isVectorInstArith() || isVectorInstMem() || isVecConfig() || isVectorRegisterMove() || isVectorIntegerWidening(); }
 
-  uint32_t width()           const override { return x(12, 3); }
 
 private:
   const uint32_t b;

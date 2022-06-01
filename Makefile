@@ -31,7 +31,7 @@ CPU_PROFILE_DUMP_PATH=perf.pdf~
 # 'rv64uv-p-vsxseg',
 # 'rv64uv-p-vsxei',
 
-WORKLOAD_PATH=/opt/cputest/rvv-test64/rv64uv-p-vle
+WORKLOAD_PATH=/opt/cputest/rvv-test64/rv64uv-p-vlse
 # WORKLOAD_PATH=isa/rv64ui-p-add
 # WORKLOAD_PATH=$$HOME/work/talon-rvv/my_rvv.elf
 # WORKLOAD_PATH=$$HOME/work/rvv-intrinsic-doc/examples/profile.out
@@ -45,12 +45,14 @@ perf:
 perf_dump:
 	pprof $(GEM5_RUN_PATH) $(CPU_PROFILE_PATH) --pdf > $(CPU_PROFILE_DUMP_PATH)
 
-scalar_flag=Exec,CpuVectorIssue,MMU,TLB,TLBVerbose,Registers,RiscvMisc,MinorScoreboard
-vector_flag=VectorEngineInfo#,VectorEngine,VectorLane,VectorInst,VectorEngineInterface,VectorRename,VectorMemUnit,InstQueue,Datapath,MemUnitReadTiming
+scalar_flag=Exec,CpuVectorIssue,Registers#,MinorScoreboard,MinorExecute,Decode,Fetch#,MinorTrace,MinorCPU#,MMU,TLB,TLBVerbose,RiscvMisc
+vector_flag=VectorEngineInfo,VectorEngine,VectorLane,VectorInst,VectorEngineInterface,VectorRename,VectorMemUnit,InstQueue,Datapath,MemUnitReadTiming
 
 flag=$(scalar_flag),$(vector_flag)
 debug:
-	$(GEM5_RUN_PATH) --debug-flag=$(flag) $(CONFIG_PATH) --cmd=$(workload)
+	# gdb \
+	$(GEM5_RUN_PATH) \
+	--debug-flag=$(flag) $(CONFIG_PATH) --cmd=$(workload)
 
 rebuild:
 	# scons PYTHON_CONFIG=python3-config $(GEM5_BUILD_PATH) -j1
