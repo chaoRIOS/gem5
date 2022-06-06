@@ -278,7 +278,7 @@ InstQueue::evaluate()
             src3 = Mem_Instruction->dyn_insn->get_renamed_src3();
             src2 = Mem_Instruction->dyn_insn->get_renamed_src2();
             mop = Mem_Instruction->insn.mop();
-            indexed_op = (mop == 3) || (mop == 7);
+            indexed_op = (mop == 1) || (mop == 3);
 
             // If the instruction is indexed we stop looking for the next
             // instructions, check dependencies for indexed is too expensive
@@ -304,12 +304,15 @@ InstQueue::evaluate()
             src_ready = (isStore && !indexed_op) ?
                 vectorwrapper->vector_reg_validbit->get_preg_valid_bit(src3) :
                 (isStore && indexed_op) ?
-                vectorwrapper->vector_reg_validbit->get_preg_valid_bit(src3) &&
-                vectorwrapper->vector_reg_validbit->get_preg_valid_bit(src2) :
-                (isLoad && !indexed_op) ?
-                !Mem_Instruction->issued && !ambiguous_dependency :
-                (isLoad && indexed_op) ?
-                vectorwrapper->vector_reg_validbit->get_preg_valid_bit(src2):0;
+                    vectorwrapper->vector_reg_validbit->
+                    get_preg_valid_bit(src3) &&
+                    vectorwrapper->vector_reg_validbit->
+                    get_preg_valid_bit(src2) :
+                    (isLoad && !indexed_op) ?
+                        !Mem_Instruction->issued && !ambiguous_dependency :
+                        (isLoad && indexed_op) ?
+                            vectorwrapper->vector_reg_validbit->
+                            get_preg_valid_bit(src2):0;
 
             if (src_ready) {
                 queue_slot = i;
@@ -367,7 +370,7 @@ InstQueue::printMemInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_d
 {
 #ifdef DEBUG
     uint64_t pc = insn.getPC();
-    bool indexed = (insn.mop() ==3);
+    bool indexed = ((insn.mop() ==1) || (insn.mop() ==3));
     bool masked_op = (insn.vm()==0);
 
     uint32_t PDst = vector_dyn_insn->get_renamed_dst();

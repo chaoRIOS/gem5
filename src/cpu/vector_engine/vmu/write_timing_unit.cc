@@ -111,8 +111,6 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
 
     uint64_t SIZE = DST_SIZE;
 
-    bool vindexed = (mop == 3);
-
     // This function tries to get up to 'get_up_to' elements from the front of
     // the input queue. if there are less elements, it returns all of them
     // if fn() is successfull, try_write deletes the data therefore, fn()
@@ -168,8 +166,8 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
         };
     };
 
-    writeFunction = [try_write,location,fin,xc,vaddr,vstride,vindexed,
-        on_item_store,SIZE,count,this](void) ->bool
+    writeFunction = [try_write,location,fin,xc,vaddr,vstride,
+        on_item_store,SIZE,mop,count,this](void) ->bool
     {
         //scratch and cache could use different line sizes
         uint64_t line_size;
@@ -179,13 +177,20 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
             default: panic("invalid location"); break;
         }
 
+        // Note: VRF reader is also passed with mop=0
+        bool unit_strided = (mop == 0);
+        bool indexed_unordered = (mop == 1);
+        bool strided = (mop == 2);
+        bool indexed_ordered = (mop == 3);
+        bool indexed = indexed_unordered || indexed_ordered;
+
         uint64_t line_addr;
         //uint8_t items_in_line;
         uint64_t addr;
         uint64_t i = this->vecIndex;
         uint64_t consec_items;
 
-        if (!vindexed) //no indexed operation
+        if (unit_strided || strided) //no indexed operation
         {
             //we can always write 1 element
             addr = vaddr + SIZE*(vstride*i);
@@ -203,7 +208,10 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
                     break;
                 }
             }
-        } else { //indexed operation
+        } else if (indexed_ordered) {
+            //
+
+        } else if (indexed_unordered) {
 
             uint64_t can_get = this->AddrsQ.size();
             if (!can_get) {
@@ -238,7 +246,7 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
         DPRINTF(MemUnitWriteTiming,"getting data to write %d items at %#x\n",
             consec_items, addr);
 
-        return try_write(consec_items, [fin,location,xc,addr,SIZE,vindexed,
+        return try_write(consec_items, [fin,location,xc,addr,SIZE,indexed,
             count,i,this](uint8_t * data, uint32_t items_ready) -> uint16_t
         {
             DPRINTF(MemUnitWriteTiming, "got %d items to write at %#x\n",
@@ -258,7 +266,7 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
             }
 
             if (success) {
-                if (vindexed) {
+                if (indexed) {
                     for (uint16_t j=0; j<items_ready; j++) {
                         this->AddrsQ.pop_front();
                         }

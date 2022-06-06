@@ -135,22 +135,57 @@ MemUnitReadTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
             default: panic("invalid location"); break;
         }
 
+        // Note: VRF reader is also passed with mop=0
+        bool unit_strided = (mop == 0);
+        bool indexed_unordered = (mop == 1);
+        bool strided = (mop == 2);
+        bool indexed_ordered = (mop == 3);
+        bool indexed = indexed_unordered || indexed_ordered;
+
+
         uint64_t line_addr;
         uint8_t items_in_line;
         uint64_t addr;
         uint64_t i = this->vecIndex;
 
-        if (mop != 3) //no indexed operation
-        {
+        if (unit_strided) {
             //we can always read the first item
-            addr = vaddr + SIZE*(i*vstride);
+            addr = vaddr + SIZE * i;
+            line_addr = addr - (addr % line_size);
+            line_offsets.push_back(addr % line_size);
+            DPRINTF(MemUnitReadTiming, "line_offsets.push_back %x\n",
+                addr % line_size);
+
+            items_in_line = 1;
+
+            //try to read more items in the same cache-line
+            for (uint8_t j=1; j<(line_size/SIZE) && (i+j)<count; ++j) {
+                uint64_t next_addr = vaddr + SIZE * (i + j);
+                uint64_t next_line_addr = next_addr - (next_addr % line_size);
+
+                if (next_line_addr == line_addr) {
+                    items_in_line += 1;
+                    line_offsets.push_back(next_addr % line_size);
+                    DPRINTF(MemUnitReadTiming, "line_offsets.push_back %x\n",
+                        next_addr % line_size);
+                } else {
+                    break;
+                }
+            }
+        } else if (strided) {
+            //we can always read the first item
+
+            // Note: strided instructions use rs2-byte stride
+            // so the addr stride should be the product of
+            // element index across rs2
+            addr = vaddr + (i * vstride);
             line_addr = addr - (addr % line_size);
             line_offsets.push_back(addr % line_size);
             items_in_line = 1;
 
             //try to read more items in the same cache-line
             for (uint8_t j=1; j<(line_size/SIZE) && (i+j)<count; ++j) {
-                uint64_t next_addr = vaddr + SIZE*((i+j)*vstride );
+                uint64_t next_addr = vaddr + ((i+j)*vstride );
                 uint64_t next_line_addr = next_addr - (next_addr % line_size);
 
                 if (next_line_addr == line_addr) {
@@ -160,7 +195,10 @@ MemUnitReadTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
                     break;
                 }
             }
-        } else { //indexed operation
+        } else if (indexed_ordered) {
+            //
+
+        } else if (indexed_unordered) {
 
             uint64_t can_get = this->dataQ.size();
             if (!can_get) {
@@ -241,7 +279,7 @@ MemUnitReadTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
                 this->channel, fin(i, line_offsets));
         }
         if (success) {
-            if (mop == 3) {
+            if (indexed) {
                 for (uint8_t j=0; j<items_in_line; j++) {
                     this->dataQ.pop_front();
                     }

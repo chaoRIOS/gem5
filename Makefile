@@ -46,7 +46,7 @@ perf_dump:
 	pprof $(GEM5_RUN_PATH) $(CPU_PROFILE_PATH) --pdf > $(CPU_PROFILE_DUMP_PATH)
 
 scalar_flag=Exec,CpuVectorIssue,Registers#,MinorScoreboard,MinorExecute,Decode,Fetch#,MinorTrace,MinorCPU#,MMU,TLB,TLBVerbose,RiscvMisc
-vector_flag=VectorEngineInfo,VectorEngine,VectorLane,VectorInst,VectorEngineInterface,VectorRename,VectorMemUnit,InstQueue,Datapath,MemUnitReadTiming
+vector_flag=VecRegs,VectorEngineInfo,VectorEngine,VectorLane,VectorInst,VectorEngineInterface,VectorRename,VectorMemUnit,InstQueue,Datapath,MemUnitReadTiming,MemUnitWriteTiming,InstQueueInst,InstQueueRenInst,VectorRegister
 
 flag=$(scalar_flag),$(vector_flag)
 debug:

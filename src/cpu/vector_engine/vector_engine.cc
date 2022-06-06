@@ -212,7 +212,7 @@ VectorEngine::printMemInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vecto
 {
 #ifdef DEBUG
     uint64_t pc = insn.getPC();
-    bool indexed = (insn.mop() ==3);
+    bool indexed = ((insn.mop() ==1) || (insn.mop() ==3));
 
     uint32_t PDst = vector_dyn_insn->get_renamed_dst();
     uint32_t POldDst = vector_dyn_insn->get_renamed_old_dst();
@@ -382,7 +382,7 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
     vi_op = (insn.func3()==3);
 
     uint8_t mop = insn.mop();
-    bool indexed = (mop ==3);
+    bool indexed = ((insn.mop() ==1) || (insn.mop() ==3));
 
     if (insn.isVectorInstMem()) {
         // TODO: maked memory operations are not implemented
@@ -891,8 +891,15 @@ VectorEngine::writeVectorReg(Addr addr, uint8_t *data,
     uint32_t size, uint8_t channel,
     std::function<void(void)> callback)
 {
-    //DPRINTF(VectorEngine, "writeVectorReg got %d bytes to write at %#x\n"
-    //    ,size, addr);
+    DPRINTF(VectorEngine, "writeVectorReg got %d bytes to write at %#x\n"
+       ,size, addr);
+
+    // for (auto i = 0; i < size; i++)
+    // {
+    //     DPRINTF(VectorEngine, "[%d] %x\n", i, data[i]);
+    // }
+
+
     uint64_t id = (uniqueReqId++);
     Vector_ReqState *pending = new Vector_W_ReqState(id, callback);
     vector_PendingReqQ.push_back(pending);
