@@ -146,14 +146,19 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
     uint64_t mvl_elem =
         vectorwrapper->vector_config->get_max_vector_length_elem(vtype);
 
+    if (mvl_elem < vl_count) {
+        panic("Vector register width %d is insufficient "
+        "for vl(%d) * sew(%d)", mvl_bits, vl_count, vsew);
+    }
+
     if (insn.isLoad())
     {
         
         mem_addr_dest = (uint64_t)dyn_insn->get_renamed_dst() * mvl_bits / 8;
         location0 = 1; // 1 Vecor Register
 
-        DPRINTF(VectorMemUnit,"Vector Load %s to Register
-            v%d @ %#010x, vl:%lu\n",
+        DPRINTF(VectorMemUnit,"Vector Load %s to Register "
+            "v%d @ %#010x, vl:%lu\n",
             mem_mop.str(),dyn_insn -> get_renamed_dst(),
             (uint64_t)dyn_insn-> get_renamed_dst()
             * mvl_bits/8, vl_count);
@@ -178,6 +183,33 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
 
         if (indexed)
         {
+            uint8_t INDEX_SIZE = 0;
+            switch (insn.func3())
+            {
+                case 0:
+                    // ei8
+                    INDEX_SIZE = 1;
+                    break;
+
+                case 5:
+                    // ei16
+                    INDEX_SIZE = 2;
+                    break;
+
+                case 6:
+                    // ei32
+                    INDEX_SIZE = 4;
+                    break;
+
+                case 7:
+                    // ei64
+                    INDEX_SIZE = 8;
+                    break;
+
+                default:
+                    break;
+            }
+
             uint64_t mem_addr_index = (uint64_t)dyn_insn->
                 get_renamed_src2() * mvl_bits/8;
 
@@ -185,28 +217,29 @@ void VectorMemUnit::issue(VectorEngine& vector_wrapper,
                 "0x%lx\n", dyn_insn->get_renamed_src2(), mem_addr_index );
 
             memReader_addr->initialize(vector_wrapper,vl_count,
-            DST_SIZE,mem_addr_index, 0,1,location0,xc,
-            [DST_SIZE,this](uint8_t*data, uint8_t size, bool done)
+            INDEX_SIZE,mem_addr_index, 0,1,location0,xc,
+            [INDEX_SIZE,this](uint8_t*data, uint8_t size, bool done)
             {
-                uint8_t *ndata = new uint8_t[DST_SIZE];
-                memcpy(ndata, data, DST_SIZE);
-                if (DST_SIZE==8) {
+                uint8_t *ndata = new uint8_t[INDEX_SIZE];
+                memcpy(ndata, data, INDEX_SIZE);
+                if (INDEX_SIZE==8) {
                     DPRINTF(VectorMemUnit,"queue Data index addr 0x%x \n",
                         *(uint64_t *) ndata );
                 }
-                if (DST_SIZE==4) {
+                if (INDEX_SIZE==4) {
                     DPRINTF(VectorMemUnit,"queue Data index addr 0x%x \n",
                         *(uint32_t *) ndata, done);
                 }
-                if (DST_SIZE==2) {
+                if (INDEX_SIZE==2) {
                     DPRINTF(VectorMemUnit,"queue Data index addr 0x%x \n",
                         *(uint16_t *) ndata );
                 }
-                if (DST_SIZE==1) {
+                if (INDEX_SIZE==1) {
                     DPRINTF(VectorMemUnit,"queue Data index addr 0x%x \n",
                         *(uint8_t *) ndata );
                 }
                 this->memReader->queueData(ndata);
+                this->memReader->setIndexWidth(INDEX_SIZE);
                 delete[] data;
             });
         }

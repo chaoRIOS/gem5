@@ -81,6 +81,8 @@ MemUnitWriteTiming::queueData(uint8_t *data)
 {
     assert(running && !done);
     dataQ.push_back(data);
+    DPRINTF(MemUnitWriteTiming, "writer pushing back %#x upto %d\n",
+    *data, dataQ.size());
 }
 
 void
@@ -106,6 +108,11 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
     assert(count > 0);
     assert(!dataQ.size());
     assert(!AddrsQ.size());
+
+
+    DPRINTF(MemUnitWriteTiming, "writer initialize with %d %d-byte elems\n",
+    count, DST_SIZE);
+
 
     vectorwrapper = &vector_wrapper;
 
@@ -140,6 +147,8 @@ MemUnitWriteTiming::initialize(VectorEngine& vector_wrapper, uint64_t count,
                 uint8_t * data = dataQ.front();
                 delete [] data;
                 dataQ.pop_front();
+                DPRINTF(MemUnitWriteTiming, "writer poping downto %d\n",
+                dataQ.size());
             }
             return true;
         } else {

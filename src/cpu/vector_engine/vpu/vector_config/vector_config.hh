@@ -36,6 +36,8 @@
 #include <deque>
 #include <functional>
 
+#include "arch/riscv/insts/vector_static_inst.hh"
+#include "arch/riscv/regs/misc.hh"
 #include "debug/VectorConfig.hh"
 #include "params/VectorConfig.hh"
 #include "sim/faults.hh"
@@ -61,7 +63,8 @@ public:
     VectorConfig(const VectorConfigParams &params);
     ~VectorConfig();
 
-    uint64_t reqAppVectorLength(uint64_t rvl, uint64_t vtype, bool r_mvl);
+    uint64_t reqAppVectorLength(uint64_t vl, uint64_t vl_old,
+      uint64_t rs1, uint64_t rd);
     uint64_t vector_length_in_bits(uint64_t vl, uint64_t vtype);
     uint64_t get_max_vector_length_elem(uint64_t vtype);
     uint64_t get_max_vector_length_bits(uint64_t vtype);
@@ -73,6 +76,10 @@ public:
     uint64_t get_vtype_lmul(uint64_t vtype);
     uint64_t get_vtype_sew(uint64_t vtype);
     uint64_t get_vtype_ediv(uint64_t vtype);
+
+    void handleVectorConfig(RiscvISA::VectorStaticInst *vinst,
+      ExecContextPtr& xc, uint64_t& vl, uint64_t& vtype);
+
 
 private:
     /* The maximum vector length in bits of one vector register (LMUL=1)*/

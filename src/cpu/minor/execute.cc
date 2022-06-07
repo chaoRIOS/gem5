@@ -1267,56 +1267,20 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
 
                     if (vector_insn->isVecConfig())
                     {
-                        bool vsetvl = (vector_insn->getName() =="vsetvl");
-                        bool vsetvli = (vector_insn->getName() =="vsetvli");
-                        bool vsetivli = (vector_insn->getName() =="vsetivli");
-                        uint64_t rvl = (!vsetivli) ? 
-                            xc->readIntRegOperand(vector_insn,0) :
-                            (uint64_t)vector_insn->imm5();
-                        uint64_t vtype = (vsetvl) ?
-                            xc->readIntRegOperand(vector_insn,1) : (vsetvli) ?
-                            (uint64_t)vector_insn->vtype11() :
-                            (uint64_t)vector_insn->vtype10();
-                        uint64_t gvl = cpu.ve_interface->reqAppVectorLength(
-                            rvl,vtype,(vector_insn->vs1()==0));
-
-                        DPRINTF(CpuVectorIssue,"vsetvl: %d, rvl: %d vtype: %d gvl: %d \n",vsetvl,rvl,vtype,gvl );
-
-                        xc->setMiscReg(RiscvISA::MISCREG_VL,gvl);
-                        xc->setMiscReg(RiscvISA::MISCREG_VTYPE,vtype);
-                        if (vector_insn->vd() != 0) {
-                            DPRINTF(CpuVectorIssue,"Setting register: %d ,"
-                                " with value : %d\n",vector_insn->vd(), gvl);
-                            xc->setIntRegOperand(vector_insn,0,gvl);
-                        }
-                        src1 = gvl;
-                        src2 = vtype;
+                        cpu.ve_interface->handleVectorConfig(vector_insn,
+                            xc, src1, src2);
                     }
                     else
                     {
-
-                        /*
-                        //bool vx_src = (vector_insn->func3()==4) || (vector_insn->func3()==6);
-                        bool vf_src = (vector_insn->func3()==5) && vector_insn->isVectorInstArith();
-                        //bool vi_src = (vector_insn->func3()==3);
-                        if ((vector_insn->func6()==0x10) && (vector_insn->vs2()==0) && vf_src) {
-                            DPRINTF(CpuVectorIssue,"%s\n", vector_insn->getName());
-                            src1 = xc->readFloatRegOperandBits(vector_insn,0);
-                        } else {
-                            src1 = (vf_src) ? xc->readFloatRegOperandBits(vector_insn,0) :
-                                xc->readIntRegOperand(vector_insn,0);
-                        }
-                        src2 = xc->readIntRegOperand(vector_insn,1);
-                        */
                         if (vector_insn->numSrcRegs() >= 1)
-                        {                            
+                        {
                             src1 = xc->readIntRegOperand(vector_insn,0);
                         }
                         if (vector_insn->numSrcRegs() >= 2)
                         {
                             src2 = xc->readIntRegOperand(vector_insn,1);
                         }
-                        
+
                     }
 
                     DPRINTF(CpuVectorIssue,"Sending vector isnt to the Vector"

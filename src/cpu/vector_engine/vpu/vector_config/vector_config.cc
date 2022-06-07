@@ -28,6 +28,7 @@
  * Author: Cristóbal Ramírez
  */
 
+
 #include "cpu/vector_engine/vpu/vector_config/vector_config.hh"
 
 #include <bitset>
@@ -39,6 +40,10 @@
 #include "params/VectorConfig.hh"
 #include "sim/faults.hh"
 #include "sim/sim_object.hh"
+
+using std::max;
+using std::min;
+
 namespace gem5
 {
 
@@ -58,12 +63,162 @@ VectorConfig::~VectorConfig()
 }
 
 uint64_t
-VectorConfig::reqAppVectorLength(uint64_t rvl, uint64_t vtype, bool r_mvl) {
-    uint32_t gvl  = 0;
-    uint32_t sew  =  get_vtype_sew(vtype);
-    uint32_t lmul = get_vtype_lmul(vtype);
-    gvl= lmul * max_vector_length/sew;
-    return (r_mvl) ? gvl:(rvl>gvl) ? gvl:rvl;
+VectorConfig::reqAppVectorLength(uint64_t vl, uint64_t vl_old,
+    uint64_t rs1, uint64_t rd) {
+
+    if (rs1 != 0) {
+        return vl;
+    } else if (rd != 0) {
+        return UINT32_MAX;
+    } else {
+        return vl_old;
+    }
+
+}
+
+void
+VectorConfig::handleVectorConfig(RiscvISA::VectorStaticInst *inst,
+    ExecContextPtr& xc, uint64_t& _vl, uint64_t& _vtype) {
+
+    bool vsetvl = (inst->func6() == 0x20);
+    bool vsetvli = (inst->func6() == 0x00);
+    bool vsetivli = (inst->func6() == 0x30);
+
+    uint64_t vl_old = xc->readMiscReg(RiscvISA::MISCREG_VL);
+    uint64_t vtype_old = xc->readMiscReg(RiscvISA::MISCREG_VTYPE);
+
+    uint64_t vl = 0;
+    uint64_t vtype = 0;
+
+    uint64_t sew = 0;
+    uint64_t lmul = 0;
+    uint64_t vlmax = 0;
+
+    uint64_t avl = 0;
+
+    uint64_t rs1 = inst->vs1();
+    uint64_t rd = inst->vd();
+
+
+    if (vsetvl) {
+        vl = xc->readIntRegOperand(inst, 0);
+        vtype = xc->readIntRegOperand(inst, 1);
+
+        sew = get_vtype_sew(vtype);
+        lmul = get_vtype_lmul(vtype);
+        vlmax = lmul * max_vector_length / sew;
+
+        avl = reqAppVectorLength(vl, vl_old, rs1, rd);
+
+        if (rs1 != 0) {
+            if (avl <= vlmax) {
+                vl = avl;
+            } else if (avl < 2*vlmax) {
+                vl = avl;
+                vl = min(max(vl, (uint64_t)ceil((float)avl/(float)2)), vlmax);
+            } else if (avl >= 2*vlmax) {
+                vl = vlmax;
+            }
+
+            _vl = vl;
+            _vtype = vtype;
+            xc->setMiscReg(RiscvISA::MISCREG_VL, vl);
+            xc->setMiscReg(RiscvISA::MISCREG_VTYPE, vtype);
+        } else if (rd != 0) {
+            vl = vlmax;
+            _vl = vl;
+            _vtype = vtype;
+            xc->setMiscReg(RiscvISA::MISCREG_VL, vl);
+            xc->setMiscReg(RiscvISA::MISCREG_VTYPE, vtype);
+        } else {
+            vl = vl_old;
+            _vl = vl;
+
+            if (((float)sew / (float)lmul) !=
+            ((float)get_vtype_sew(vtype_old) /
+            (float)get_vtype_lmul(vtype_old))) {
+                // set vill
+                vtype &= ~(UINT32_MAX >> 1);
+            }
+
+            // Not setting vl csr
+            _vtype = vtype;
+            xc->setMiscReg(RiscvISA::MISCREG_VTYPE, vtype);
+
+        }
+
+    } else if (vsetvli) {
+        vl = xc->readIntRegOperand(inst, 0);
+        vtype = (uint64_t)(inst->vtype11());
+
+        sew = get_vtype_sew(vtype);
+        lmul = get_vtype_lmul(vtype);
+        vlmax = lmul * max_vector_length / sew;
+
+        avl = reqAppVectorLength(vl, vl_old, rs1, rd);
+
+        if (rs1 != 0) {
+            if (avl <= vlmax) {
+                vl = avl;
+            } else if (avl < 2*vlmax) {
+                vl = avl;
+                vl = min(max(vl, (uint64_t)ceil((float)avl/(float)2)), vlmax);
+            } else if (avl >= 2*vlmax) {
+                vl = vlmax;
+            }
+
+            _vl = vl;
+            _vtype = vtype;
+            xc->setMiscReg(RiscvISA::MISCREG_VL, vl);
+            xc->setMiscReg(RiscvISA::MISCREG_VTYPE, vtype);
+        } else if (rd != 0) {
+            vl = vlmax;
+            _vl = vl;
+            _vtype = vtype;
+            xc->setMiscReg(RiscvISA::MISCREG_VL, vl);
+            xc->setMiscReg(RiscvISA::MISCREG_VTYPE, vtype);
+        } else {
+            vl = vl_old;
+            _vl = vl;
+
+            if (((float)sew / (float)lmul) !=
+            ((float)get_vtype_sew(vtype_old) /
+            (float)get_vtype_lmul(vtype_old))) {
+                // set vill
+                vtype &= ~(UINT32_MAX >> 1);
+            }
+
+            // Not setting vl csr
+            _vtype = vtype;
+            xc->setMiscReg(RiscvISA::MISCREG_VTYPE, vtype);
+
+        }
+
+    } else if (vsetivli) {
+        vl = (uint64_t)(inst->imm5());
+        vtype = (uint64_t)(inst->vtype10());
+
+        sew = get_vtype_sew(vtype);
+        lmul = get_vtype_lmul(vtype);
+        vlmax = lmul * max_vector_length / sew;
+
+        avl = vl;
+
+        _vl = vl;
+        _vtype = vtype;
+        xc->setMiscReg(RiscvISA::MISCREG_VL, vl);
+        xc->setMiscReg(RiscvISA::MISCREG_VTYPE, vtype);
+
+    } else {
+        panic("Illegal vector config instruction");
+    }
+
+    if (inst->vd() != 0) {
+        DPRINTF(VectorConfig,"Setting register: %d ,"
+            " with value : %d\n",inst->vd(), vl);
+        xc->setIntRegOperand(inst,0,vl);
+    }
+
 }
 
 uint64_t

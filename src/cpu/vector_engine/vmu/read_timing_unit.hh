@@ -63,6 +63,8 @@ public:
         uint64_t DST_SIZE,uint64_t mem_addr,uint8_t mop,uint64_t stride,
         bool location, ExecContextPtr& xc,
         std::function<void(uint8_t*,uint8_t,bool)> on_item_load);
+    void setIndexWidth(uint8_t width);
+    uint8_t getIndexWidth();
 
 private:
     //set by params
@@ -77,6 +79,9 @@ private:
     //modified by readFunction closure over time
     uint64_t vecIndex;
     VectorEngine* vectorwrapper;
+
+    // Width of index encoded by ei-x
+    uint8_t indexWidth;
 
 public:
     // Stat for number of cache lines read requested

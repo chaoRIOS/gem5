@@ -42,7 +42,6 @@
 #include "arch/riscv/insts/vector_static_inst.hh"
 #include "base/statistics.hh"
 #include "base/types.hh"
-// #include "cpu/minor/exec_context.hh"
 #include "cpu/simple_thread.hh"
 #include "cpu/translation.hh"
 #include "cpu/vector_engine/packet.hh"

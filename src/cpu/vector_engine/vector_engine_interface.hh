@@ -40,7 +40,6 @@
 #include "arch/riscv/insts/vector_static_inst.hh"
 #include "base/statistics.hh"
 #include "base/types.hh"
-// #include "cpu/minor/exec_context.hh"
 #include "cpu/vector_engine/vector_engine.hh"
 #include "params/VectorEngineInterface.hh"
 #include "sim/sim_object.hh"
@@ -81,7 +80,15 @@ public:
     * instructions. This instructions ask to the vector engine for some
     * vector length, and the vector engine answer with the available one.
     */
-    uint64_t reqAppVectorLength(uint64_t rvl, uint64_t vtype, bool r_mvl);
+    uint64_t reqAppVectorLength(uint64_t vl, uint64_t vtype,
+        uint64_t rs1, uint64_t rd);
+
+    /**
+    * handleVectorConfig function is used by the vector configuration
+    * instructions. This function is an API exposed by ve_interface
+    */
+    void handleVectorConfig(RiscvISA::VectorStaticInst *vinst,
+        ExecContextPtr& xc, uint64_t& vl, uint64_t& vtype);
 
     /**
     * bussy function is used by the scalar core to know the state of the vector

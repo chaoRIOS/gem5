@@ -381,7 +381,6 @@ VectorEngine::renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *
     vf_op = (insn.func3()==5);
     vi_op = (insn.func3()==3);
 
-    uint8_t mop = insn.mop();
     bool indexed = ((insn.mop() ==1) || (insn.mop() ==3));
 
     if (insn.isVectorInstMem()) {

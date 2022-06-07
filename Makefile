@@ -31,7 +31,7 @@ CPU_PROFILE_DUMP_PATH=perf.pdf~
 # 'rv64uv-p-vsxseg',
 # 'rv64uv-p-vsxei',
 
-WORKLOAD_PATH=/opt/cputest/rvv-test64/rv64uv-p-vlse
+WORKLOAD_PATH=/opt/cputest/rvv-test64/rv64uv-p-vlxei
 # WORKLOAD_PATH=isa/rv64ui-p-add
 # WORKLOAD_PATH=$$HOME/work/talon-rvv/my_rvv.elf
 # WORKLOAD_PATH=$$HOME/work/rvv-intrinsic-doc/examples/profile.out
