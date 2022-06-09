@@ -80,6 +80,11 @@ void
 VectorConfig::handleVectorConfig(RiscvISA::VectorStaticInst *inst,
     ExecContextPtr& xc, uint64_t& _vl, uint64_t& _vtype) {
 
+    if (xc->readMiscReg(RiscvISA::MISCREG_VLENB) !=
+        get_vlenb()) {
+        xc->setMiscReg(MISCREG_VLENB, get_vlenb());
+    }
+
     bool vsetvl = (inst->func6() == 0x20);
     bool vsetvli = (inst->func6() == 0x00);
     bool vsetivli = (inst->func6() == 0x30);
