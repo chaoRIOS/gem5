@@ -11,7 +11,7 @@
 # neither the name of the copyright holders nor the names of its
 # contributors may be used to endorse or promote products derived from
 # this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -26,16 +26,16 @@
 #
 # Author: Cristóbal Ramírez
 
-Import('*')
+Import("*")
 
-if not env['BUILD_VECTOR_ENGINE']:
+if not env["BUILD_VECTOR_ENGINE"]:
     Return()
 
-SimObject('VectorRegister.py', sim_objects=['VectorRegister'])
-SimObject('VectorValidBit.py', sim_objects=['VectorValidBit'])
+SimObject("VectorRegister.py", sim_objects=["VectorRegister"])
+SimObject("VectorValidBit.py", sim_objects=["VectorValidBit"])
 
-Source('vector_reg.cc')
-Source('vector_reg_valid_bit.cc')
+Source("vector_reg.cc")
+Source("vector_reg_valid_bit.cc")
 
-DebugFlag('VectorRegister')
-DebugFlag('VectorValidBit')
+DebugFlag("VectorRegister")
+DebugFlag("VectorValidBit")

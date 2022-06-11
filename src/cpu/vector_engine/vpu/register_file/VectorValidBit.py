@@ -11,7 +11,7 @@
 # neither the name of the copyright holders nor the names of its
 # contributors may be used to endorse or promote products derived from
 # this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -30,9 +30,10 @@ from m5.params import *
 
 from m5.SimObject import SimObject
 
+
 class VectorValidBit(SimObject):
-    type = 'VectorValidBit'
+    type = "VectorValidBit"
     cxx_header = "cpu/vector_engine/vpu/register_file/vector_reg_valid_bit.hh"
-    cxx_class = 'gem5::RiscvISA::VectorValidBit'
+    cxx_class = "gem5::RiscvISA::VectorValidBit"
 
     PhysicalRegs = Param.Unsigned("Number of Vector Physical Registers")

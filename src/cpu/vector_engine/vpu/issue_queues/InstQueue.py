@@ -11,7 +11,7 @@
 # neither the name of the copyright holders nor the names of its
 # contributors may be used to endorse or promote products derived from
 # this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -30,10 +30,11 @@ from m5.params import *
 
 from m5.objects.TickedObject import TickedObject
 
+
 class InstQueue(TickedObject):
-    type = 'InstQueue'
+    type = "InstQueue"
     cxx_header = "cpu/vector_engine/vpu/issue_queues/inst_queue.hh"
-    cxx_class = 'gem5::RiscvISA::InstQueue'
+    cxx_class = "gem5::RiscvISA::InstQueue"
 
     OoO_queues = Param.Bool("Out-of-Order/In-Order Queues")
     vector_mem_queue_size = Param.Unsigned("memory queue entries")

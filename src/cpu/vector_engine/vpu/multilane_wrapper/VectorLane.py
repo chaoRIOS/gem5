@@ -11,7 +11,7 @@
 # neither the name of the copyright holders nor the names of its
 # contributors may be used to endorse or promote products derived from
 # this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -30,16 +30,17 @@ from m5.params import *
 
 from m5.SimObject import SimObject
 
+
 class VectorLane(SimObject):
-    type = 'VectorLane'
+    type = "VectorLane"
     cxx_header = "cpu/vector_engine/vpu/multilane_wrapper/vector_lane.hh"
-    cxx_class = 'gem5::RiscvISA::VectorLane'
+    cxx_class = "gem5::RiscvISA::VectorLane"
 
     dataPath = Param.Datapath("This unit's datapath")
 
-    lane_id     = Param.Unsigned("Cluster ID")
-    srcAReader  = Param.MemUnitReadTiming("srcA read streaming submodule")
-    srcBReader  = Param.MemUnitReadTiming("srcB read streaming submodule")
-    srcMReader  = Param.MemUnitReadTiming("srcM read streaming submodule")
-    dstReader   = Param.MemUnitReadTiming("srcC read streaming submodule")
-    dstWriter   = Param.MemUnitWriteTiming("dst write streaming submodule")
+    lane_id = Param.Unsigned("Cluster ID")
+    srcAReader = Param.MemUnitReadTiming("srcA read streaming submodule")
+    srcBReader = Param.MemUnitReadTiming("srcB read streaming submodule")
+    srcMReader = Param.MemUnitReadTiming("srcM read streaming submodule")
+    dstReader = Param.MemUnitReadTiming("srcC read streaming submodule")
+    dstWriter = Param.MemUnitWriteTiming("dst write streaming submodule")

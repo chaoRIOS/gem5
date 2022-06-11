@@ -11,7 +11,7 @@
 # neither the name of the copyright holders nor the names of its
 # contributors may be used to endorse or promote products derived from
 # this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -30,9 +30,10 @@ from m5.params import *
 
 from m5.SimObject import SimObject
 
-class VectorConfig(SimObject):
-    type = 'VectorConfig'
-    cxx_header = "cpu/vector_engine/vpu/vector_config/vector_config.hh"
-    cxx_class = 'gem5::RiscvISA::VectorConfig'
 
-    max_vl 	= Param.Unsigned("Maximun VL")
+class VectorConfig(SimObject):
+    type = "VectorConfig"
+    cxx_header = "cpu/vector_engine/vpu/vector_config/vector_config.hh"
+    cxx_class = "gem5::RiscvISA::VectorConfig"
+
+    max_vl = Param.Unsigned("Maximun VL")
