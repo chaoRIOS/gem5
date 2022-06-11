@@ -16,7 +16,4 @@ DebugFlag("MemUnitWriteTiming")
 DebugFlag("MemUnitReadTiming")
 DebugFlag("VectorMemUnit")
 
-CompoundFlag(
-    "VectorMem",
-    ["VectorMemUnit", "MemUnitWriteTiming", "MemUnitReadTiming"]
-)
+CompoundFlag("VectorMem", ["VectorMemUnit", "MemUnitWriteTiming", "MemUnitReadTiming"])

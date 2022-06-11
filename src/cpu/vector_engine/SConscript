@@ -11,7 +11,7 @@
 # neither the name of the copyright holders nor the names of its
 # contributors may be used to endorse or promote products derived from
 # this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -26,19 +26,18 @@
 #
 # Author: Cristóbal Ramírez
 
-Import('*')
+Import("*")
 
-if not env['BUILD_VECTOR_ENGINE']:
+if not env["BUILD_VECTOR_ENGINE"]:
     Return()
 
-SimObject('VectorEngineInterface.py', sim_objects=['VectorEngineInterface'])
-SimObject('VectorEngine.py', sim_objects=['VectorEngine'])
+SimObject("VectorEngineInterface.py", sim_objects=["VectorEngineInterface"])
+SimObject("VectorEngine.py", sim_objects=["VectorEngine"])
 
-Source('vector_engine_interface.cc')
-Source('vector_engine.cc')
+Source("vector_engine_interface.cc")
+Source("vector_engine.cc")
 
-DebugFlag('VectorEngineInterface')
-DebugFlag('VectorEngine')
-DebugFlag('VectorEngineInfo')
-DebugFlag('VectorInst')
-
+DebugFlag("VectorEngineInterface")
+DebugFlag("VectorEngine")
+DebugFlag("VectorEngineInfo")
+DebugFlag("VectorInst")

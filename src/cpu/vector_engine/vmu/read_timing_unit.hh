@@ -43,53 +43,52 @@
 namespace gem5
 {
 
-    namespace RiscvISA
-    {
+namespace RiscvISA
+{
 
-        class VectorEngine;
+class VectorEngine;
 
-        class MemUnitReadTiming : public TickedObject
-        {
-        public:
-            MemUnitReadTiming(const MemUnitReadTimingParams &params);
-            ~MemUnitReadTiming();
+class MemUnitReadTiming : public TickedObject
+{
+  public:
+    MemUnitReadTiming(const MemUnitReadTimingParams &params);
+    ~MemUnitReadTiming();
 
-            // overrides
-            void evaluate() override;
-            void regStats() override;
-            // Queuedata is used for indexed operations
-            void queueData(uint8_t *data);
-            void initialize(VectorEngine &vector_wrapper, uint64_t count,
-                            uint64_t DST_SIZE, uint64_t mem_addr,
-                            uint8_t mop, uint64_t stride,
-                            bool location, ExecContextPtr &xc,
-                            std::function<void(uint8_t *, uint8_t, bool)> on_item_load);
-            void setIndexWidth(uint8_t width);
-            uint8_t getIndexWidth();
+    // overrides
+    void evaluate() override;
+    void regStats() override;
+    // Queuedata is used for indexed operations
+    void queueData(uint8_t *data);
+    void initialize(VectorEngine &vector_wrapper, uint64_t count,
+            uint64_t DST_SIZE, uint64_t mem_addr, uint8_t mop, uint64_t stride,
+            bool location, ExecContextPtr &xc,
+            std::function<void(uint8_t *, uint8_t, bool)> on_item_load);
+    void setIndexWidth(uint8_t width);
+    uint8_t getIndexWidth();
 
-        private:
-            // set by params
-            const uint8_t channel;
-            const uint64_t cacheLineSize;
-            const uint64_t VRF_LineSize;
+  private:
+    // set by params
+    const uint8_t channel;
+    const uint64_t cacheLineSize;
+    const uint64_t VRF_LineSize;
 
-            volatile bool done;
-            std::function<bool(void)> readFunction;
-            // Used by indexed Operations to hold the element index
-            std::deque<uint8_t *> dataQ;
-            // modified by readFunction closure over time
-            uint64_t vecIndex;
-            VectorEngine *vectorwrapper;
+    volatile bool done;
+    std::function<bool(void)> readFunction;
+    // Used by indexed Operations to hold the element index
+    std::deque<uint8_t *> dataQ;
+    // modified by readFunction closure over time
+    uint64_t vecIndex;
+    VectorEngine *vectorwrapper;
 
-            // Width of index encoded by ei-x
-            uint8_t indexWidth;
+    // Width of index encoded by ei-x
+    uint8_t indexWidth;
 
-        public:
-            // Stat for number of cache lines read requested
-            Stats::Scalar Cache_line_r_req;
-        };
+  public:
+    // Stat for number of cache lines read requested
+    Stats::Scalar Cache_line_r_req;
+};
 
-    }
+} // namespace RiscvISA
 
-}
+} // namespace gem5
 #endif //__CPU_MEM_UNIT_READ_TIMING__

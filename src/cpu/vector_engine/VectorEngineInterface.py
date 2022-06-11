@@ -11,7 +11,7 @@
 # neither the name of the copyright holders nor the names of its
 # contributors may be used to endorse or promote products derived from
 # this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -31,11 +31,9 @@ from m5.proxy import *
 from m5.SimObject import SimObject
 
 
-
 class VectorEngineInterface(SimObject):
-    type = 'VectorEngineInterface'
+    type = "VectorEngineInterface"
     cxx_header = "cpu/vector_engine/vector_engine_interface.hh"
-    cxx_class = 'gem5::RiscvISA::VectorEngineInterface'
+    cxx_class = "gem5::RiscvISA::VectorEngineInterface"
 
     vector_engine = Param.VectorEngine("RISC-V Vector Engine")
-

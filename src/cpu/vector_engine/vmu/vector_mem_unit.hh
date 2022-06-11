@@ -45,38 +45,39 @@
 namespace gem5
 {
 
-  namespace RiscvISA
-  {
+namespace RiscvISA
+{
 
-    class VectorEngine;
+class VectorEngine;
 
-    class VectorMemUnit : public SimObject
+class VectorMemUnit : public SimObject
+{
+  public:
+    VectorMemUnit(const VectorMemUnitParams &params);
+    ~VectorMemUnit();
+
+    bool isOccupied();
+    void issue(VectorEngine &vector_wrapper, RiscvISA::VectorStaticInst &insn,
+            VectorDynInst *dyn_insn, ExecContextPtr &xc, uint64_t src1,
+            uint64_t src2, uint64_t vtype, uint64_t vl,
+            std::function<void(Fault fault)> done_callback);
+
+  private:
+    bool occupied;
+    MemUnitReadTiming *memReader;
+    MemUnitReadTiming *memReader_addr;
+    MemUnitWriteTiming *memWriter;
+
+    VectorEngine *vectorwrapper;
+
+    uint64_t
+    vt(uint64_t val, int lo, int len) const
     {
-    public:
-      VectorMemUnit(const VectorMemUnitParams &params);
-      ~VectorMemUnit();
-
-      bool isOccupied();
-      void issue(VectorEngine &vector_wrapper, RiscvISA::VectorStaticInst &insn,
-                 VectorDynInst *dyn_insn, ExecContextPtr &xc, uint64_t src1, uint64_t src2,
-                 uint64_t vtype, uint64_t vl,
-                 std::function<void(Fault fault)> done_callback);
-
-    private:
-      bool occupied;
-      MemUnitReadTiming *memReader;
-      MemUnitReadTiming *memReader_addr;
-      MemUnitWriteTiming *memWriter;
-
-      VectorEngine *vectorwrapper;
-
-      uint64_t vt(uint64_t val, int lo, int len) const
-      {
         return (val >> lo) & ((uint64_t(1) << len) - 1);
-      }
-    };
+    }
+};
 
-  }
+} // namespace RiscvISA
 
-}
+} // namespace gem5
 #endif // __CPU_MEM_UNIT_HH__
