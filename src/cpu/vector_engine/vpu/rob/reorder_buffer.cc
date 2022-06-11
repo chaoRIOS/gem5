@@ -45,26 +45,24 @@ namespace gem5
 namespace RiscvISA
 {
 
-ReorderBuffer::ReorderBuffer(const ReorderBufferParams &params):
-TickedObject(TickedObjectParams(params)),occupied(false), ROB_Size(params.ROB_Size)
+ReorderBuffer::ReorderBuffer(const ReorderBufferParams& params) :
+    TickedObject(TickedObjectParams(params)), occupied(false),
+    ROB_Size(params.ROB_Size)
 {
-    for (int i=0 ; i<ROB_Size ; i++) {
-        rob.push_back(new rob_entry(0,0));
+    for (int i = 0; i < ROB_Size; i++) {
+        rob.push_back(new rob_entry(0, 0));
     }
-    tail=0;
-    head=0;
-    valid_elements=0;
+    tail = 0;
+    head = 0;
+    valid_elements = 0;
 }
 
-ReorderBuffer::~ReorderBuffer()
-{
-}
-
+ReorderBuffer::~ReorderBuffer() {}
 
 void
 ReorderBuffer::startTicking(VectorEngine& vector_wrapper)
 {
-    DPRINTF(ReorderBuffer,"ReorderBuffer StartTicking \n");
+    DPRINTF(ReorderBuffer, "ReorderBuffer StartTicking \n");
     this->vectorwrapper = &vector_wrapper;
     start();
 }
@@ -72,7 +70,7 @@ ReorderBuffer::startTicking(VectorEngine& vector_wrapper)
 void
 ReorderBuffer::stopTicking()
 {
-    DPRINTF(ReorderBuffer,"ReorderBuffer StopTicking \n");
+    DPRINTF(ReorderBuffer, "ReorderBuffer StopTicking \n");
     stop();
 }
 
@@ -87,9 +85,8 @@ ReorderBuffer::regStats()
 {
     TickedObject::regStats();
 
-    VectorROBentriesUsed
-        .name(name() + ".VectorROBentriesUsed")
-        .desc("Max number of ROB entries used during execution");
+    VectorROBentriesUsed.name(name() + ".VectorROBentriesUsed")
+            .desc("Max number of ROB entries used during execution");
 }
 
 void
@@ -97,24 +94,24 @@ ReorderBuffer::evaluate()
 {
     assert(running);
     assert((valid_elements >= 0) && (valid_elements <= ROB_Size));
-    if ( valid_elements==0) {
-        stopTicking(); return;
+    if (valid_elements == 0) {
+        stopTicking();
+        return;
     }
     /* For statistics*/
     if ((double)valid_elements > VectorROBentriesUsed.value()) {
         VectorROBentriesUsed = valid_elements;
     }
 
-    if (rob[head]->executed)
-    {
-        DPRINTF(ReorderBuffer,"Commiting ROB entry %d \n",head);
-        if (rob[head]->valid_old_dst)
-        {
-        DPRINTF(ReorderBuffer,"Freeing up old_dst %d \n",rob[head]->old_dst);
-        vectorwrapper->vector_rename->set_frl(rob[head]->old_dst);
+    if (rob[head]->executed) {
+        DPRINTF(ReorderBuffer, "Commiting ROB entry %d \n", head);
+        if (rob[head]->valid_old_dst) {
+            DPRINTF(ReorderBuffer, "Freeing up old_dst %d \n",
+                    rob[head]->old_dst);
+            vectorwrapper->vector_rename->set_frl(rob[head]->old_dst);
         }
-        if (head == ROB_Size-1) {
-            head=0;
+        if (head == ROB_Size - 1) {
+            head = 0;
         } else {
             head++;
         }
@@ -125,13 +122,13 @@ ReorderBuffer::evaluate()
 bool
 ReorderBuffer::rob_full()
 {
-    return (valid_elements==ROB_Size);
+    return (valid_elements == ROB_Size);
 }
 
 bool
 ReorderBuffer::rob_empty()
 {
-    return (valid_elements==0);
+    return (valid_elements == 0);
 }
 
 uint32_t
@@ -144,20 +141,21 @@ ReorderBuffer::set_rob_entry(uint32_t old_dst, bool valid_old_dst)
     rob[tail]->executed = 0;
     uint32_t return_tail = tail;
     if (valid_old_dst) {
-        DPRINTF(ReorderBuffer,"Setting the ROB entry %d  with an old dst %d \n"
-            ,tail,old_dst);
+        DPRINTF(ReorderBuffer,
+                "Setting the ROB entry %d  with an old dst %d \n", tail,
+                old_dst);
     } else {
-        DPRINTF(ReorderBuffer,"Setting the ROB entry %d without old dst %d \n"
-            ,tail);
+        DPRINTF(ReorderBuffer,
+                "Setting the ROB entry %d without old dst %d \n", tail);
     }
 
-    if (tail == ROB_Size-1) {
-        tail=0;
+    if (tail == ROB_Size - 1) {
+        tail = 0;
     } else {
         tail++;
     }
 
-    valid_elements ++;
+    valid_elements++;
 
     return return_tail;
 }
@@ -166,11 +164,10 @@ void
 ReorderBuffer::set_rob_entry_executed(uint32_t idx)
 {
     assert(idx < ROB_Size);
-    DPRINTF(ReorderBuffer,"Setting the ROB entry %d as executed \n",idx);
+    DPRINTF(ReorderBuffer, "Setting the ROB entry %d as executed \n", idx);
     rob[idx]->executed = 1;
 }
 
-}
+} // namespace RiscvISA
 
-
-}
+} // namespace gem5

@@ -11,7 +11,7 @@
 # neither the name of the copyright holders nor the names of its
 # contributors may be used to endorse or promote products derived from
 # this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -29,10 +29,11 @@
 from m5.params import *
 from m5.objects.TickedObject import TickedObject
 
+
 class MemUnitWriteTiming(TickedObject):
-    type = 'MemUnitWriteTiming'
+    type = "MemUnitWriteTiming"
     cxx_header = "cpu/vector_engine/vmu/write_timing_unit.hh"
-    cxx_class = 'gem5::RiscvISA::MemUnitWriteTiming'
+    cxx_class = "gem5::RiscvISA::MemUnitWriteTiming"
 
     channel = Param.Unsigned("Channel")
     cacheLineSize = Param.Unsigned("Cache Line Size")

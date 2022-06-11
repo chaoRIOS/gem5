@@ -50,47 +50,44 @@ namespace RiscvISA
 
 class VectorValidBit : public SimObject
 {
-public:
+  public:
     VectorValidBit(const VectorValidBitParams &params);
     ~VectorValidBit();
 
-    //void startTicking();
-    //void stopTicking();
-    //bool isOccupied();
+    // void startTicking();
+    // void stopTicking();
+    // bool isOccupied();
 
-    //void regStats() override;
-    //void evaluate() override;
+    // void regStats() override;
+    // void evaluate() override;
 
-protected:
-    //bool occupied;
+  protected:
+    // bool occupied;
     const uint64_t PhysicalRegs;
 
-/*    class validbit_queue {
-          public:
-            validbit_queue(uint64_t idx, uint64_t val):
-            idx(idx),val(val),cyclesLeft(0) {}
-            ~validbit_queue() {}
+    /*    class validbit_queue {
+              public:
+                validbit_queue(uint64_t idx, uint64_t val):
+                idx(idx),val(val),cyclesLeft(0) {}
+                ~validbit_queue() {}
 
-            uint64_t idx;
-            uint64_t val;
-            uint64_t cyclesLeft;
-        };
+                uint64_t idx;
+                uint64_t val;
+                uint64_t cyclesLeft;
+            };
 
-    std::deque<validbit_queue *> Validbit_queue;
-*/
+        std::deque<validbit_queue *> Validbit_queue;
+    */
     std::vector<int> reg_valid_bit;
-public:
+
+  public:
     int get_preg_valid_bit(int idx);
-    void set_preg_valid_bit(int idx , int val);
+    void set_preg_valid_bit(int idx, int val);
     void print_valid_bit();
 };
 
-}
+} // namespace RiscvISA
 
-}
-
-
+} // namespace gem5
 
 #endif // __CPU_VECTOR_VB_H__
-
-

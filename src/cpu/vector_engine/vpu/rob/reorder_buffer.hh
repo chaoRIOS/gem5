@@ -31,7 +31,6 @@
 #ifndef __CPU_VECTOR_ROB_H__
 #define __CPU_VECTOR_ROB_H__
 
-
 #include <bitset>
 #include <cstdint>
 #include <functional>
@@ -50,19 +49,21 @@ class VectorEngine;
 
 class ReorderBuffer : public TickedObject
 {
-public:
-    class rob_entry {
-        public:
-        rob_entry(uint16_t old_dst, bool valid_old_dst):
-        old_dst(old_dst),valid_old_dst(valid_old_dst),executed(0) {}
+  public:
+    class rob_entry
+    {
+      public:
+        rob_entry(uint16_t old_dst, bool valid_old_dst) :
+            old_dst(old_dst), valid_old_dst(valid_old_dst), executed(0)
+        {}
         ~rob_entry() {}
-        //private:
+        // private:
         uint16_t old_dst;
         bool valid_old_dst;
         bool executed;
     };
 
-    ReorderBuffer(const ReorderBufferParams &params);
+    ReorderBuffer(const ReorderBufferParams& params);
     ~ReorderBuffer();
 
     void startTicking(VectorEngine& vector_wrapper);
@@ -75,24 +76,26 @@ public:
     bool rob_empty();
     uint32_t set_rob_entry(uint32_t old_dst, bool valid_old_dst);
     void set_rob_entry_executed(uint32_t idx);
-protected:
+
+  protected:
     bool occupied;
-public:
+
+  public:
     const uint64_t ROB_Size;
-private:
-    std::vector<rob_entry *> rob;
+
+  private:
+    std::vector<rob_entry*> rob;
     uint32_t tail;
     uint32_t head;
     int valid_elements;
     VectorEngine* vectorwrapper;
-public:
+
+  public:
     Stats::Scalar VectorROBentriesUsed;
 };
 
-}
+} // namespace RiscvISA
 
-}
+} // namespace gem5
 
 #endif // __CPU_VECTOR_ROB_H__
-
-

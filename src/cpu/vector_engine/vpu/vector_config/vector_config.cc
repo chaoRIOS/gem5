@@ -28,7 +28,6 @@
  * Author: Cristóbal Ramírez
  */
 
-
 #include "cpu/vector_engine/vpu/vector_config/vector_config.hh"
 
 #include <bitset>
@@ -53,19 +52,16 @@ namespace RiscvISA
  * VPU local Configuration
  */
 
-VectorConfig::VectorConfig(const VectorConfigParams &params) :
-SimObject(SimObjectParams(params)) ,  max_vector_length(params.max_vl)
-{
-}
+VectorConfig::VectorConfig(const VectorConfigParams& params) :
+    SimObject(SimObjectParams(params)), max_vector_length(params.max_vl)
+{}
 
-VectorConfig::~VectorConfig()
-{
-}
+VectorConfig::~VectorConfig() {}
 
 uint64_t
-VectorConfig::reqAppVectorLength(uint64_t vl, uint64_t vl_old,
-    uint64_t rs1, uint64_t rd) {
-
+VectorConfig::reqAppVectorLength(
+        uint64_t vl, uint64_t vl_old, uint64_t rs1, uint64_t rd)
+{
     if (rs1 != 0) {
         return vl;
     } else if (rd != 0) {
@@ -73,15 +69,13 @@ VectorConfig::reqAppVectorLength(uint64_t vl, uint64_t vl_old,
     } else {
         return vl_old;
     }
-
 }
 
 void
-VectorConfig::handleVectorConfig(RiscvISA::VectorStaticInst *inst,
-    ExecContextPtr& xc, uint64_t& _vl, uint64_t& _vtype) {
-
-    if (xc->readMiscReg(RiscvISA::MISCREG_VLENB) !=
-        get_vlenb()) {
+VectorConfig::handleVectorConfig(RiscvISA::VectorStaticInst* inst,
+        ExecContextPtr& xc, uint64_t& _vl, uint64_t& _vtype)
+{
+    if (xc->readMiscReg(RiscvISA::MISCREG_VLENB) != get_vlenb()) {
         xc->setMiscReg(MISCREG_VLENB, get_vlenb());
     }
 
@@ -104,7 +98,6 @@ VectorConfig::handleVectorConfig(RiscvISA::VectorStaticInst *inst,
     uint64_t rs1 = inst->vs1();
     uint64_t rd = inst->vd();
 
-
     if (vsetvl) {
         vl = xc->readIntRegOperand(inst, 0);
         vtype = xc->readIntRegOperand(inst, 1);
@@ -118,10 +111,11 @@ VectorConfig::handleVectorConfig(RiscvISA::VectorStaticInst *inst,
         if (rs1 != 0) {
             if (avl <= vlmax) {
                 vl = avl;
-            } else if (avl < 2*vlmax) {
+            } else if (avl < 2 * vlmax) {
                 vl = avl;
-                vl = min(max(vl, (uint64_t)ceil((float)avl/(float)2)), vlmax);
-            } else if (avl >= 2*vlmax) {
+                vl = min(
+                        max(vl, (uint64_t)ceil((float)avl / (float)2)), vlmax);
+            } else if (avl >= 2 * vlmax) {
                 vl = vlmax;
             }
 
@@ -140,8 +134,8 @@ VectorConfig::handleVectorConfig(RiscvISA::VectorStaticInst *inst,
             _vl = vl;
 
             if (((float)sew / (float)lmul) !=
-            ((float)get_vtype_sew(vtype_old) /
-            (float)get_vtype_lmul(vtype_old))) {
+                    ((float)get_vtype_sew(vtype_old) /
+                            (float)get_vtype_lmul(vtype_old))) {
                 // set vill
                 vtype &= ~(UINT32_MAX >> 1);
             }
@@ -149,7 +143,6 @@ VectorConfig::handleVectorConfig(RiscvISA::VectorStaticInst *inst,
             // Not setting vl csr
             _vtype = vtype;
             xc->setMiscReg(RiscvISA::MISCREG_VTYPE, vtype);
-
         }
 
     } else if (vsetvli) {
@@ -165,10 +158,11 @@ VectorConfig::handleVectorConfig(RiscvISA::VectorStaticInst *inst,
         if (rs1 != 0) {
             if (avl <= vlmax) {
                 vl = avl;
-            } else if (avl < 2*vlmax) {
+            } else if (avl < 2 * vlmax) {
                 vl = avl;
-                vl = min(max(vl, (uint64_t)ceil((float)avl/(float)2)), vlmax);
-            } else if (avl >= 2*vlmax) {
+                vl = min(
+                        max(vl, (uint64_t)ceil((float)avl / (float)2)), vlmax);
+            } else if (avl >= 2 * vlmax) {
                 vl = vlmax;
             }
 
@@ -187,8 +181,8 @@ VectorConfig::handleVectorConfig(RiscvISA::VectorStaticInst *inst,
             _vl = vl;
 
             if (((float)sew / (float)lmul) !=
-            ((float)get_vtype_sew(vtype_old) /
-            (float)get_vtype_lmul(vtype_old))) {
+                    ((float)get_vtype_sew(vtype_old) /
+                            (float)get_vtype_lmul(vtype_old))) {
                 // set vill
                 vtype &= ~(UINT32_MAX >> 1);
             }
@@ -196,7 +190,6 @@ VectorConfig::handleVectorConfig(RiscvISA::VectorStaticInst *inst,
             // Not setting vl csr
             _vtype = vtype;
             xc->setMiscReg(RiscvISA::MISCREG_VTYPE, vtype);
-
         }
 
     } else if (vsetivli) {
@@ -219,103 +212,128 @@ VectorConfig::handleVectorConfig(RiscvISA::VectorStaticInst *inst,
     }
 
     if (inst->vd() != 0) {
-        DPRINTF(VectorConfig,"Setting register: %d ,"
-            " with value : %d\n",inst->vd(), vl);
-        xc->setIntRegOperand(inst,0,vl);
+        DPRINTF(VectorConfig,
+                "Setting register: %d ,"
+                " with value : %d\n",
+                inst->vd(), vl);
+        xc->setIntRegOperand(inst, 0, vl);
     }
-
 }
 
 uint64_t
-VectorConfig::vector_length_in_bits(uint64_t vl, uint64_t vtype) {
-    uint64_t vl_bits=0;
+VectorConfig::vector_length_in_bits(uint64_t vl, uint64_t vtype)
+{
+    uint64_t vl_bits = 0;
     uint32_t sew = get_vtype_sew(vtype);
-    vl_bits = vl*sew;
-    return  vl_bits;
+    vl_bits = vl * sew;
+    return vl_bits;
 }
 
 uint64_t
-VectorConfig::get_max_vector_length_elem(uint64_t vtype) {
-    uint32_t mvl_elem=0;
-    uint32_t sew  =  get_vtype_sew(vtype);
+VectorConfig::get_max_vector_length_elem(uint64_t vtype)
+{
+    uint32_t mvl_elem = 0;
+    uint32_t sew = get_vtype_sew(vtype);
     uint32_t lmul = get_vtype_lmul(vtype);
-    mvl_elem = lmul*max_vector_length/sew;
+    mvl_elem = lmul * max_vector_length / sew;
     return mvl_elem;
 }
 
 uint64_t
-VectorConfig::get_max_vector_length_bits(uint64_t vtype) {
-    uint32_t mvl_bits=0;
-    //uint32_t sew  =  get_vtype_sew(vtype);
+VectorConfig::get_max_vector_length_bits(uint64_t vtype)
+{
+    uint32_t mvl_bits = 0;
+    // uint32_t sew  =  get_vtype_sew(vtype);
     uint32_t lmul = get_vtype_lmul(vtype);
-    mvl_bits = lmul*max_vector_length;
+    mvl_bits = lmul * max_vector_length;
     return mvl_bits;
 }
 
 uint64_t
-VectorConfig::get_mvl_lmul1_bits() {
-    uint32_t mvl_bits=0;
+VectorConfig::get_mvl_lmul1_bits()
+{
+    uint32_t mvl_bits = 0;
     mvl_bits = max_vector_length;
     return mvl_bits;
 }
 
 uint64_t
-VectorConfig::get_vtype_lmul(uint64_t vtype) {
-    uint8_t vlmul = vt(vtype,0,2);
+VectorConfig::get_vtype_lmul(uint64_t vtype)
+{
+    uint8_t vlmul = vt(vtype, 0, 2);
     uint64_t LMUL;
 
-    switch (vlmul){
-        case 0:
-            LMUL = 1; break;
-        case 1: 
-            LMUL = 2; break;
-        case 2:
-            LMUL = 4; break;
-        case 3:
-            LMUL = 8; break;
-        default:  panic("LMUL not implemented\n"); LMUL = 0;
+    switch (vlmul) {
+    case 0:
+        LMUL = 1;
+        break;
+    case 1:
+        LMUL = 2;
+        break;
+    case 2:
+        LMUL = 4;
+        break;
+    case 3:
+        LMUL = 8;
+        break;
+    default:
+        panic("LMUL not implemented\n");
+        LMUL = 0;
     }
     return LMUL;
 }
 
 uint64_t
-VectorConfig::get_vtype_sew(uint64_t vtype) {
-    uint8_t vsew = vt(vtype,3,3);
+VectorConfig::get_vtype_sew(uint64_t vtype)
+{
+    uint8_t vsew = vt(vtype, 3, 3);
     uint64_t SEW;
-    switch (vsew){
-        case 0:
-            SEW = 8; break;
-        case 1: 
-            SEW = 16; break;
-        case 2:
-            SEW = 32; break;
-        case 3:
-            SEW = 64; break;
-        default:  panic("SEW not supported vtype: %d vsew: %d \n", vtype, vsew); SEW = 0;
+    switch (vsew) {
+    case 0:
+        SEW = 8;
+        break;
+    case 1:
+        SEW = 16;
+        break;
+    case 2:
+        SEW = 32;
+        break;
+    case 3:
+        SEW = 64;
+        break;
+    default:
+        panic("SEW not supported vtype: %d vsew: %d \n", vtype, vsew);
+        SEW = 0;
     }
     return SEW;
 }
 
 uint64_t
-VectorConfig::get_vtype_ediv(uint64_t vtype) {
-    uint8_t vediv = vt(vtype,5,2);
+VectorConfig::get_vtype_ediv(uint64_t vtype)
+{
+    uint8_t vediv = vt(vtype, 5, 2);
     uint64_t EDIV;
 
-    switch (vediv){
-        case 0:
-            EDIV = 1; break;
-        case 1: 
-            EDIV = 2; break;
-        case 2:
-            EDIV = 4; break;
-        case 3:
-            EDIV = 8; break;
-        default:  panic("EDIV not implemented\n"); EDIV = 0;
+    switch (vediv) {
+    case 0:
+        EDIV = 1;
+        break;
+    case 1:
+        EDIV = 2;
+        break;
+    case 2:
+        EDIV = 4;
+        break;
+    case 3:
+        EDIV = 8;
+        break;
+    default:
+        panic("EDIV not implemented\n");
+        EDIV = 0;
     }
     return EDIV;
 }
 
-}
+} // namespace RiscvISA
 
-
-}
+} // namespace gem5

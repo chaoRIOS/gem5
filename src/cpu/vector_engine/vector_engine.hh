@@ -37,8 +37,8 @@
 #include <string>
 #include <vector>
 
-#include "arch/generic/tlb.hh"
 #include "arch/generic/mmu.hh"
+#include "arch/generic/tlb.hh"
 #include "arch/riscv/insts/vector_static_inst.hh"
 #include "base/statistics.hh"
 #include "base/types.hh"
@@ -48,13 +48,13 @@
 #include "cpu/vector_engine/req_state.hh"
 #include "cpu/vector_engine/vector_dyn_inst.hh"
 #include "cpu/vector_engine/vmu/vector_mem_unit.hh"
-#include "cpu/vector_engine/vpu/vector_config/vector_config.hh"
 #include "cpu/vector_engine/vpu/issue_queues/inst_queue.hh"
 #include "cpu/vector_engine/vpu/multilane_wrapper/vector_lane.hh"
 #include "cpu/vector_engine/vpu/register_file/vector_reg.hh"
 #include "cpu/vector_engine/vpu/register_file/vector_reg_valid_bit.hh"
 #include "cpu/vector_engine/vpu/rename/vector_rename.hh"
 #include "cpu/vector_engine/vpu/rob/reorder_buffer.hh"
+#include "cpu/vector_engine/vpu/vector_config/vector_config.hh"
 #include "mem/request.hh"
 #include "params/VectorEngine.hh"
 #include "sim/faults.hh"
@@ -88,26 +88,26 @@ namespace RiscvISA
 
 class VectorEngine : public SimObject
 {
-public:
+  public:
     class VectorMemPort : public RequestPort
     {
       public:
-        VectorMemPort(const std::string& name, VectorEngine* owner,
-            uint8_t channels);
+        VectorMemPort(const std::string &name, VectorEngine *owner,
+                uint8_t channels);
         ~VectorMemPort();
 
         bool recvTimingResp(PacketPtr pkt) override;
         void recvReqRetry() override;
 
         bool startTranslation(Addr addr, uint8_t *data, uint64_t size,
-            BaseMMU::Mode mode, ThreadContext *tc, uint64_t req_id,
-            uint8_t channel);
+                BaseMMU::Mode mode, ThreadContext *tc, uint64_t req_id,
+                uint8_t channel);
         bool sendTimingReadReq(Addr addr, uint64_t size, ThreadContext *tc,
-            uint64_t req_id, uint8_t channel);
+                uint64_t req_id, uint8_t channel);
         bool sendTimingWriteReq(Addr addr, uint8_t *data, uint64_t size,
-            ThreadContext *tc, uint64_t req_id, uint8_t channel);
+                ThreadContext *tc, uint64_t req_id, uint8_t channel);
 
-        std::vector< std::deque<PacketPtr> > laCachePktQs;
+        std::vector<std::deque<PacketPtr> > laCachePktQs;
         VectorEngine *owner;
 
         class Tlb_Translation : public BaseMMU::Translation
@@ -118,15 +118,17 @@ public:
 
             void markDelayed() override;
             /** TLB interace */
-            void finish(const Fault &_fault,const RequestPtr &_req,
-                ThreadContext *_tc, BaseMMU::Mode _mode) ;
+            void finish(const Fault &_fault, const RequestPtr &_req,
+                    ThreadContext *_tc, BaseMMU::Mode _mode);
 
             void finish(const Fault _fault, uint64_t latency);
             std::string name();
+
           private:
             void translated();
-            EventWrapper<Tlb_Translation,&Tlb_Translation::translated> event;
+            EventWrapper<Tlb_Translation, &Tlb_Translation::translated> event;
             VectorEngine *owner;
+
           public:
             Fault fault;
         };
@@ -134,83 +136,88 @@ public:
 
     class VectorRegPort : public RequestPort
     {
-    public:
-        VectorRegPort(const std::string& name, VectorEngine* owner,
-            uint64_t channel);
+      public:
+        VectorRegPort(const std::string &name, VectorEngine *owner,
+                uint64_t channel);
         ~VectorRegPort();
 
         bool recvTimingResp(PacketPtr pkt) override;
         void recvReqRetry() override;
 
-        bool sendTimingReadReq(Addr addr, uint64_t size,
-            uint64_t req_id);
-        bool sendTimingWriteReq(Addr addr, uint8_t *data, uint64_t size,
-            uint64_t req_id);
+        bool sendTimingReadReq(Addr addr, uint64_t size, uint64_t req_id);
+        bool sendTimingWriteReq(
+                Addr addr, uint8_t *data, uint64_t size, uint64_t req_id);
 
         VectorEngine *owner;
         const uint64_t channel;
     };
-public:
+
+  public:
     VectorEngine(const VectorEngineParams &params);
     ~VectorEngine();
 
-    VectorConfig  *   vector_config;
-    //used to identify ports uniquely to whole memory system
+    VectorConfig *vector_config;
+    // used to identify ports uniquely to whole memory system
     RequestorID VectorCacheRequestorId;
     VectorMemPort vectormem_port;
-    //used to identify ports uniquely to whole memory system
+    // used to identify ports uniquely to whole memory system
     std::vector<RequestorID> VectorRegRequestorIds;
     std::vector<VectorRegPort> VectorRegPorts;
 
-    VectorRegister * vector_reg;
-    //RequestPort &getRequestPort(const std::string &if_name,
-    //                             PortID idx = InvalidPortID)/* override*/;
-    Port& getPort(const std::string& if_name,
-                                  PortID idx = InvalidPortID) override;
-    RequestPort &getVectorMemPort() { return vectormem_port; }
+    VectorRegister *vector_reg;
+    // RequestPort &getRequestPort(const std::string &if_name,
+    //                              PortID idx = InvalidPortID)/* override*/;
+    Port &getPort(
+            const std::string &if_name, PortID idx = InvalidPortID) override;
+    RequestPort &
+    getVectorMemPort()
+    {
+        return vectormem_port;
+    }
 
     void recvTimingResp(VectorPacketPtr pkt);
 
     bool writeVectorReg(Addr addr, uint8_t *data, uint32_t size,
-        uint8_t channel,
-        std::function<void(void)> callback);
-    bool readVectorReg(Addr addr, uint32_t size,
-        uint8_t channel,
-        std::function<void(uint8_t*,uint8_t)> callback);
+            uint8_t channel, std::function<void(void)> callback);
+    bool readVectorReg(Addr addr, uint32_t size, uint8_t channel,
+            std::function<void(uint8_t *, uint8_t)> callback);
 
-   bool writeVectorMem(Addr addr, uint8_t *data, uint32_t size,
-        ThreadContext *tc, uint8_t channel,
-        std::function<void(void)> callback);
+    bool writeVectorMem(Addr addr, uint8_t *data, uint32_t size,
+            ThreadContext *tc, uint8_t channel,
+            std::function<void(void)> callback);
     bool readVectorMem(Addr addr, uint32_t size, ThreadContext *tc,
-        uint8_t channel,
-        std::function<void(uint8_t*,uint8_t)> callback);
+            uint8_t channel, std::function<void(uint8_t *, uint8_t)> callback);
 
-    //fields for keeping track of outstanding requests for reordering
+    // fields for keeping track of outstanding requests for reordering
     uint64_t uniqueReqId;
     std::deque<Vector_ReqState *> vector_PendingReqQ;
 
-
-    bool requestGrant(RiscvISA::VectorStaticInst* insn);
+    bool requestGrant(RiscvISA::VectorStaticInst *insn);
     bool isOccupied();
     bool cluster_available();
 
-    void dispatch(RiscvISA::VectorStaticInst& insn ,ExecContextPtr& xc ,
-        uint64_t src1, uint64_t src2, std::function<void()> dependencie_callback);
-    void renameVectorInst(RiscvISA::VectorStaticInst& insn, VectorDynInst *dyn_insn);
+    void dispatch(RiscvISA::VectorStaticInst &insn, ExecContextPtr &xc,
+            uint64_t src1, uint64_t src2,
+            std::function<void()> dependencie_callback);
+    void renameVectorInst(
+            RiscvISA::VectorStaticInst &insn, VectorDynInst *dyn_insn);
 
-    void issue(RiscvISA::VectorStaticInst& insn, VectorDynInst *dyn_insn,
-        ExecContextPtr& xc,
-    uint64_t src1 , uint64_t src2,uint64_t vtype,uint64_t vl,
-        std::function<void(Fault fault)> done_callback);
+    void issue(RiscvISA::VectorStaticInst &insn, VectorDynInst *dyn_insn,
+            ExecContextPtr &xc, uint64_t src1, uint64_t src2, uint64_t vtype,
+            uint64_t vl, std::function<void(Fault fault)> done_callback);
 
     void regStats() override;
 
-    void printConfigInst(RiscvISA::VectorStaticInst& insn,uint64_t src1,uint64_t src2);
-    void printMemInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn);
-    void printArithInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn);
-    void printVectorRegisterMoveInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn);
+    void printConfigInst(
+            RiscvISA::VectorStaticInst &insn, uint64_t src1, uint64_t src2);
+    void printMemInst(
+            RiscvISA::VectorStaticInst &insn, VectorDynInst *vector_dyn_insn);
+    void printArithInst(
+            RiscvISA::VectorStaticInst &insn, VectorDynInst *vector_dyn_insn);
+    void printVectorRegisterMoveInst(
+            RiscvISA::VectorStaticInst &insn, VectorDynInst *vector_dyn_insn);
 
-public:
+  public:
     bool masked_op;
     bool vx_op;
     bool vf_op;
@@ -221,14 +228,14 @@ public:
     uint8_t num_clusters;
     uint8_t num_lanes;
 
-    ReorderBuffer *   vector_rob;
-    std::vector<VectorLane *>  vector_lane;
-    VectorMemUnit *   vector_memory_unit;
-    InstQueue     *   vector_inst_queue;
-    VectorRename  *   vector_rename;
-    VectorValidBit *  vector_reg_validbit;
+    ReorderBuffer *vector_rob;
+    std::vector<VectorLane *> vector_lane;
+    VectorMemUnit *vector_memory_unit;
+    InstQueue *vector_inst_queue;
+    VectorRename *vector_rename;
+    VectorValidBit *vector_reg_validbit;
 
-public:
+  public:
     // Stat for number of Vector Arithmetic Instructions
     Stats::Scalar VectorArithmeticIns;
     // Stat for number of Vector Memory Instructions
@@ -244,20 +251,21 @@ public:
     Stats::Scalar SumVL;
     // Stat for Average VL)
     Stats::Formula AverageVL;
-private:
+
+  private:
     uint64_t last_vtype;
     uint64_t last_vl;
 
     /* lmul parameter */
-    uint8_t last_lmul=1;
+    uint8_t last_lmul = 1;
     /* Physical registers */
     uint64_t PDst;
     uint64_t POldDst;
-    uint64_t Pvs1,Pvs2,Pvs3;
+    uint64_t Pvs1, Pvs2, Pvs3;
     uint64_t PMask;
 };
 
-}
+} // namespace RiscvISA
 
-}
+} // namespace gem5
 #endif // __CPU_VECTOR_ENGINE_HH__

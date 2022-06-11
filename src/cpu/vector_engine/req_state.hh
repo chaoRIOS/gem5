@@ -51,20 +51,31 @@ class Vector_ReqState
     Vector_ReqState(uint64_t req_id) :
         reqId(req_id), matched(false), pkt(nullptr)
     {}
-    virtual ~Vector_ReqState() {
+    virtual ~Vector_ReqState()
+    {
         if (pkt != nullptr) {
             assert(pkt->req != nullptr);
-            //delete pkt->req;
+            // delete pkt->req;
             delete pkt;
         }
     }
 
-    //read/write have different callback type-definitions. so abstract it here
+    // read/write have different callback type-definitions. so abstract it here
     virtual void executeCallback() = 0;
 
-    uint64_t getReqId() { return reqId; }
-    bool isMatched() { return matched; }
-    void setPacket(PacketPtr _pkt) {
+    uint64_t
+    getReqId()
+    {
+        return reqId;
+    }
+    bool
+    isMatched()
+    {
+        return matched;
+    }
+    void
+    setPacket(PacketPtr _pkt)
+    {
         assert(!matched);
         matched = true;
         pkt = _pkt;
@@ -76,32 +87,38 @@ class Vector_ReqState
     PacketPtr pkt;
 };
 
-
 class Vector_R_ReqState : public Vector_ReqState
 {
   public:
     Vector_R_ReqState(uint64_t req_id,
-        std::function<void(uint8_t*data, uint8_t size)> callback) :
-        Vector_ReqState(req_id), callback(callback) {}
+            std::function<void(uint8_t* data, uint8_t size)> callback) :
+        Vector_ReqState(req_id),
+        callback(callback)
+    {}
     ~Vector_R_ReqState() {}
 
-    void executeCallback() override {
+    void
+    executeCallback() override
+    {
         assert(matched);
         callback(pkt->getPtr<uint8_t>(), pkt->getSize());
     }
 
   private:
-    std::function<void(uint8_t*data, uint8_t size)> callback;
+    std::function<void(uint8_t* data, uint8_t size)> callback;
 };
 
 class Vector_W_ReqState : public Vector_ReqState
 {
   public:
     Vector_W_ReqState(uint64_t req_id, std::function<void(void)> callback) :
-        Vector_ReqState(req_id), callback(callback) {}
+        Vector_ReqState(req_id), callback(callback)
+    {}
     ~Vector_W_ReqState() {}
 
-    void executeCallback() override {
+    void
+    executeCallback() override
+    {
         assert(matched);
         callback();
     }
@@ -110,7 +127,7 @@ class Vector_W_ReqState : public Vector_ReqState
     std::function<void(void)> callback;
 };
 
-}
+} // namespace RiscvISA
 
-}
+} // namespace gem5
 #endif // __CPU_VECTOR_REQ_STATE_HH__

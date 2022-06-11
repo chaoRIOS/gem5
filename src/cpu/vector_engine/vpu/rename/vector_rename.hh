@@ -28,7 +28,7 @@
  * Author: Cristóbal Ramírez
  */
 
- #ifndef __CPU_VECTOR_RENAME_H__
+#ifndef __CPU_VECTOR_RENAME_H__
 #define __CPU_VECTOR_RENAME_H__
 
 #include <bitset>
@@ -52,7 +52,7 @@ namespace RiscvISA
  */
 class VectorRename : public SimObject
 {
-public:
+  public:
     VectorRename(const VectorRenameParams &params);
     ~VectorRename();
 
@@ -62,74 +62,76 @@ public:
     std::deque<uint64_t> frl_mem;
     uint64_t rat_mem[32];
 
-    bool frl_empty()
+    bool
+    frl_empty()
     {
-        if (frl_mem.size()==0) {
+        if (frl_mem.size() == 0) {
             return 1;
-        }
-        else{
+        } else {
             return 0;
         }
     }
 
-    uint32_t frl_elements()
+    uint32_t
+    frl_elements()
     {
         return frl_mem.size();
     }
 
-    uint64_t get_frl()
+    uint64_t
+    get_frl()
     {
-        if (frl_mem.size()>0) {
+        if (frl_mem.size() > 0) {
             uint64_t aux;
             aux = frl_mem.front();
             frl_mem.pop_front();
             return aux;
-            }
-        else
-        {
+        } else {
             DPRINTF(VectorRename, "FRL Empty\n");
             return 0;
         }
     }
 
-    void set_frl(uint64_t reg_idx)
+    void
+    set_frl(uint64_t reg_idx)
     {
-        assert(frl_mem.size()<PhysicalRegs-1);
+        assert(frl_mem.size() < PhysicalRegs - 1);
         frl_mem.push_back(reg_idx);
     }
 
-    uint64_t get_preg_rat(uint64_t idx)
+    uint64_t
+    get_preg_rat(uint64_t idx)
     {
         return rat_mem[idx];
     }
 
-    void set_preg_rat(uint64_t idx , uint64_t val)
+    void
+    set_preg_rat(uint64_t idx, uint64_t val)
     {
         rat_mem[idx] = val;
     }
 
-    void print_rat()
+    void
+    print_rat()
     {
         DPRINTF(VectorRename, "REGISTER ALIAS TABLE\n");
-        DPRINTF(VectorRename, "%lu %lu %lu %lu %lu %lu %lu %lu\n"
-            ,rat_mem[0],rat_mem[1],rat_mem[2],rat_mem[3],
-            rat_mem[4],rat_mem[5],rat_mem[6],rat_mem[7]);
-        DPRINTF(VectorRename, "%lu %lu %lu %lu %lu %lu %lu %lu\n"
-            ,rat_mem[8],rat_mem[9],rat_mem[10],rat_mem[11],
-            rat_mem[12],rat_mem[13],rat_mem[14],rat_mem[15]);
-        DPRINTF(VectorRename, "%lu %lu %lu %lu %lu %lu %lu %lu\n"
-            ,rat_mem[16],rat_mem[17],rat_mem[18],rat_mem[19],
-            rat_mem[20],rat_mem[21],rat_mem[22],rat_mem[23]);
-        DPRINTF(VectorRename, "%lu %lu %lu %lu %lu %lu %lu %lu\n"
-            ,rat_mem[24],rat_mem[25],rat_mem[26],rat_mem[27],
-            rat_mem[28],rat_mem[29],rat_mem[30],rat_mem[31]);
+        DPRINTF(VectorRename, "%lu %lu %lu %lu %lu %lu %lu %lu\n", rat_mem[0],
+                rat_mem[1], rat_mem[2], rat_mem[3], rat_mem[4], rat_mem[5],
+                rat_mem[6], rat_mem[7]);
+        DPRINTF(VectorRename, "%lu %lu %lu %lu %lu %lu %lu %lu\n", rat_mem[8],
+                rat_mem[9], rat_mem[10], rat_mem[11], rat_mem[12], rat_mem[13],
+                rat_mem[14], rat_mem[15]);
+        DPRINTF(VectorRename, "%lu %lu %lu %lu %lu %lu %lu %lu\n", rat_mem[16],
+                rat_mem[17], rat_mem[18], rat_mem[19], rat_mem[20],
+                rat_mem[21], rat_mem[22], rat_mem[23]);
+        DPRINTF(VectorRename, "%lu %lu %lu %lu %lu %lu %lu %lu\n", rat_mem[24],
+                rat_mem[25], rat_mem[26], rat_mem[27], rat_mem[28],
+                rat_mem[29], rat_mem[30], rat_mem[31]);
     }
 };
 
-}
+} // namespace RiscvISA
 
-}
+} // namespace gem5
 
 #endif // __CPU_VECTOR_RENAME_H__
-
-

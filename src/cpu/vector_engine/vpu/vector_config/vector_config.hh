@@ -58,42 +58,41 @@ namespace RiscvISA
 
 class VectorConfig : public SimObject
 {
-
-public:
-    VectorConfig(const VectorConfigParams &params);
+  public:
+    VectorConfig(const VectorConfigParams& params);
     ~VectorConfig();
 
-    uint64_t reqAppVectorLength(uint64_t vl, uint64_t vl_old,
-      uint64_t rs1, uint64_t rd);
+    uint64_t reqAppVectorLength(
+            uint64_t vl, uint64_t vl_old, uint64_t rs1, uint64_t rd);
     uint64_t vector_length_in_bits(uint64_t vl, uint64_t vtype);
     uint64_t get_max_vector_length_elem(uint64_t vtype);
     uint64_t get_max_vector_length_bits(uint64_t vtype);
     uint64_t get_mvl_lmul1_bits();
-    uint64_t get_vlenb(){
-      return max_vector_length/8;
+    uint64_t
+    get_vlenb()
+    {
+        return max_vector_length / 8;
     }
 
     uint64_t get_vtype_lmul(uint64_t vtype);
     uint64_t get_vtype_sew(uint64_t vtype);
     uint64_t get_vtype_ediv(uint64_t vtype);
 
-    void handleVectorConfig(RiscvISA::VectorStaticInst *vinst,
-      ExecContextPtr& xc, uint64_t& vl, uint64_t& vtype);
+    void handleVectorConfig(RiscvISA::VectorStaticInst* vinst,
+            ExecContextPtr& xc, uint64_t& vl, uint64_t& vtype);
 
-
-private:
+  private:
     /* The maximum vector length in bits of one vector register (LMUL=1)*/
     // VLEN_MAX = VLEN * LMUL
     uint64_t max_vector_length;
 
-    uint64_t vt(uint64_t val, int lo, int len) const {
-      return (val >> lo) & ((uint64_t(1) << len)-1);
+    uint64_t
+    vt(uint64_t val, int lo, int len) const
+    {
+        return (val >> lo) & ((uint64_t(1) << len) - 1);
     }
-
 };
 
-}
-}
+} // namespace RiscvISA
+} // namespace gem5
 #endif // __CPU_VECTOR_CSR_H__
-
-

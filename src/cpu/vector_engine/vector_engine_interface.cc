@@ -45,60 +45,57 @@ namespace gem5
 namespace RiscvISA
 {
 
+VectorEngineInterface::VectorEngineInterface(
+        const VectorEngineInterfaceParams& params) :
+    SimObject(SimObjectParams(params)),
+    vector_engine(params.vector_engine)
+{}
 
-VectorEngineInterface::VectorEngineInterface(const VectorEngineInterfaceParams &params) :
-SimObject(SimObjectParams(params)),vector_engine(params.vector_engine)
-{
-}
-
-VectorEngineInterface::~VectorEngineInterface()
-{
-}
+VectorEngineInterface::~VectorEngineInterface() {}
 
 bool
 VectorEngineInterface::requestGrant(RiscvISA::VectorStaticInst* vinst)
 {
     bool grant = vector_engine->requestGrant(vinst);
-    DPRINTF(VectorEngineInterface,"Resquesting a grant with answer : %d\n",grant);
+    DPRINTF(VectorEngineInterface, "Resquesting a grant with answer : %d\n",
+            grant);
     return grant;
 }
 
 void
-VectorEngineInterface::sendCommand(RiscvISA::VectorStaticInst* vinst ,ExecContextPtr& xc ,
-        uint64_t src1, uint64_t src2,
+VectorEngineInterface::sendCommand(RiscvISA::VectorStaticInst* vinst,
+        ExecContextPtr& xc, uint64_t src1, uint64_t src2,
         std::function<void()> done_callback)
 {
-    DPRINTF(VectorEngineInterface,"Sending a new command to the vector engine\n");
-    vector_engine->dispatch(*vinst,xc,src1,src2,done_callback);
+    DPRINTF(VectorEngineInterface,
+            "Sending a new command to the vector engine\n");
+    vector_engine->dispatch(*vinst, xc, src1, src2, done_callback);
 }
 
 uint64_t
-VectorEngineInterface::reqAppVectorLength(uint64_t vl, uint64_t vtype,
-        uint64_t rs1, uint64_t rd)
+VectorEngineInterface::reqAppVectorLength(
+        uint64_t vl, uint64_t vtype, uint64_t rs1, uint64_t rd)
 {
-    DPRINTF(VectorEngineInterface,"Resquesting a vector length\n");
-    uint64_t avl = vector_engine->vector_config->
-        reqAppVectorLength(vl,vtype, rs1, rd);
+    DPRINTF(VectorEngineInterface, "Resquesting a vector length\n");
+    uint64_t avl = vector_engine->vector_config->reqAppVectorLength(
+            vl, vtype, rs1, rd);
     return avl;
 }
 
 void
-VectorEngineInterface::handleVectorConfig(RiscvISA::VectorStaticInst *vinst,
+VectorEngineInterface::handleVectorConfig(RiscvISA::VectorStaticInst* vinst,
         ExecContextPtr& xc, uint64_t& vl, uint64_t& vtype)
 {
     vector_engine->vector_config->handleVectorConfig(vinst, xc, vl, vtype);
 }
 
-
 bool
 VectorEngineInterface::bussy()
 {
-
     bool bussy = vector_engine->isOccupied();
     return bussy;
 }
 
-}
+} // namespace RiscvISA
 
-
-}
+} // namespace gem5

@@ -43,21 +43,25 @@ namespace RiscvISA
 
 class VectorPacket;
 
-typedef VectorPacket * VectorPacketPtr;
+typedef VectorPacket* VectorPacketPtr;
 
 class VectorPacket : public Packet
 {
   public:
-    VectorPacket(RequestPtr req,MemCmd cmd,uint64_t req_id,uint8_t channel) :
-        Packet(req, cmd), reqId(req_id), channel(channel) {}
+    VectorPacket(
+            RequestPtr req, MemCmd cmd, uint64_t req_id, uint8_t channel) :
+        Packet(req, cmd),
+        reqId(req_id), channel(channel)
+    {}
     VectorPacket(RequestPtr req, MemCmd cmd, uint64_t req_id) :
-        Packet(req, cmd), reqId(req_id), channel(0) {}
+        Packet(req, cmd), reqId(req_id), channel(0)
+    {}
     ~VectorPacket() {}
 
     const uint64_t reqId;
     const uint8_t channel;
 };
 
-}
-}
+} // namespace RiscvISA
+} // namespace gem5
 #endif // __CPU_VECTOR_PACKET_HH__

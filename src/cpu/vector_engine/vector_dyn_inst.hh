@@ -44,59 +44,117 @@ class VectorStaticInst;
 
 class VectorDynInst
 {
-public:
-VectorDynInst() : vinst(NULL),
-  renamed_src1(1024),renamed_src2(1024),renamed_src3(1024),
-  renamed_dst(1024),renamed_old_dst(1024),renamed_mask(1024),
-  rob_entry(1024){
-  }
-~VectorDynInst() {}
+  public:
+    VectorDynInst() :
+        vinst(NULL), renamed_src1(1024), renamed_src2(1024),
+        renamed_src3(1024), renamed_dst(1024), renamed_old_dst(1024),
+        renamed_mask(1024), rob_entry(1024)
+    {}
+    ~VectorDynInst() {}
 
-/* Renamed registers */
-  uint16_t get_renamed_src1()  { return renamed_src1; }
-  void set_renamed_src1(uint16_t val)  { renamed_src1 = val; }
-
-  uint16_t get_renamed_src2() { return renamed_src2; }
-  void set_renamed_src2(uint16_t val) { renamed_src2  = val; }
-
-  uint16_t get_renamed_src3() { return renamed_src3; }
-  void set_renamed_src3(uint16_t val) { renamed_src3  = val; }
-
-  uint16_t get_renamed_dst() { return renamed_dst; }
-  void set_renamed_dst(uint16_t val) { renamed_dst  = val; }
-
-  uint16_t get_renamed_old_dst() { return renamed_old_dst; }
-  void set_renamed_old_dst(uint16_t val) { renamed_old_dst  = val; }
-
-  uint16_t get_renamed_mask() { return renamed_mask; }
-  void set_renamed_mask(uint16_t val) { renamed_mask  = val; }
-
-/* rob_entry */
-  uint16_t get_rob_entry() { return rob_entry; }
-  void set_rob_entry(uint16_t val) { rob_entry  = val; }
-
-  RiscvISA::VectorStaticInst*
-  get_VectorStaticInst() {
-    return vinst;
-  }
-
-  void
-  set_VectorStaticInst(RiscvISA::VectorStaticInst* instruction){
-    vinst  = instruction;
+    /* Renamed registers */
+    uint16_t
+    get_renamed_src1()
+    {
+        return renamed_src1;
+    }
+    void
+    set_renamed_src1(uint16_t val)
+    {
+        renamed_src1 = val;
     }
 
-private:
-  RiscvISA::VectorStaticInst *vinst;
-  uint16_t  renamed_src1;
-  uint16_t  renamed_src2;
-  uint16_t  renamed_src3;
-  uint16_t  renamed_dst;
-  uint16_t  renamed_old_dst;
-  uint16_t  renamed_mask;
-  uint16_t  rob_entry;
+    uint16_t
+    get_renamed_src2()
+    {
+        return renamed_src2;
+    }
+    void
+    set_renamed_src2(uint16_t val)
+    {
+        renamed_src2 = val;
+    }
+
+    uint16_t
+    get_renamed_src3()
+    {
+        return renamed_src3;
+    }
+    void
+    set_renamed_src3(uint16_t val)
+    {
+        renamed_src3 = val;
+    }
+
+    uint16_t
+    get_renamed_dst()
+    {
+        return renamed_dst;
+    }
+    void
+    set_renamed_dst(uint16_t val)
+    {
+        renamed_dst = val;
+    }
+
+    uint16_t
+    get_renamed_old_dst()
+    {
+        return renamed_old_dst;
+    }
+    void
+    set_renamed_old_dst(uint16_t val)
+    {
+        renamed_old_dst = val;
+    }
+
+    uint16_t
+    get_renamed_mask()
+    {
+        return renamed_mask;
+    }
+    void
+    set_renamed_mask(uint16_t val)
+    {
+        renamed_mask = val;
+    }
+
+    /* rob_entry */
+    uint16_t
+    get_rob_entry()
+    {
+        return rob_entry;
+    }
+    void
+    set_rob_entry(uint16_t val)
+    {
+        rob_entry = val;
+    }
+
+    RiscvISA::VectorStaticInst*
+    get_VectorStaticInst()
+    {
+        return vinst;
+    }
+
+    void
+    set_VectorStaticInst(RiscvISA::VectorStaticInst* instruction)
+    {
+        vinst = instruction;
+    }
+
+  private:
+    RiscvISA::VectorStaticInst* vinst;
+    uint16_t renamed_src1;
+    uint16_t renamed_src2;
+    uint16_t renamed_src3;
+    uint16_t renamed_dst;
+    uint16_t renamed_old_dst;
+    uint16_t renamed_mask;
+    uint16_t rob_entry;
 };
 
-}
+} // namespace RiscvISA
 
-}
+} // namespace gem5
 #endif // __ARCH_RISCV_VECTOR_DYN_INSTS_HH__

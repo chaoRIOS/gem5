@@ -37,36 +37,31 @@ namespace gem5
 namespace RiscvISA
 {
 
-
 /**
  * Valid bits
  */
-VectorValidBit::VectorValidBit(const VectorValidBitParams &params):
-SimObject(SimObjectParams(params)), PhysicalRegs(params.PhysicalRegs)
+VectorValidBit::VectorValidBit(const VectorValidBitParams &params) :
+    SimObject(SimObjectParams(params)), PhysicalRegs(params.PhysicalRegs)
 {
-    for (uint64_t i=0; i<32; i++)
-        {
-            reg_valid_bit.push_back(1);
-        }
-    for (uint64_t i=32; i<PhysicalRegs; i++)
-        {
-            reg_valid_bit.push_back(0);
-        }
+    for (uint64_t i = 0; i < 32; i++) {
+        reg_valid_bit.push_back(1);
+    }
+    for (uint64_t i = 32; i < PhysicalRegs; i++) {
+        reg_valid_bit.push_back(0);
+    }
 }
 
-VectorValidBit::~VectorValidBit()
-{
-}
+VectorValidBit::~VectorValidBit() {}
 
 void
-VectorValidBit::set_preg_valid_bit(int idx , int val)
+VectorValidBit::set_preg_valid_bit(int idx, int val)
 {
     assert(idx <= PhysicalRegs);
-    //DPRINTF(VectorValidBit,"Setting valid bit %d: %d\n",idx,val);
-    //if (Validbit_queue.size()==0) {
-    //    startTicking();
-    //}
-    //Validbit_queue.push_back(new validbit_queue(idx,val));
+    // DPRINTF(VectorValidBit,"Setting valid bit %d: %d\n",idx,val);
+    // if (Validbit_queue.size()==0) {
+    //     startTicking();
+    // }
+    // Validbit_queue.push_back(new validbit_queue(idx,val));
 
     reg_valid_bit[idx] = val;
     // @TODO: fix
@@ -81,26 +76,25 @@ VectorValidBit::get_preg_valid_bit(int idx)
     return reg_valid_bit[idx];
 }
 
-//bool
-//VectorValidBit::isOccupied()
+// bool
+// VectorValidBit::isOccupied()
 //{
-//    return occupied;
-//}
+//     return occupied;
+// }
 
-//void
-//VectorValidBit::startTicking()
+// void
+// VectorValidBit::startTicking()
 //{
-//    //DPRINTF(VectorValidBit,"VectorValidBit StartTicking \n");
-//    start();
-//}
+//     //DPRINTF(VectorValidBit,"VectorValidBit StartTicking \n");
+//     start();
+// }
 
-
-//void
-//VectorValidBit::stopTicking()
+// void
+// VectorValidBit::stopTicking()
 //{
-//    //DPRINTF(VectorValidBit,"VectorValidBit StopTicking \n");
-//    stop();
-//}
+//     //DPRINTF(VectorValidBit,"VectorValidBit StopTicking \n");
+//     stop();
+// }
 /*
 void
 VectorValidBit::regStats()
@@ -110,34 +104,34 @@ VectorValidBit::regStats()
 }
 */
 
-//void
-//VectorValidBit::evaluate()
+// void
+// VectorValidBit::evaluate()
 //{
-//    assert(running);
-//    if ( Validbit_queue.size()==0) {
-//        stopTicking();
-//        return;
-//    }
+//     assert(running);
+//     if ( Validbit_queue.size()==0) {
+//         stopTicking();
+//         return;
+//     }
 //
-//    validbit_queue * set_new_vb = Validbit_queue.front();
+//     validbit_queue * set_new_vb = Validbit_queue.front();
 //
-//    if (set_new_vb->cyclesLeft == 0) {
-//        reg_valid_bit[set_new_vb->idx] = set_new_vb->val;
-//        DPRINTF(VectorValidBit, "Setting the validbit reg %d with %d\n"
-//            ,set_new_vb->idx,set_new_vb->val);
-//        Validbit_queue.pop_front();
-//        delete set_new_vb;
-//    } else {
-//        set_new_vb->cyclesLeft --;
-//    }
-//}
+//     if (set_new_vb->cyclesLeft == 0) {
+//         reg_valid_bit[set_new_vb->idx] = set_new_vb->val;
+//         DPRINTF(VectorValidBit, "Setting the validbit reg %d with %d\n"
+//             ,set_new_vb->idx,set_new_vb->val);
+//         Validbit_queue.pop_front();
+//         delete set_new_vb;
+//     } else {
+//         set_new_vb->cyclesLeft --;
+//     }
+// }
 
 void
-VectorValidBit::print_valid_bit() {
+VectorValidBit::print_valid_bit()
+{
     // Empty
 }
 
-}
+} // namespace RiscvISA
 
-
-}
+} // namespace gem5

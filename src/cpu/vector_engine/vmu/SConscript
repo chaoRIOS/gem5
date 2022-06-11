@@ -1,22 +1,22 @@
+Import("*")
 
-Import('*')
-
-if not env['BUILD_VECTOR_ENGINE']:
+if not env["BUILD_VECTOR_ENGINE"]:
     Return()
 
-SimObject('MemUnitReadTiming.py', sim_objects=['MemUnitReadTiming'])
-SimObject('MemUnitWriteTiming.py', sim_objects=['MemUnitWriteTiming'])
-SimObject('VectorMemUnit.py', sim_objects=['VectorMemUnit'])
+SimObject("MemUnitReadTiming.py", sim_objects=["MemUnitReadTiming"])
+SimObject("MemUnitWriteTiming.py", sim_objects=["MemUnitWriteTiming"])
+SimObject("VectorMemUnit.py", sim_objects=["VectorMemUnit"])
 
-Source('write_timing_unit.cc')
-Source('read_timing_unit.cc')
-Source('vector_mem_unit.cc')
+Source("write_timing_unit.cc")
+Source("read_timing_unit.cc")
+Source("vector_mem_unit.cc")
 
 
-DebugFlag('MemUnitWriteTiming')
-DebugFlag('MemUnitReadTiming')
-DebugFlag('VectorMemUnit')
+DebugFlag("MemUnitWriteTiming")
+DebugFlag("MemUnitReadTiming")
+DebugFlag("VectorMemUnit")
 
-CompoundFlag('VectorMem',
-    [ 'VectorMemUnit','MemUnitWriteTiming', 'MemUnitReadTiming' ])
-
+CompoundFlag(
+    "VectorMem",
+    ["VectorMemUnit", "MemUnitWriteTiming", "MemUnitReadTiming"]
+)

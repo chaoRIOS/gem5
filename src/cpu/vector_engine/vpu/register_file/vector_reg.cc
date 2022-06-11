@@ -46,17 +46,15 @@ namespace RiscvISA
 {
 
 #ifdef DEBUG
-    using namespace gem5::Trace;
+using namespace gem5::Trace;
 #endif
-
 
 // vector_reg::VectorRegisterPort
 VectorRegister::VectorRegisterPort::VectorRegisterPort(
-    const std::string &name, VectorRegister& vector_reg) :
-    QueuedResponsePort(name, &vector_reg, queue), queue(vector_reg, *this),
-    vector_reg(vector_reg)
-{
-}
+        const std::string &name, VectorRegister &vector_reg) :
+    QueuedResponsePort(name, &vector_reg, queue),
+    queue(vector_reg, *this), vector_reg(vector_reg)
+{}
 
 Tick
 VectorRegister::VectorRegisterPort::recvAtomic(PacketPtr pkt)
@@ -91,18 +89,16 @@ VectorRegister::regStats()
 {
     ClockedObject::regStats();
 
-    numReads_64bit_elements
-        .name(name() + ".numReads_64bit_elements")
-        .desc("Number of reads to the vrf, 64-bit elements");
-    numWritess_64bit_elements
-        .name(name() + ".numWritess_64bit_elements")
-        .desc("Number of writes to the vrf, 64-bit elements");
+    numReads_64bit_elements.name(name() + ".numReads_64bit_elements")
+            .desc("Number of reads to the vrf, 64-bit elements");
+    numWritess_64bit_elements.name(name() + ".numWritess_64bit_elements")
+            .desc("Number of writes to the vrf, 64-bit elements");
     numReads_perLane_64bit_elements
-        .name(name() + ".numReads_perLane_64bit_elements")
-        .desc("Number of reads to the vrf per lane, 64-bit elements");
+            .name(name() + ".numReads_perLane_64bit_elements")
+            .desc("Number of reads to the vrf per lane, 64-bit elements");
     numWritess_perLane_64bit_elements
-        .name(name() + ".numWritess_perLane_64bit_elements")
-        .desc("Number of writes to the vrf per lane, 64-bit elements");
+            .name(name() + ".numWritess_perLane_64bit_elements")
+            .desc("Number of writes to the vrf per lane, 64-bit elements");
 }
 
 uint64_t
@@ -112,87 +108,92 @@ VectorRegister::get_size()
 }
 
 VectorRegister::VectorRegister(const VectorRegisterParams &params) :
-    ClockedObject(ClockedObjectParams(params)),num_lanes(params.num_lanes),
-    num_regs(params.num_regs),mvl(params.mvl),
-    size(params.size), lineSize(params.lineSize),
-    numPorts(params.numPorts), accessLatency(params.accessLatency)
+    ClockedObject(ClockedObjectParams(params)), num_lanes(params.num_lanes),
+    num_regs(params.num_regs), mvl(params.mvl), size(params.size),
+    lineSize(params.lineSize), numPorts(params.numPorts),
+    accessLatency(params.accessLatency)
 {
     assert(size % lineSize == 0);
     assert(lineSize % sizeof(float) == 0);
 
-    //in this moment 4-byte word is smallest addressable unit
+    // in this moment 4-byte word is smallest addressable unit
     bytesPerBankAccess = sizeof(uint8_t);
     data = new uint8_t[size];
 
-    for (uint8_t i=0; i<numPorts; ++i) {
+    for (uint8_t i = 0; i < numPorts; ++i) {
         ports.push_back(new VectorRegisterPort(name() + ".port", *this));
     }
-
 }
 
-VectorRegister::~VectorRegister()
-{
-    delete data;
-}
-
+VectorRegister::~VectorRegister() { delete data; }
 
 // vector_reg memory/port functions
 bool
 VectorRegister::handleTimingReq(PacketPtr pkt, VectorRegisterPort *port)
 {
-    //need to make sure all accesses happen within a single line
+    // need to make sure all accesses happen within a single line
     uint64_t start_addr = pkt->getAddr();
 #ifdef DEBUG
-    uint64_t end_addr = pkt->getAddr() + pkt->getSize() -1;
+    uint64_t end_addr = pkt->getAddr() + pkt->getSize() - 1;
     uint64_t start_line_addr = start_addr - (start_addr % lineSize);
     uint64_t end_line_addr = end_addr - (end_addr % lineSize);
 
     assert(start_line_addr == end_line_addr);
 
-    //need to make sure we are accessing full data from accessed banks
+    // need to make sure we are accessing full data from accessed banks
     assert(start_addr % bytesPerBankAccess == 0);
-    assert((end_addr+1) % bytesPerBankAccess == 0);
+    assert((end_addr + 1) % bytesPerBankAccess == 0);
 #endif
 
     // The memories for the VRF can be seen as num_entries*WORD_WIDTH.
-    //The read/write accesses are counted for each 64-bit read/write operation.
+    // The read/write accesses are counted for each 64-bit read/write
+    // operation.
     uint64_t WORD_WIDTH = 8;
 
 #ifdef DEBUG
     // Physical register size in bytes
-    uint64_t phys_reg_size = mvl/8 ;
+    uint64_t phys_reg_size = mvl / 8;
     // Corresponding physical register
     uint64_t phys_reg = pkt->getAddr() / phys_reg_size;
 #endif
 
-    if (pkt->isRead())
-    {
-        numReads_64bit_elements = numReads_64bit_elements.value() + (pkt->getSize()/WORD_WIDTH); // 64-bit elements
-        numReads_perLane_64bit_elements = numReads_perLane_64bit_elements.value() + ((pkt->getSize()/WORD_WIDTH) / num_lanes); // 64-bit elements
-        memcpy(pkt->getPtr<uint8_t>(), data+start_addr, pkt->getSize());
+    if (pkt->isRead()) {
+        numReads_64bit_elements =
+                numReads_64bit_elements.value() +
+                (pkt->getSize() / WORD_WIDTH); // 64-bit elements
+        numReads_perLane_64bit_elements =
+                numReads_perLane_64bit_elements.value() +
+                ((pkt->getSize() / WORD_WIDTH) / num_lanes); // 64-bit elements
+        memcpy(pkt->getPtr<uint8_t>(), data + start_addr, pkt->getSize());
 #ifdef DEBUG
-        DPRINTF(VectorRegister,"Have been read %u bytes from addr 0x%lx (Physical Reg %d)\n"
-            ,pkt->getSize(), pkt->getAddr(),phys_reg);
-        DPRINTF(VectorRegister, "Reading vec reg %d (%d) as %#x\n"
-            ,phys_reg, phys_reg, *(uint64_t*)(data+start_addr));
+        DPRINTF(VectorRegister,
+                "Have been read %u bytes from addr 0x%lx (Physical Reg %d)\n",
+                pkt->getSize(), pkt->getAddr(), phys_reg);
+        DPRINTF(VectorRegister, "Reading vec reg %d (%d) as %#x\n", phys_reg,
+                phys_reg, *(uint64_t *)(data + start_addr));
 #endif
     } else {
-        numWritess_64bit_elements = numWritess_64bit_elements.value() + (pkt->getSize()/WORD_WIDTH); // 64-bit elements
-        numWritess_perLane_64bit_elements = numWritess_perLane_64bit_elements.value() + ((pkt->getSize()/WORD_WIDTH) / num_lanes); // 64-bit elements
-        memcpy(data+start_addr, pkt->getPtr<uint8_t>(), pkt->getSize());
+        numWritess_64bit_elements =
+                numWritess_64bit_elements.value() +
+                (pkt->getSize() / WORD_WIDTH); // 64-bit elements
+        numWritess_perLane_64bit_elements =
+                numWritess_perLane_64bit_elements.value() +
+                ((pkt->getSize() / WORD_WIDTH) / num_lanes); // 64-bit elements
+        memcpy(data + start_addr, pkt->getPtr<uint8_t>(), pkt->getSize());
 #ifdef DEBUG
-        DPRINTF(VectorRegister,"Have been written %u bytes to addr 0x%lx (Physical Reg %d)\n"
-            ,pkt->getSize(), pkt->getAddr(),phys_reg);
-        DPRINTF(VectorRegister, "Setting vec reg %d (%d) to %#x\n"
-            ,phys_reg, phys_reg, *(uint64_t*)(data+start_addr));
+        DPRINTF(VectorRegister,
+                "Have been written %u bytes to addr 0x%lx (Physical Reg %d)\n",
+                pkt->getSize(), pkt->getAddr(), phys_reg);
+        DPRINTF(VectorRegister, "Setting vec reg %d (%d) to %#x\n", phys_reg,
+                phys_reg, *(uint64_t *)(data + start_addr));
 #endif
     }
 
     pkt->makeTimingResponse();
     pkt->headerDelay = 0;
     pkt->payloadDelay = 0;
-    port->schedTimingResp(pkt,curTick()
-        + cyclesToTicks(Cycles(accessLatency))/*, true*/);
+    port->schedTimingResp(
+            pkt, curTick() + cyclesToTicks(Cycles(accessLatency)) /*, true*/);
 
     return true;
 }
@@ -200,14 +201,13 @@ VectorRegister::handleTimingReq(PacketPtr pkt, VectorRegisterPort *port)
 Port &
 VectorRegister::getPort(const std::string &if_name, PortID idx)
 {
-    //if (if_name != "port") {
-    //    return AbstractMemory::getPort(if_name, idx);
-    //} else {
-        return *ports[idx];
+    // if (if_name != "port") {
+    //     return AbstractMemory::getPort(if_name, idx);
+    // } else {
+    return *ports[idx];
     //}
 }
 
-}
+} // namespace RiscvISA
 
-
-}
+} // namespace gem5

@@ -49,30 +49,31 @@ namespace RiscvISA
 {
 
 class VectorEngine;
-//class ExecContextPtr;
-//class ExecContext;
+// class ExecContextPtr;
+// class ExecContext;
 
 class InstQueue : public TickedObject
 {
-
-public:
-    class QueueEntry {
-        public:
-        QueueEntry(RiscvISA::VectorStaticInst& insn, VectorDynInst *dyn_insn,
-            ExecContextPtr& _xc, std::function<void()> dependencie_callback,
-            uint64_t src1,uint64_t src2,uint64_t rename_vtype,uint64_t rename_vl):
+  public:
+    class QueueEntry
+    {
+      public:
+        QueueEntry(RiscvISA::VectorStaticInst& insn, VectorDynInst* dyn_insn,
+                ExecContextPtr& _xc,
+                std::function<void()> dependencie_callback, uint64_t src1,
+                uint64_t src2, uint64_t rename_vtype, uint64_t rename_vl) :
             dependencie_callback(dependencie_callback),
-            insn(insn),
-            dyn_insn(dyn_insn)/*,xc(_xc)*/,src1(src1),src2(src2),
-            rename_vtype(rename_vtype),rename_vl(rename_vl),issued(0)
-            {
-                xc=_xc;
-            }
+            insn(insn), dyn_insn(dyn_insn) /*,xc(_xc)*/, src1(src1),
+            src2(src2), rename_vtype(rename_vtype), rename_vl(rename_vl),
+            issued(0)
+        {
+            xc = _xc;
+        }
         ~QueueEntry() {}
 
         std::function<void()> dependencie_callback;
         RiscvISA::VectorStaticInst& insn;
-        VectorDynInst     *dyn_insn;
+        VectorDynInst* dyn_insn;
         ExecContextPtr xc;
         uint64_t src1;
         uint64_t src2;
@@ -81,7 +82,7 @@ public:
         bool issued;
     };
 
-    InstQueue(const InstQueueParams &params);
+    InstQueue(const InstQueueParams& params);
     ~InstQueue();
 
     void startTicking(VectorEngine& vector_wrapper/*,
@@ -91,35 +92,40 @@ public:
 
     bool arith_queue_full();
     bool mem_queue_full();
-    //overrides
+    // overrides
     void regStats() override;
     void evaluate() override;
 
-    void printInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn);
-    void printMemInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn);
-    void printArithInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn);
-    void printVectorRegisterMoveInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_dyn_insn);
+    void printInst(
+            RiscvISA::VectorStaticInst& insn, VectorDynInst* vector_dyn_insn);
+    void printMemInst(
+            RiscvISA::VectorStaticInst& insn, VectorDynInst* vector_dyn_insn);
+    void printArithInst(
+            RiscvISA::VectorStaticInst& insn, VectorDynInst* vector_dyn_insn);
+    void printVectorRegisterMoveInst(
+            RiscvISA::VectorStaticInst& insn, VectorDynInst* vector_dyn_insn);
 
-protected:
+  protected:
     bool occupied;
 
-public:
-    std::deque<QueueEntry *> Instruction_Queue;
-    std::deque<QueueEntry *> Memory_Queue;
+  public:
+    std::deque<QueueEntry*> Instruction_Queue;
+    std::deque<QueueEntry*> Memory_Queue;
     bool OoO_queues;
     uint64_t vector_mem_queue_size;
     uint64_t vector_arith_queue_size;
-private:
+
+  private:
     VectorEngine* vectorwrapper;
     bool dst_dp;
-    //std::function<void(uint8_t*,uint8_t)> dataCallback;
-    //std::function<void()> dependencie_callback;
-public:
+    // std::function<void(uint8_t*,uint8_t)> dataCallback;
+    // std::function<void()> dependencie_callback;
+  public:
     Stats::Scalar VectorMemQueueSlotsUsed;
     Stats::Scalar VectorArithQueueSlotsUsed;
 };
 
-}
+} // namespace RiscvISA
 
-}
+} // namespace gem5
 #endif //__CPU_INST_QUEUE_HH__

@@ -55,37 +55,38 @@ class VectorEngine;
 class VectorLane : public SimObject
 {
   public:
-    VectorLane(const VectorLaneParams &params);
+    VectorLane(const VectorLaneParams& params);
     ~VectorLane();
 
     bool isOccupied();
-    void issue(VectorEngine& vector_wrapper,RiscvISA::VectorStaticInst& insn,
-        VectorDynInst *dyn_insn, ExecContextPtr& xc, uint64_t src1,
-        uint64_t vtype,uint64_t vl,
-        std::function<void(Fault fault)> done_callback);
-    //internal state for current instruction
-    //these need to be public so Datapath can access them
+    void issue(VectorEngine& vector_wrapper, RiscvISA::VectorStaticInst& insn,
+            VectorDynInst* dyn_insn, ExecContextPtr& xc, uint64_t src1,
+            uint64_t vtype, uint64_t vl,
+            std::function<void(Fault fault)> done_callback);
+    // internal state for current instruction
+    // these need to be public so Datapath can access them
     std::deque<uint8_t*> AdataQ;
     std::deque<uint8_t*> BdataQ;
     std::deque<uint8_t*> MdataQ;
     std::deque<uint8_t*> DstdataQ;
     uint64_t data_acc_dp;
     uint32_t data_acc_sp;
+
   protected:
     uint64_t lane_id;
     bool occupied;
-    MemUnitReadTiming * srcAReader;
-    MemUnitReadTiming * srcBReader;
-    MemUnitReadTiming * srcMReader;
-    MemUnitReadTiming * dstReader;
-    MemUnitWriteTiming * dstWriter;
+    MemUnitReadTiming* srcAReader;
+    MemUnitReadTiming* srcBReader;
+    MemUnitReadTiming* srcMReader;
+    MemUnitReadTiming* dstReader;
+    MemUnitWriteTiming* dstWriter;
 
   private:
-    //configuration from python object
-    Datapath * dataPath;
+    // configuration from python object
+    Datapath* dataPath;
     VectorEngine* vectorwrapper;
 
-    //internal state for current instruction
+    // internal state for current instruction
     uint64_t Aread;
     uint64_t Bread;
     uint64_t Mread;
@@ -106,7 +107,7 @@ class VectorLane : public SimObject
     bool vi_op;
 };
 
-}
+} // namespace RiscvISA
 
-}
+} // namespace gem5
 #endif // __CPU_VECTOR_EXE_UNIT_HH__

@@ -32,17 +32,17 @@
 #define __CPU_VECTOR_REG_HH__
 
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <vector>
-#include <functional>
 
 #include "base/statistics.hh"
 #include "base/types.hh"
+#include "debug/VectorRegister.hh"
 #include "mem/abstract_mem.hh"
 #include "mem/packet.hh"
 #include "mem/qport.hh"
 #include "params/VectorRegister.hh"
-#include "debug/VectorRegister.hh"
 #include "sim/faults.hh"
 #include "sim/sim_object.hh"
 
@@ -54,12 +54,12 @@ namespace RiscvISA
 
 class VectorRegister : public ClockedObject
 {
-public:
+  public:
     class VectorRegisterPort : public QueuedResponsePort
     {
       public:
-        VectorRegisterPort(const std::string& name,
-            VectorRegister& vector_reg);
+        VectorRegisterPort(
+                const std::string& name, VectorRegister& vector_reg);
 
       protected:
         Tick recvAtomic(PacketPtr pkt) override;
@@ -72,21 +72,21 @@ public:
         VectorRegister& vector_reg;
     };
 
-public:
-    VectorRegister(const VectorRegisterParams &params);
+  public:
+    VectorRegister(const VectorRegisterParams& params);
     ~VectorRegister();
 
-    Port& getPort(const std::string& if_name,
-                                  PortID idx = InvalidPortID) override;
+    Port& getPort(
+            const std::string& if_name, PortID idx = InvalidPortID) override;
 
     // called by the VectorRegisterPort on a received packet
-    bool handleTimingReq(PacketPtr pkt, VectorRegisterPort *port);
+    bool handleTimingReq(PacketPtr pkt, VectorRegisterPort* port);
     void regStats() override;
     // Return the size of the register file in bytes
     uint64_t get_size();
-private:
 
-    //python configuration
+  private:
+    // python configuration
     const uint64_t num_lanes;
     const uint64_t num_regs;
     const uint64_t mvl;
@@ -95,22 +95,23 @@ private:
     const uint64_t numPorts;
     const uint64_t accessLatency;
 
-    //how many bytes per line are distributed to each bank
+    // how many bytes per line are distributed to each bank
     uint64_t numBanks;
     uint64_t bytesPerBankAccess;
 
     // the Response port to access the vector_reg
-    std::vector<VectorRegisterPort *> ports;
+    std::vector<VectorRegisterPort*> ports;
 
-    //the physical vector_reg storage
-    uint8_t * data;
-public:
+    // the physical vector_reg storage
+    uint8_t* data;
+
+  public:
     Stats::Scalar numReads_64bit_elements;
     Stats::Scalar numWritess_64bit_elements;
     Stats::Scalar numReads_perLane_64bit_elements;
     Stats::Scalar numWritess_perLane_64bit_elements;
 };
 
-}
-}
+} // namespace RiscvISA
+} // namespace gem5
 #endif //__CPU_VECTOR_REG_HH__

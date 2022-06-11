@@ -56,65 +56,67 @@ class VectorEngine;
 
 class VectorEngineInterface : public SimObject
 {
-public:
-    VectorEngineInterface(const VectorEngineInterfaceParams &params);
+  public:
+    VectorEngineInterface(const VectorEngineInterfaceParams& params);
     ~VectorEngineInterface();
 
     /**
-    * requestGrant function is used by the scalar to ask for permision to send
-    * a new vector instruction to the vector engine.
-    */
+     * requestGrant function is used by the scalar to ask for permision to send
+     * a new vector instruction to the vector engine.
+     */
     bool requestGrant(RiscvISA::VectorStaticInst* insn);
 
     /**
-    * sendCommand function receives the command from the scalar core
-    * and sent it to the vector engine. Previous to use this function,
-    * a granted signal  from the vector engine must be received, otherwise,
-    * the command must not be send.
-    */
-    void sendCommand(RiscvISA::VectorStaticInst *vinst ,ExecContextPtr& xc ,
-        uint64_t src1, uint64_t src2, std::function<void()> done_callback);
+     * sendCommand function receives the command from the scalar core
+     * and sent it to the vector engine. Previous to use this function,
+     * a granted signal  from the vector engine must be received, otherwise,
+     * the command must not be send.
+     */
+    void sendCommand(RiscvISA::VectorStaticInst* vinst, ExecContextPtr& xc,
+            uint64_t src1, uint64_t src2, std::function<void()> done_callback);
 
     /**
-    * reqAppVectorLength function is used by the vector configuration
-    * instructions. This instructions ask to the vector engine for some
-    * vector length, and the vector engine answer with the available one.
-    */
-    uint64_t reqAppVectorLength(uint64_t vl, uint64_t vtype,
-        uint64_t rs1, uint64_t rd);
+     * reqAppVectorLength function is used by the vector configuration
+     * instructions. This instructions ask to the vector engine for some
+     * vector length, and the vector engine answer with the available one.
+     */
+    uint64_t reqAppVectorLength(
+            uint64_t vl, uint64_t vtype, uint64_t rs1, uint64_t rd);
 
     /**
-    * handleVectorConfig function is used by the vector configuration
-    * instructions. This function is an API exposed by ve_interface
-    */
-    void handleVectorConfig(RiscvISA::VectorStaticInst *vinst,
-        ExecContextPtr& xc, uint64_t& vl, uint64_t& vtype);
+     * handleVectorConfig function is used by the vector configuration
+     * instructions. This function is an API exposed by ve_interface
+     */
+    void handleVectorConfig(RiscvISA::VectorStaticInst* vinst,
+            ExecContextPtr& xc, uint64_t& vl, uint64_t& vtype);
 
     /**
-    * bussy function is used by the scalar core to know the state of the vector
-    * engine. "1" means that the vector engine has vector instructions either
-    * in the instructions queues, memory unit o vector lanes. It is useful for
-    * synchronization.
-    */
+     * bussy function is used by the scalar core to know the state of the
+     * vector engine. "1" means that the vector engine has vector instructions
+     * either in the instructions queues, memory unit o vector lanes. It is
+     * useful for synchronization.
+     */
     bool bussy();
 
     /**
      * @brief Get the Vector Engine object
-     * 
-     * @return VectorEngine* 
+     *
+     * @return VectorEngine*
      */
-    VectorEngine * getVectorEngine(){
+    VectorEngine*
+    getVectorEngine()
+    {
         return vector_engine;
     };
 
-private:
+  private:
     /**
     The vector Engine
     */
-    VectorEngine *vector_engine;
+    VectorEngine* vector_engine;
 };
 
-}
+} // namespace RiscvISA
 
-}
+} // namespace gem5
 #endif // __CPU_VECTOR_ENGINE_INTERFACE_HH__

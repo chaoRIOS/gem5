@@ -46,22 +46,19 @@ namespace RiscvISA
  *  Vector Renaming
  */
 VectorRename::VectorRename(const VectorRenameParams &params) :
-SimObject(SimObjectParams(params)), PhysicalRegs(params.PhysicalRegs)
+    SimObject(SimObjectParams(params)), PhysicalRegs(params.PhysicalRegs)
 {
     DPRINTF(VectorRename, "Created the Renaming Unit object \n");
-    for (uint64_t i=32; i<PhysicalRegs; i++) {
-            frl_mem.push_back(i);
-        }
-    for (uint64_t i=0; i<LogicalRegs; i++) {
-            rat_mem[i]=i;
-        }
+    for (uint64_t i = 32; i < PhysicalRegs; i++) {
+        frl_mem.push_back(i);
+    }
+    for (uint64_t i = 0; i < LogicalRegs; i++) {
+        rat_mem[i] = i;
+    }
 }
 
-VectorRename::~VectorRename()
-{
-}
+VectorRename::~VectorRename() {}
 
-}
+} // namespace RiscvISA
 
-
-}
+} // namespace gem5

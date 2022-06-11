@@ -54,91 +54,95 @@ class VectorLane;
  */
 class Datapath : public TickedObject
 {
-private:
-    class TimedFunc {
+  private:
+    class TimedFunc
+    {
       public:
         TimedFunc(uint64_t cyclesLeft, std::function<void(void)> execute) :
-            cyclesLeft(cyclesLeft), execute(execute) {}
+            cyclesLeft(cyclesLeft), execute(execute)
+        {}
         ~TimedFunc() {}
 
         uint64_t cyclesLeft;
         std::function<void(void)> execute;
     };
 
-public:
-    Datapath(const DatapathParams &params);
+  public:
+    Datapath(const DatapathParams& params);
     ~Datapath();
 
     void get_instruction_latency();
 
     double compute_double_fp_op(double Aitem, double Bitem, uint8_t Mitem,
-        double Dstitem, RiscvISA::VectorStaticInst* insn);
-    double computeDoubleFPReduction(double accumDp,double Bitem,uint8_t Mitem);
-    long int compute_double_fp_comp_op(double Aitem, double Bitem,
-        RiscvISA::VectorStaticInst* insn);
+            double Dstitem, RiscvISA::VectorStaticInst* insn);
+    double computeDoubleFPReduction(
+            double accumDp, double Bitem, uint8_t Mitem);
+    long int compute_double_fp_comp_op(
+            double Aitem, double Bitem, RiscvISA::VectorStaticInst* insn);
 
-    
+    float compute_float_fp_op(float Aitem, float Bitem, uint8_t Mitem,
+            float Dstitem, RiscvISA::VectorStaticInst* insn);
+    float computeSingleFPReduction(float accumSp, float Bitem, uint8_t Mitem);
+    int compute_float_fp_comp_op(
+            float Aitem, float Bitem, RiscvISA::VectorStaticInst* insn);
 
-    float compute_float_fp_op(float Aitem, float Bitem,  uint8_t Mitem,
-        float Dstitem, RiscvISA::VectorStaticInst* insn);
-    float computeSingleFPReduction(float accumSp,float Bitem,uint8_t Mitem);
-    int compute_float_fp_comp_op(float Aitem, float Bitem ,
-        RiscvISA::VectorStaticInst* insn);
+    long int computeLongIntReduction(
+            long int accumDp, long int Bitem, uint8_t Mitem);
+    int computeIntReduction(int accumDp, int Bitem, uint8_t Mitem);
+    int16_t computeInt16Reduction(
+            int16_t accumDp, int16_t Bitem, uint8_t Mitem);
+    int8_t computeInt8Reduction(int8_t accumDp, int8_t Bitem, uint8_t Mitem);
 
-    long int computeLongIntReduction(long int accumDp,long int Bitem,uint8_t Mitem);
-    int computeIntReduction(int accumDp,int Bitem,uint8_t Mitem);
-    int16_t computeInt16Reduction(int16_t accumDp,int16_t Bitem,uint8_t Mitem);
-    int8_t computeInt8Reduction(int8_t accumDp,int8_t Bitem,uint8_t Mitem);
+    long int compute_long_int_op(long int Aitem, long int Bitem, uint8_t Mitem,
+            long int Dstitem, RiscvISA::VectorStaticInst* insn);
+    int compute_int_op(int Aitem, int Bitem, uint8_t Mitem, int Dstitem,
+            RiscvISA::VectorStaticInst* insn);
+    int16_t compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem,
+            int16_t Dstitem, RiscvISA::VectorStaticInst* insn);
+    int8_t compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem,
+            int8_t Dstitem, RiscvISA::VectorStaticInst* insn);
 
-    long int compute_long_int_op(long int Aitem, long int Bitem,
-        uint8_t Mitem, long int Dstitem, RiscvISA::VectorStaticInst* insn);
-    int compute_int_op(int Aitem, int Bitem,  uint8_t Mitem, int Dstitem,
-        RiscvISA::VectorStaticInst* insn);
-    int16_t compute_int16_op(int16_t Aitem, int16_t Bitem, uint8_t Mitem, int16_t Dstitem,
-        RiscvISA::VectorStaticInst* insn);
-    int8_t compute_int8_op(int8_t Aitem, int8_t Bitem, uint8_t Mitem, int8_t Dstitem,
-        RiscvISA::VectorStaticInst* insn);
+    template <typename WT, typename UWT, typename T, typename UT>
+    WT compute_widening_op(WT Aitem, WT Bitem, uint8_t Mitem, WT Dstitem,
+            RiscvISA::VectorStaticInst* insn);
 
-    template<typename WT, typename UWT, typename T, typename UT> WT 
-    compute_widening_op(WT Aitem, WT Bitem,  uint8_t Mitem, WT Dstitem,
-    RiscvISA::VectorStaticInst* insn);
+    long int computeLongMaskLogicalOp(
+            bool Aitem, bool Bitem, RiscvISA::VectorStaticInst* insn);
+    int computeIntMaskLogicalOp(
+            bool Aitem, bool Bitem, RiscvISA::VectorStaticInst* insn);
 
-    long int computeLongMaskLogicalOp(bool Aitem, bool Bitem,
-        RiscvISA::VectorStaticInst* insn);
-    int computeIntMaskLogicalOp(bool Aitem, bool Bitem,
-        RiscvISA::VectorStaticInst* insn);
+    double compute_cvt_f_x_64_op(long int Bitem, uint8_t Mitem,
+            long int Dstitem, RiscvISA::VectorStaticInst* insn);
+    float compute_cvt_f_x_32_op(int Bitem, uint8_t Mitem, int Dstitem,
+            RiscvISA::VectorStaticInst* insn);
 
-    double compute_cvt_f_x_64_op( long int Bitem, uint8_t Mitem,
-        long int Dstitem, RiscvISA::VectorStaticInst* insn);
-    float compute_cvt_f_x_32_op( int Bitem, uint8_t Mitem, int Dstitem,
-        RiscvISA::VectorStaticInst* insn);
+    long int compute_cvt_x_f_64_op(double Bitem, uint8_t Mitem, double Dstitem,
+            RiscvISA::VectorStaticInst* insn);
+    int compute_cvt_x_f_32_op(float Bitem, uint8_t Mitem, float Dstitem,
+            RiscvISA::VectorStaticInst* insn);
 
-    long int compute_cvt_x_f_64_op( double Bitem, uint8_t Mitem,
-        double Dstitem, RiscvISA::VectorStaticInst* insn);
-    int compute_cvt_x_f_32_op( float Bitem, uint8_t Mitem, float Dstitem,
-        RiscvISA::VectorStaticInst* insn);
-
-    double compute_cvt_f64_x32_op( int Bitem, uint8_t Mitem, int Dstitem,
-        RiscvISA::VectorStaticInst* insn);
-
+    double compute_cvt_f64_x32_op(int Bitem, uint8_t Mitem, int Dstitem,
+            RiscvISA::VectorStaticInst* insn);
 
     void startTicking(VectorLane& data_op_unit,
-        RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc, uint64_t src_count,
-        uint64_t dst_count, uint64_t vsew, uint64_t slide_count,uint64_t src1,
-        std::function<void(uint8_t*,uint8_t,bool)> data_callback);
+            RiscvISA::VectorStaticInst& insn, ExecContextPtr& xc,
+            uint64_t src_count, uint64_t dst_count, uint64_t vsew,
+            uint64_t slide_count, uint64_t src1,
+            std::function<void(uint8_t*, uint8_t, bool)> data_callback);
 
     template <typename data_type>
     data_type compute_integer_op(data_type Aitem, data_type Bitem,
-        uint8_t Mitem, data_type Dstitem, RiscvISA::VectorStaticInst* insn);
+            uint8_t Mitem, data_type Dstitem,
+            RiscvISA::VectorStaticInst* insn);
 
     void stopTicking();
     void evaluate() override;
     void regStats() override;
 
-private:
-    //Operation Latency
+  private:
+    // Operation Latency
     uint64_t Oplatency;
-    //Number of Vector Lanes
+    // Number of Vector Lanes
     const uint64_t VectorLanes;
 
     bool slide_infligh;
@@ -153,12 +157,12 @@ private:
     /*********************************
      * Slide Operations
      */
-    bool vslideup,vslidedown;
-    bool vslide1up,vslide1down;
+    bool vslideup, vslidedown;
+    bool vslide1up, vslide1down;
     /*********************************
      * Operations with mask
      */
-    bool vcpop,vfirst;
+    bool vcpop, vfirst;
     /*********************************
      * Operation type
      */
@@ -187,12 +191,12 @@ private:
     bool arith3Srcs;
 
     bool op_imm;
-        // Masked Operation
+    // Masked Operation
     bool vm;
 
-//--------------------------------------------------------------
-private:
-    //state passed in for current instruction
+    //--------------------------------------------------------------
+  private:
+    // state passed in for current instruction
     VectorLane* vector_lane;
     RiscvISA::VectorStaticInst* insn;
     ExecContextPtr* xc;
@@ -202,11 +206,11 @@ private:
 
     uint64_t slide_count;
     uint64_t vsew;
-    std::function<void(uint8_t*,uint8_t,bool)> dataCallback;
+    std::function<void(uint8_t*, uint8_t, bool)> dataCallback;
 
-    //internal state for current instruction
-    std::deque<TimedFunc *> vecFuncs;
-    std::deque<TimedFunc *> reduceFuncs;
+    // internal state for current instruction
+    std::deque<TimedFunc*> vecFuncs;
+    std::deque<TimedFunc*> reduceFuncs;
     uint64_t curSrcCount;
     uint64_t curDstCount;
 
@@ -214,7 +218,7 @@ private:
     long int accum_mask;
     long int first_set_mask;
     double accumDp;
-    float  accumSp;
+    float accumSp;
     long int accumLongInt;
     int accumInt;
     int16_t accumInt16;
@@ -231,7 +235,8 @@ private:
     // TODO: Pass the MVL parameter to initialize the size of these vectors
     uint64_t srcB_data_slide_64[256];
     uint32_t srcB_data_slide_32[256];
-public:
+
+  public:
     // Stats for McPAT
     Stats::Scalar numFP64_operations;
     Stats::Scalar numFP32_operations;
@@ -245,8 +250,7 @@ public:
     Stats::Scalar numMUL8_operations;
 };
 
+} // namespace RiscvISA
 
-}
-
-}
+} // namespace gem5
 #endif //__CPU_VECTOR_LANE_DATAPATH_HH__

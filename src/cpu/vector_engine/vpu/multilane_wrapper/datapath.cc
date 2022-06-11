@@ -46,28 +46,22 @@ namespace gem5
 namespace RiscvISA
 {
 
-
 Datapath::Datapath(const DatapathParams &params) :
     TickedObject(TickedObjectParams(params)), VectorLanes(params.VectorLanes)
-{
-}
+{}
 
-Datapath::~Datapath()
-{
-}
-
+Datapath::~Datapath() {}
 
 void
-Datapath::startTicking(
-    VectorLane& data_op_unit, RiscvISA::VectorStaticInst& insn,
-    ExecContextPtr& xc, 
-    uint64_t src_count, uint64_t dst_count, uint64_t vsew,
-    uint64_t slide_count, uint64_t src1,
-    std::function<void(uint8_t*,uint8_t,bool)> data_callback)
+Datapath::startTicking(VectorLane &data_op_unit,
+        RiscvISA::VectorStaticInst &insn, ExecContextPtr &xc,
+        uint64_t src_count, uint64_t dst_count, uint64_t vsew,
+        uint64_t slide_count, uint64_t src1,
+        std::function<void(uint8_t *, uint8_t, bool)> data_callback)
 {
     assert(!running);
 
-    //copy over the configuration inputs
+    // copy over the configuration inputs
     this->vector_lane = &data_op_unit;
     this->insn = &insn;
     this->xc = &xc;
@@ -77,7 +71,7 @@ Datapath::startTicking(
     this->slide_count = slide_count;
     this->src1 = src1;
     this->dataCallback = data_callback;
-    //reset all state
+    // reset all state
     vecFuncs.clear();
     curSrcCount = 0;
     curDstCount = 0;
@@ -93,63 +87,65 @@ Datapath::startTicking(
     red_SrcCount = 0;
     slide_SrcCount = 0;
     srcB_data_slide_count = 0;
-    //reset config
-    is_FP           =0;
-    is_INT          =0;
-    is_convert      =0;
-    is_slide        =0;
-    isVectorRegisterMove =0;
-    isVectorIntegerWidening =0;
-    isVectorIntegerWideningCrossSew =0;
+    // reset config
+    is_FP = 0;
+    is_INT = 0;
+    is_convert = 0;
+    is_slide = 0;
+    isVectorRegisterMove = 0;
+    isVectorIntegerWidening = 0;
+    isVectorIntegerWideningCrossSew = 0;
 
-    vector_set      =0;
+    vector_set = 0;
 
-    is_mask_logical =0;
-    is_FP_Comp      =0;
-    is_INT_to_FP    =0;
-    is_FP_to_INT    =0;
-    reduction_first_done =0;
-    slide_infligh   =0;
-
+    is_mask_logical = 0;
+    is_FP_Comp = 0;
+    is_INT_to_FP = 0;
+    is_FP_to_INT = 0;
+    reduction_first_done = 0;
+    slide_infligh = 0;
 
     std::string operation = this->insn->getName();
 
     /* Default Operation Latency
      * Note: In case the Operation takes more than 1 cycle to be executed
-     * the instruction should be added to inst_latency.hh file to define 
+     * the instruction should be added to inst_latency.hh file to define
      * the new lantecy
      */
-    Oplatency       =1;
+    Oplatency = 1;
     /*get the instruction latency in case it is not 1*/
     get_instruction_latency();
 
     /* 4 main groups */
-    is_FP         = this->insn->isFP();
-    is_INT        = this->insn->isInt();
-    is_convert    = this->insn->isConvert();
-    is_slide      =  this->insn->is_slide();
+    is_FP = this->insn->isFP();
+    is_INT = this->insn->isInt();
+    is_convert = this->insn->isConvert();
+    is_slide = this->insn->is_slide();
     assert(is_FP || is_INT || is_slide || is_convert);
 
     /* Masked Operation? */
     vm = this->insn->vm();
 
     /* Number of sources used by the isntruction */
-    arith1Src     = this->insn->arith1Src();
-    arith2Srcs    = this->insn->arith2Srcs();
-    arith3Srcs    = this->insn->arith3Srcs();
+    arith1Src = this->insn->arith1Src();
+    arith2Srcs = this->insn->arith2Srcs();
+    arith3Srcs = this->insn->arith3Srcs();
     /* Conversion between Int<->FP */
-    isWidening    = this->insn->isWidening(); // Limited Widening support only for conversions
-    isNarrowing   = this->insn->isNarrowing(); // Limited Widening support only for conversions
-    is_INT_to_FP    = this->insn->isConvertIntToFP();
-    is_FP_to_INT    = this->insn->isConvertFPToInt();
+    isWidening = this->insn->isWidening(); // Limited Widening support only for
+                                           // conversions
+    isNarrowing = this->insn->isNarrowing(); // Limited Widening support only
+                                             // for conversions
+    is_INT_to_FP = this->insn->isConvertIntToFP();
+    is_FP_to_INT = this->insn->isConvertFPToInt();
     isVectorRegisterMove = this->insn->isVectorRegisterMove();
     isVectorIntegerWidening = this->insn->isVectorIntegerWidening();
-    isVectorIntegerWideningCrossSew = this->insn->isVectorIntegerWideningCrossSew();
+    isVectorIntegerWideningCrossSew =
+            this->insn->isVectorIntegerWideningCrossSew();
 
     /* isFPCompare is a FP subset */
-    is_FP_Comp  = this->insn->isFPCompare();
+    is_FP_Comp = this->insn->isFPCompare();
     /* INT operation with an immediate */
-    op_imm = (this->insn->func3()==3);
+    op_imm = (this->insn->func3() == 3);
     /*reduction*/
     reduction = this->insn->is_reduction();
     /* Floating point reductions */
@@ -157,7 +153,7 @@ Datapath::startTicking(
     /* Int reductions */
     int_reduction = this->insn->is_reduction() && this->insn->isInt();
     /* Vector Slides */
-    vslideup =  this->insn->is_slideup();
+    vslideup = this->insn->is_slideup();
     vslide1up = (operation == "vslide1up_vx");
     vslidedown = this->insn->is_slidedown();
     vslide1down = (operation == "vslide1down_vx");
@@ -166,21 +162,24 @@ Datapath::startTicking(
     vfirst = (operation == "vfirst_m");
     is_mask_logical = this->insn->VectorMaskLogical();
 
-    vector_set =  ((operation == "vmv_vx") || (operation == "vmv_vi") || (operation == "vfmv_vf"));
+    vector_set = ((operation == "vmv_vx") || (operation == "vmv_vi") ||
+                  (operation == "vfmv_vf"));
 
-    DATA_SIZE = vsew/8; // Esto cambiará para widening y narrowing
-    DST_SIZE = ((isWidening && (vsew == 32)) || isVectorIntegerWidening) ? vsew/4 :vsew/8;  // Esto cambiará para widening y narrowing
+    DATA_SIZE = vsew / 8; // Esto cambiará para widening y narrowing
+    DST_SIZE = ((isWidening && (vsew == 32)) || isVectorIntegerWidening) ?
+                       vsew / 4 :
+                       vsew / 8; // Esto cambiará para widening y narrowing
 
-    //Accumulator for reductions, vcpop and vfirst
+    // Accumulator for reductions, vcpop and vfirst
     accum_mask = 0;
     first_set_mask = -1;
 
-    
 #ifdef DEBUG
     uint64_t pc = this->insn->getPC();
-    DPRINTF(Datapath,"Executing inst %s, pc 0x%lx, Oplatency = %d,"
-        " DataType = %d-bit\n" , this->insn->getName(),*(uint64_t*)&pc,
-        Oplatency , DATA_SIZE*8);
+    DPRINTF(Datapath,
+            "Executing inst %s, pc 0x%lx, Oplatency = %d,"
+            " DataType = %d-bit\n",
+            this->insn->getName(), *(uint64_t *)&pc, Oplatency, DATA_SIZE * 8);
 #endif
     start();
 }
@@ -197,36 +196,26 @@ Datapath::regStats()
 {
     TickedObject::regStats();
 
-    numFP64_operations
-        .name(name() + ".numFP64_operations")
-        .desc("Number of 64-bit Floating-point operations");
-    numFP32_operations
-        .name(name() + ".numFP32_operations")
-        .desc("Number of 32-bit Floating-point operations");
-    numALU64_operations
-        .name(name() + ".numALU64_operations")
-        .desc("Number of 64-bit ALU operations");
-    numALU32_operations
-        .name(name() + ".numALU32_operations")
-        .desc("Number of 32-bit ALU operations");
-    numALU16_operations
-        .name(name() + ".numALU16_operations")
-        .desc("Number of 16-bit ALU operations");
-    numALU8_operations
-        .name(name() + ".numALU8_operations")
-        .desc("Number of 8-bit ALU operations");
-    numMUL64_operations
-        .name(name() + ".numMUL64_operations")
-        .desc("Number of 64-bit Integer Multiplication operations");
-    numMUL32_operations
-        .name(name() + ".numMUL32_operations")
-        .desc("Number of 32-bit Integer Multiplication operations");
-    numMUL16_operations
-        .name(name() + ".numMUL16_operations")
-        .desc("Number of 16-bit Integer Multiplication operations");
-    numMUL8_operations
-        .name(name() + ".numMUL8_operations")
-        .desc("Number of 8-bit Integer Multiplication operations");
+    numFP64_operations.name(name() + ".numFP64_operations")
+            .desc("Number of 64-bit Floating-point operations");
+    numFP32_operations.name(name() + ".numFP32_operations")
+            .desc("Number of 32-bit Floating-point operations");
+    numALU64_operations.name(name() + ".numALU64_operations")
+            .desc("Number of 64-bit ALU operations");
+    numALU32_operations.name(name() + ".numALU32_operations")
+            .desc("Number of 32-bit ALU operations");
+    numALU16_operations.name(name() + ".numALU16_operations")
+            .desc("Number of 16-bit ALU operations");
+    numALU8_operations.name(name() + ".numALU8_operations")
+            .desc("Number of 8-bit ALU operations");
+    numMUL64_operations.name(name() + ".numMUL64_operations")
+            .desc("Number of 64-bit Integer Multiplication operations");
+    numMUL32_operations.name(name() + ".numMUL32_operations")
+            .desc("Number of 32-bit Integer Multiplication operations");
+    numMUL16_operations.name(name() + ".numMUL16_operations")
+            .desc("Number of 16-bit Integer Multiplication operations");
+    numMUL8_operations.name(name() + ".numMUL8_operations")
+            .desc("Number of 8-bit Integer Multiplication operations");
 }
 
 void
@@ -238,146 +227,128 @@ Datapath::evaluate()
     }
 
     if (vecFuncs.size()) {
-      TimedFunc * vecFunc = vecFuncs.front();
-      if (vecFunc->cyclesLeft == 0) {
-          vecFuncs.pop_front();
-          vecFunc->execute();
-          delete vecFunc;
-      }
+        TimedFunc *vecFunc = vecFuncs.front();
+        if (vecFunc->cyclesLeft == 0) {
+            vecFuncs.pop_front();
+            vecFunc->execute();
+            delete vecFunc;
+        }
     }
 
     /*
-        Checking operand queue length >= length of required operands 
+        Checking operand queue length >= length of required operands
     */
-    uint64_t max_simd_items = VectorLanes*(sizeof(double)/DST_SIZE);
-    uint64_t simd_size = std::min(max_simd_items, srcCount-curSrcCount);
+    uint64_t max_simd_items = VectorLanes * (sizeof(double) / DST_SIZE);
+    uint64_t simd_size = std::min(max_simd_items, srcCount - curSrcCount);
 
-    if (simd_size == 0)
-    {
+    if (simd_size == 0) {
         return;
     }
 
-    if ((vm==0)) // Masked Operations uses
+    if ((vm == 0)) // Masked Operations uses
     {
-        if (reduction)
-        {
-            if ((vector_lane->MdataQ.size() < simd_size))
-            {
+        if (reduction) {
+            if ((vector_lane->MdataQ.size() < simd_size)) {
                 return;
             }
-        }
-        else if ((vector_lane->MdataQ.size() < simd_size)
-            | (vector_lane->DstdataQ.size() < simd_size))
-        {
+        } else if ((vector_lane->MdataQ.size() < simd_size) |
+                   (vector_lane->DstdataQ.size() < simd_size)) {
             return;
         }
     }
 
     if (arith3Srcs) // 3 sources operation
     {
-        if ( (vector_lane->AdataQ.size() < simd_size) |
-            (vector_lane->BdataQ.size() < simd_size) |
-            (vector_lane->DstdataQ.size() < simd_size))
-        {
-           return;
-        }
-    }
-    else if (reduction)   // Reduction Operation
-    {
-        if ( (vector_lane->BdataQ.size() < simd_size) ||
-            ((vector_lane->AdataQ.size() < 1) && !reduction))
-        {
+        if ((vector_lane->AdataQ.size() < simd_size) |
+                (vector_lane->BdataQ.size() < simd_size) |
+                (vector_lane->DstdataQ.size() < simd_size)) {
             return;
         }
-    }
-    else if (arith2Srcs)  // 2 sources operation
+    } else if (reduction) // Reduction Operation
     {
-        if((vector_lane->AdataQ.size() < simd_size) && vector_set) {
+        if ((vector_lane->BdataQ.size() < simd_size) ||
+                ((vector_lane->AdataQ.size() < 1) && !reduction)) {
+            return;
+        }
+    } else if (arith2Srcs) // 2 sources operation
+    {
+        if ((vector_lane->AdataQ.size() < simd_size) && vector_set) {
             return;
         } else if (((vector_lane->AdataQ.size() < simd_size) |
-            (vector_lane->BdataQ.size() < simd_size) ) && !vector_set )
-        {
+                           (vector_lane->BdataQ.size() < simd_size)) &&
+                   !vector_set) {
             return;
         }
-    }
-    else if (is_slide)
-    {
-        DPRINTF(Datapath," Is slide \n");
-        if (( vector_lane->BdataQ.size() < simd_size ) |
-            slide_infligh | (vector_lane->DstdataQ.size() < simd_size))
-        {
+    } else if (is_slide) {
+        DPRINTF(Datapath, " Is slide \n");
+        if ((vector_lane->BdataQ.size() < simd_size) | slide_infligh |
+                (vector_lane->DstdataQ.size() < simd_size)) {
             return;
         }
-    }
-    else if (arith1Src)  // 1 source operation (src2)
+    } else if (arith1Src) // 1 source operation (src2)
     {
-        if ( vector_lane->BdataQ.size() < simd_size )
-        {
+        if (vector_lane->BdataQ.size() < simd_size) {
             return;
         }
     }
 
-    uint8_t * Adata = (uint8_t *)malloc(simd_size*DATA_SIZE);
-    uint8_t * Bdata = (uint8_t *)malloc(simd_size*DATA_SIZE);
-    uint8_t * Mdata = (uint8_t *)malloc(simd_size);
-    uint8_t * Dstdata = (uint8_t *)malloc(simd_size*DATA_SIZE);
+    uint8_t *Adata = (uint8_t *)malloc(simd_size * DATA_SIZE);
+    uint8_t *Bdata = (uint8_t *)malloc(simd_size * DATA_SIZE);
+    uint8_t *Mdata = (uint8_t *)malloc(simd_size);
+    uint8_t *Dstdata = (uint8_t *)malloc(simd_size * DATA_SIZE);
 
     /*
         Filling operands from Vector Lane's operand queues
     */
-    for (uint64_t i=0; i<simd_size; ++i) {
-
+    for (uint64_t i = 0; i < simd_size; ++i) {
         /*
          * Reduction instruction
          */
-        if (reduction)
-        {
-            if (vector_lane->AdataQ.size() > 0)
-            {
-                if (fp_reduction)
-                {
+        if (reduction) {
+            if (vector_lane->AdataQ.size() > 0) {
+                if (fp_reduction) {
                     uint8_t *Aitem = vector_lane->AdataQ.front();
-                    memcpy(Adata+(i*DATA_SIZE), Aitem, DATA_SIZE);
+                    memcpy(Adata + (i * DATA_SIZE), Aitem, DATA_SIZE);
                     vector_lane->AdataQ.pop_front();
                     delete[] Aitem;
 
                     if (vsew == 64) {
-                        double Accitem = (double)((double*)Adata)[i] ;
+                        double Accitem = (double)((double *)Adata)[i];
                         accumDp = Accitem;
                     } else {
-                        float Accitem = (float)((float*)Adata)[i] ;
+                        float Accitem = (float)((float *)Adata)[i];
                         accumSp = Accitem;
                     }
-                    reduction_first_done=1;
+                    reduction_first_done = 1;
                 } else if (int_reduction) {
                     uint8_t *Aitem = vector_lane->AdataQ.front();
-                    memcpy(Adata+(i*DATA_SIZE), Aitem, DATA_SIZE);
+                    memcpy(Adata + (i * DATA_SIZE), Aitem, DATA_SIZE);
                     vector_lane->AdataQ.pop_front();
                     delete[] Aitem;
 
                     if (vsew == 64) {
-                        uint64_t Accitem = (long int)((long int*)Adata)[i] ;
+                        uint64_t Accitem = (long int)((long int *)Adata)[i];
                         accumLongInt = Accitem;
                     } else if (vsew == 32) {
-                        uint32_t Accitem = (int)((int*)Adata)[i] ;
+                        uint32_t Accitem = (int)((int *)Adata)[i];
                         accumInt = Accitem;
                     } else if (vsew == 16) {
-                        int16_t Accitem = (int16_t)((int16_t*)Adata)[i] ;
+                        int16_t Accitem = (int16_t)((int16_t *)Adata)[i];
                         accumInt16 = Accitem;
                     } else if (vsew == 8) {
-                        int8_t Accitem = (int8_t)((int8_t*)Adata)[i] ;
+                        int8_t Accitem = (int8_t)((int8_t *)Adata)[i];
                         accumInt8 = Accitem;
                     }
-                    reduction_first_done=1;
+                    reduction_first_done = 1;
                 }
             }
-        /*
-         * If aritmetic instruction with only 1 source means that src1 is not used
-         */
-        } else if (!arith1Src && !isVectorRegisterMove)
-        {
+            /*
+             * If aritmetic instruction with only 1 source means that src1 is
+             * not used
+             */
+        } else if (!arith1Src && !isVectorRegisterMove) {
             uint8_t *Aitem = vector_lane->AdataQ.front();
-            memcpy(Adata+(i*DATA_SIZE), Aitem, DATA_SIZE);
+            memcpy(Adata + (i * DATA_SIZE), Aitem, DATA_SIZE);
             vector_lane->AdataQ.pop_front();
             delete[] Aitem;
         }
@@ -385,13 +356,12 @@ Datapath::evaluate()
         /*
          * Src2 is always used by the arithmetic instructions
          */
-        if(!vector_set)
-        {
+        if (!vector_set) {
             uint8_t *Bitem = vector_lane->BdataQ.front();
             if (isVectorIntegerWideningCrossSew) {
-                memcpy(Bdata+(i*DATA_SIZE), Bitem, DATA_SIZE * 2);
+                memcpy(Bdata + (i * DATA_SIZE), Bitem, DATA_SIZE * 2);
             } else {
-                memcpy(Bdata+(i*DATA_SIZE), Bitem, DATA_SIZE);
+                memcpy(Bdata + (i * DATA_SIZE), Bitem, DATA_SIZE);
             }
             vector_lane->BdataQ.pop_front();
             delete[] Bitem;
@@ -399,30 +369,28 @@ Datapath::evaluate()
         /*
          * Mask register used by the instruction
          */
-        if (vm==0)
-        {
+        if (vm == 0) {
             uint8_t *Mitem = vector_lane->MdataQ.front();
-            memcpy(Mdata+(i*1), Mitem, 1);
+            memcpy(Mdata + (i * 1), Mitem, 1);
             vector_lane->MdataQ.pop_front();
             delete[] Mitem;
         }
         /*
          * Dstitem is used to read the old destination register.
          * This is used when:
-         *       -the instruction uses the mask register meaning that it is neecesary
-         *        to write the old element when the mask is 0 in the corresponding possition
-         *       -the instruction uses 3 sources
-         *       -the instruction is slide, the shifted position should be filled by the old
-         *        destination
-         * When reduction is enable, masked Op does not read old destination
+         *       -the instruction uses the mask register meaning that it is
+         * neecesary to write the old element when the mask is 0 in the
+         * corresponding possition -the instruction uses 3 sources -the
+         * instruction is slide, the shifted position should be filled by the
+         * old destination When reduction is enable, masked Op does not read
+         * old destination
          */
-        if (((vm==0) & !reduction) | arith3Srcs | is_slide)
-        {
+        if (((vm == 0) & !reduction) | arith3Srcs | is_slide) {
             uint8_t *Dstitem = vector_lane->DstdataQ.front();
             if (isVectorIntegerWidening && arith3Srcs) {
-                memcpy(Dstdata+(i*DATA_SIZE), Dstitem, DATA_SIZE * 2);
+                memcpy(Dstdata + (i * DATA_SIZE), Dstitem, DATA_SIZE * 2);
             } else {
-                memcpy(Dstdata+(i*DATA_SIZE), Dstitem, DATA_SIZE);
+                memcpy(Dstdata + (i * DATA_SIZE), Dstitem, DATA_SIZE);
             }
             vector_lane->DstdataQ.pop_front();
             delete[] Dstitem;
@@ -433,584 +401,615 @@ Datapath::evaluate()
     // the block of elements is partially full
     curSrcCount += simd_size;
 
-    //queue up the vecNode results for the given latency
-    vecFuncs.push_back(new TimedFunc(Oplatency,
-        [this,simd_size,Adata,Bdata,Mdata,Dstdata]() {
+    // queue up the vecNode results for the given latency
+    vecFuncs.push_back(new TimedFunc(Oplatency, [this, simd_size, Adata, Bdata,
+                                                        Mdata, Dstdata]() {
+        // create data result buffer
+        uint8_t *Ddata = (uint8_t *)malloc(simd_size * DST_SIZE);
 
-        //create data result buffer
-        uint8_t * Ddata = (uint8_t *)malloc(simd_size*DST_SIZE);
-
-        if (is_slide)
-        {
-            for (int i=0; i<simd_size; ++i)
-            {
-                if (vsew == 64)
-                {
-                    uint64_t Bitem = ((uint64_t*)Bdata)[i] ;
+        if (is_slide) {
+            for (int i = 0; i < simd_size; ++i) {
+                if (vsew == 64) {
+                    uint64_t Bitem = ((uint64_t *)Bdata)[i];
                     srcB_data_slide_64[srcB_data_slide_count] = Bitem;
-                }
-                else
-                {
-                    uint32_t Bitem = ((uint32_t*)Bdata)[i] ;
+                } else {
+                    uint32_t Bitem = ((uint32_t *)Bdata)[i];
                     srcB_data_slide_32[srcB_data_slide_count] = Bitem;
                 }
                 srcB_data_slide_count++;
             }
 
-            for (int i=0; i<simd_size; ++i)
-            {
-                if (vsew == 64)
-                {
+            for (int i = 0; i < simd_size; ++i) {
+                if (vsew == 64) {
                     uint64_t slide_1element = src1;
-                    uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                    uint64_t Dstitem = ((uint64_t*)Dstdata)[i] ;
+                    uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                    uint64_t Dstitem = ((uint64_t *)Dstdata)[i];
                     uint64_t Ditem;
-                    if (vslideup | vslide1up)
-                    {
+                    if (vslideup | vslide1up) {
                         if (vslide1up && (slide_SrcCount == 0))
                             Ditem = slide_1element;
-                        else if (slide_SrcCount>=slide_count)
-                            Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ?
-                                srcB_data_slide_64[slide_SrcCount-slide_count]:
-                                Dstitem;
+                        else if (slide_SrcCount >= slide_count)
+                            Ditem = ((vm == 1) ||
+                                            ((vm == 0) && (Mitem == 1))) ?
+                                            srcB_data_slide_64[slide_SrcCount -
+                                                               slide_count] :
+                                            Dstitem;
                         else
                             Ditem = Dstitem;
 
-                        DPRINTF(Datapath," vslideup: Ditem 0x%x "
-                            "Source 0x%x Old= 0x%x ,slide_1element = 0x%x \n",
-                            Ditem,
-                            srcB_data_slide_64[slide_SrcCount-slide_count],
-                            Dstitem , slide_1element);
-                        if (vm==0){
-                            DPRINTF(Datapath," WB Instruction is "
-                                "masked vm(%d), old(0x%x)  \n",Mitem,Dstitem);
+                        DPRINTF(Datapath,
+                                " vslideup: Ditem 0x%x "
+                                "Source 0x%x Old= 0x%x ,slide_1element = 0x%x "
+                                "\n",
+                                Ditem,
+                                srcB_data_slide_64[slide_SrcCount -
+                                                   slide_count],
+                                Dstitem, slide_1element);
+                        if (vm == 0) {
+                            DPRINTF(Datapath,
+                                    " WB Instruction is "
+                                    "masked vm(%d), old(0x%x)  \n",
+                                    Mitem, Dstitem);
                         }
-                    }
-                   else if (vslidedown | vslide1down)
-                    {
-                        if (vslide1down && (slide_SrcCount+1 == srcCount))
+                    } else if (vslidedown | vslide1down) {
+                        if (vslide1down && (slide_SrcCount + 1 == srcCount))
                             Ditem = slide_1element;
-                        else if (slide_SrcCount>=(srcCount-slide_count))
-                            Ditem =  0;
+                        else if (slide_SrcCount >= (srcCount - slide_count))
+                            Ditem = 0;
                         else
-                            Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ?
-                                srcB_data_slide_64[slide_SrcCount] : Dstitem;
+                            Ditem = ((vm == 1) ||
+                                            ((vm == 0) && (Mitem == 1))) ?
+                                            srcB_data_slide_64
+                                                    [slide_SrcCount] :
+                                            Dstitem;
 
-                        DPRINTF(Datapath," vslidedown: Ditem 0x%x "
-                            "Source 0x%x Old= 0x%x ,slide_1element = 0x%x \n",
-                            Ditem, srcB_data_slide_64[slide_SrcCount], Dstitem,
-                            slide_1element);
-                        if (vm==0) {
-                            DPRINTF(Datapath," WB Instruction is "
-                                "masked vm(%d), old(0x%x)  \n",Mitem,Dstitem);
+                        DPRINTF(Datapath,
+                                " vslidedown: Ditem 0x%x "
+                                "Source 0x%x Old= 0x%x ,slide_1element = 0x%x "
+                                "\n",
+                                Ditem, srcB_data_slide_64[slide_SrcCount],
+                                Dstitem, slide_1element);
+                        if (vm == 0) {
+                            DPRINTF(Datapath,
+                                    " WB Instruction is "
+                                    "masked vm(%d), old(0x%x)  \n",
+                                    Mitem, Dstitem);
                         }
                     }
 
-                    memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem, DST_SIZE);
+                    memcpy(Ddata + (i * DST_SIZE), (uint8_t *)&Ditem,
+                            DST_SIZE);
                     slide_SrcCount++;
-                }
-                else
-                {
+                } else {
                     uint32_t slide_1element = src1;
-                    uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                    uint32_t Dstitem = ((uint32_t*)Dstdata)[i] ;
+                    uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                    uint32_t Dstitem = ((uint32_t *)Dstdata)[i];
                     uint32_t Ditem;
-                    if (vslideup | vslide1up)
-                    {
+                    if (vslideup | vslide1up) {
                         if (vslide1up && (slide_SrcCount == 0))
                             Ditem = slide_1element;
-                        else if (slide_SrcCount>=slide_count)
-                            Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ?
-                                srcB_data_slide_32[slide_SrcCount-slide_count]:
-                                Dstitem;
+                        else if (slide_SrcCount >= slide_count)
+                            Ditem = ((vm == 1) ||
+                                            ((vm == 0) && (Mitem == 1))) ?
+                                            srcB_data_slide_32[slide_SrcCount -
+                                                               slide_count] :
+                                            Dstitem;
                         else
                             Ditem = Dstitem;
 
-                        DPRINTF(Datapath,"vslideup: Ditem 0x%x "
-                            "Source 0x%x  Old= 0x%x  \n" ,Ditem,
-                            srcB_data_slide_32[slide_SrcCount-slide_count],
-                            Dstitem);
-                        if (vm==0) {
-                            DPRINTF(Datapath,"WB Instruction is "
-                                "masked vm(%d), old(0x%x)  \n",Mitem,Dstitem);
+                        DPRINTF(Datapath,
+                                "vslideup: Ditem 0x%x "
+                                "Source 0x%x  Old= 0x%x  \n",
+                                Ditem,
+                                srcB_data_slide_32[slide_SrcCount -
+                                                   slide_count],
+                                Dstitem);
+                        if (vm == 0) {
+                            DPRINTF(Datapath,
+                                    "WB Instruction is "
+                                    "masked vm(%d), old(0x%x)  \n",
+                                    Mitem, Dstitem);
                         }
-                    }
-                    else if (vslidedown | vslide1down)
-                    {
-                        if (vslide1down && (slide_SrcCount+1 == srcCount))
+                    } else if (vslidedown | vslide1down) {
+                        if (vslide1down && (slide_SrcCount + 1 == srcCount))
                             Ditem = slide_1element;
-                        else if (slide_SrcCount>=(srcCount-slide_count))
-                            Ditem =  0;
+                        else if (slide_SrcCount >= (srcCount - slide_count))
+                            Ditem = 0;
                         else
-                            Ditem = ((vm==1) || ((vm==0) && (Mitem==1))) ?
-                                srcB_data_slide_32[slide_SrcCount] : Dstitem;
+                            Ditem = ((vm == 1) ||
+                                            ((vm == 0) && (Mitem == 1))) ?
+                                            srcB_data_slide_32
+                                                    [slide_SrcCount] :
+                                            Dstitem;
 
-                        DPRINTF(Datapath,"vslidedown: Ditem 0x%x "
-                            "Source 0x%x  Old= 0x%x  \n" ,Ditem,
-                            srcB_data_slide_32[slide_SrcCount], Dstitem);
-                        if (vm==0) {
-                            DPRINTF(Datapath,"WB Instruction is "
-                                "masked vm(%d), old(0x%x)  \n",Mitem,Dstitem);
+                        DPRINTF(Datapath,
+                                "vslidedown: Ditem 0x%x "
+                                "Source 0x%x  Old= 0x%x  \n",
+                                Ditem, srcB_data_slide_32[slide_SrcCount],
+                                Dstitem);
+                        if (vm == 0) {
+                            DPRINTF(Datapath,
+                                    "WB Instruction is "
+                                    "masked vm(%d), old(0x%x)  \n",
+                                    Mitem, Dstitem);
                         }
                     }
 
-                    memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem, DST_SIZE);
+                    memcpy(Ddata + (i * DST_SIZE), (uint8_t *)&Ditem,
+                            DST_SIZE);
                     slide_SrcCount++;
                 }
             }
-        }
-        else
-        {
-            for (int i=0; i<simd_size; ++i)
-            {
-                if (is_FP )  // FLOATING POINT OPERATION
+        } else {
+            for (int i = 0; i < simd_size; ++i) {
+                if (is_FP) // FLOATING POINT OPERATION
                 {
-                    if (vsew == 64)
-                    {
-                        if (fp_reduction)
-                        {
-                            double Bitem = (double)((double*)Bdata)[i] ;
-                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                            accumDp = computeDoubleFPReduction(accumDp,Bitem,Mitem);
-                            red_SrcCount=red_SrcCount + 1;
+                    if (vsew == 64) {
+                        if (fp_reduction) {
+                            double Bitem = (double)((double *)Bdata)[i];
+                            uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                            accumDp = computeDoubleFPReduction(
+                                    accumDp, Bitem, Mitem);
+                            red_SrcCount = red_SrcCount + 1;
                         } else {
-                            double Aitem = (double)((double*)Adata)[i] ;
-                            double Bitem = (double)((double*)Bdata)[i] ;
-                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                            double Dstitem = (double)((double*)Dstdata)[i];
-                            if (is_FP_Comp)
-                            {
+                            double Aitem = (double)((double *)Adata)[i];
+                            double Bitem = (double)((double *)Bdata)[i];
+                            uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                            double Dstitem = (double)((double *)Dstdata)[i];
+                            if (is_FP_Comp) {
                                 long int Ditem = compute_double_fp_comp_op(
-                                    Aitem, Bitem, insn);
-                                memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
-                                    DST_SIZE);
+                                        Aitem, Bitem, insn);
+                                memcpy(Ddata + (i * DST_SIZE),
+                                        (uint8_t *)&Ditem, DST_SIZE);
                             } else {
-                                double Ditem = compute_double_fp_op(Aitem,
-                                    Bitem, Mitem, Dstitem, insn);
-                                memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
-                                    DST_SIZE);
+                                double Ditem = compute_double_fp_op(
+                                        Aitem, Bitem, Mitem, Dstitem, insn);
+                                memcpy(Ddata + (i * DST_SIZE),
+                                        (uint8_t *)&Ditem, DST_SIZE);
                             }
                         }
-                    }
-                    else
-                    {
-                        if (fp_reduction)
-                        {
-                            float Bitem = (float)((float*)Bdata)[i];
-                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                            accumSp = computeSingleFPReduction(accumSp,Bitem,Mitem);
-                            red_SrcCount=red_SrcCount + 1;
+                    } else {
+                        if (fp_reduction) {
+                            float Bitem = (float)((float *)Bdata)[i];
+                            uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                            accumSp = computeSingleFPReduction(
+                                    accumSp, Bitem, Mitem);
+                            red_SrcCount = red_SrcCount + 1;
                         } else {
-                            float Aitem = (float)((float*)Adata)[i];
-                            float Bitem = (float)((float*)Bdata)[i];
-                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                            float Dstitem = (float)((float*)Dstdata)[i];
-                            if (is_FP_Comp)
-                            {
-                                int Ditem = compute_float_fp_comp_op(Aitem,
-                                    Bitem, insn);
-                                memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
-                                    DST_SIZE);
+                            float Aitem = (float)((float *)Adata)[i];
+                            float Bitem = (float)((float *)Bdata)[i];
+                            uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                            float Dstitem = (float)((float *)Dstdata)[i];
+                            if (is_FP_Comp) {
+                                int Ditem = compute_float_fp_comp_op(
+                                        Aitem, Bitem, insn);
+                                memcpy(Ddata + (i * DST_SIZE),
+                                        (uint8_t *)&Ditem, DST_SIZE);
                             } else {
-                                float Ditem = compute_float_fp_op(Aitem, Bitem,
-                                    Mitem, Dstitem, insn);
-                                memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
-                                    DST_SIZE);
+                                float Ditem = compute_float_fp_op(
+                                        Aitem, Bitem, Mitem, Dstitem, insn);
+                                memcpy(Ddata + (i * DST_SIZE),
+                                        (uint8_t *)&Ditem, DST_SIZE);
                             }
                         }
                     }
 
-                    if (fp_reduction && (red_SrcCount==srcCount))
-                    {
-                        uint8_t *ndata = new uint8_t[DST_SIZE];
-                        if (vsew == 64)
-                        {
-                            memcpy(ndata, (uint8_t*)&accumDp, DST_SIZE);
-                            dataCallback(ndata, DST_SIZE , 0);
-                        } else {
-                            memcpy(ndata, (uint8_t*)&accumSp, DST_SIZE);
-                            dataCallback(ndata, DST_SIZE , 0);
-                        }
-                    }
-                }
-                else if (is_INT)
-                {
-                    if (vsew == 64)
-                    {
-                        if (vcpop | vfirst)
-                        {
-                            if (vcpop)
-                            {
-                                int64_t Bitem = ((int64_t)((int64_t*)Bdata)[0] >> i) & 0x1;
-                                uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                                accum_mask = (vm==1) ? accum_mask + Bitem :
-                                    (Mitem) ? accum_mask + Bitem : accum_mask;
-                                red_SrcCount=red_SrcCount + 1;
-                                DPRINTF(Datapath," vcpop: Source "
-                                    "%ld  Acc= %ld  \n" ,Bitem, accum_mask);
-                            } else if (vfirst) {
-                                int64_t Bitem = ((int64_t)((int64_t*)Bdata)[0] >> i) & 0x1;
-                                uint8_t Mitem = ((uint8_t*)Mdata)[i];
-
-                                first_elem = (Bitem == 0x0000000000000001);
-                                first_set_mask = ((vm==1) || ((vm==0) && (Mitem==1)))
-                                        ? (first_elem) ? red_SrcCount :
-                                        first_set_mask : first_set_mask;
-
-                                if (first_elem)
-                                {
-                                    DPRINTF(Datapath," vfirst: "
-                                        "first active element found at %ld"
-                                        " position \n" ,first_set_mask);
-                                    break;
-                                }
-                                red_SrcCount=red_SrcCount + 1;
-                            }
-                        } else if(is_mask_logical) {
-                            int Aitem = (int)((int*)Adata)[i];
-                            int Bitem = (int)((int*)Bdata)[i];
-                            long int Ditem = computeLongMaskLogicalOp(Aitem,Bitem,insn);
-                            memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
-                                DST_SIZE);
-                        } else if (int_reduction) {
-                            long int Bitem = (long int)((long int*)Bdata)[i] ;
-                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                            accumLongInt = computeLongIntReduction(accumLongInt,Bitem,Mitem);
-                            red_SrcCount=red_SrcCount + 1;
-                        } else if (isVectorIntegerWidening){
-                            __int128_t Aitem = (__int128_t)((__int128_t*)Adata)[i] ;
-                            __int128_t Bitem = (__int128_t)((__int128_t*)Bdata)[i] ;
-                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                            __int128_t Dstitem = (__int128_t)((__int128_t*)Dstdata)[i] ;
-                            numALU64_operations = numALU64_operations.value() + 1;
-                            __int128_t Ditem = compute_widening_op<__int128_t, __uint128_t,
-                                int64_t, uint64_t>(Aitem, Bitem, Mitem, Dstitem, insn);
-                            memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
-                                DST_SIZE);
-                        } else {
-                            long int Aitem = (long int)((long int*)Adata)[i];
-                            long int Bitem = (long int)((long int*)Bdata)[i];
-                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                            long int Dstitem =
-                                (long int)((long int*)Dstdata)[i];
-                            long int Ditem = compute_long_int_op(Aitem, Bitem,
-                                Mitem, Dstitem, insn);
-                            memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
-                                DST_SIZE);
-                        }
-                    }
-                    else if (vsew == 32)
-                    {
-                        if (vcpop | vfirst)
-                        {
-                            if (vcpop)
-                            {
-                                int Bitem = ((int)((int*)Bdata)[0] >> i) & 0x1;
-                                uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                                accum_mask = (vm==1) ? accum_mask + Bitem : (Mitem)
-                                     ? accum_mask + Bitem : accum_mask;
-                                red_SrcCount=red_SrcCount + 1;
-                                DPRINTF(Datapath," vcpop: Source %d"
-                                    " Acc= %d  \n" ,Bitem, accum_mask);
-
-                            } else if (vfirst) {
-                                int Bitem = ((int)((int*)Bdata)[0] >> i) & 0x1;
-                                uint8_t Mitem = ((uint8_t*)Mdata)[i];
-
-                                first_elem = (Bitem == 0x00000001);
-                                first_set_mask = ((vm==1) || ((vm==0) && (Mitem==1)))
-                                    ? (first_elem) ? red_SrcCount :
-                                    first_set_mask : first_set_mask;
-
-                                if (first_elem)
-                                {
-                                    DPRINTF(Datapath," vfirst: "
-                                        "first active element found at %d "
-                                        "position \n" ,first_set_mask);
-                                    break;
-                                }
-
-                                red_SrcCount=red_SrcCount + 1;
-                            }
-                        } else if(is_mask_logical) {
-                            int Aitem = (int)((int*)Adata)[i];
-                            int Bitem = (int)((int*)Bdata)[i];
-                            int Ditem = computeIntMaskLogicalOp(Aitem,Bitem,insn);
-                            memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
-                                DST_SIZE);
-                        } else if (int_reduction) {
-                            int Bitem = (int)((int*)Bdata)[i] ;
-                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                            accumInt = computeIntReduction(accumInt,Bitem,Mitem);
-                            red_SrcCount=red_SrcCount + 1;
-                        } else if (isVectorIntegerWidening){
-                            int64_t Aitem = (int64_t)((int64_t*)Adata)[i] ;
-                            int64_t Bitem = (int64_t)((int64_t*)Bdata)[i] ;
-                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                            int64_t Dstitem = (int64_t)((int64_t*)Dstdata)[i] ;
-                            numALU32_operations = numALU32_operations.value() + 1;
-                            int64_t Ditem = compute_widening_op<int64_t, uint64_t,
-                                int32_t, uint32_t>(Aitem, Bitem, Mitem,Dstitem, insn);
-                            memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
-                                DST_SIZE);
-                        } else {
-                            int Aitem = (int)((int*)Adata)[i] ;
-                            int Bitem = (int)((int*)Bdata)[i] ;
-                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                            int Dstitem = (int)((int*)Dstdata)[i] ;
-                            int Ditem = compute_int_op(Aitem, Bitem, Mitem,
-                                Dstitem, insn);
-                            memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
-                                DST_SIZE);
-                        }
-                    }
-                    else if (vsew == 16)
-                    {
-                        if (vcpop | vfirst)
-                        {
-                            if (vcpop)
-                            {
-                                int16_t Bitem = ((int16_t)((int16_t*)Bdata)[0] >> i) & 0x1;
-                                uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                                accum_mask = (vm == 1) ? accum_mask + Bitem :
-                                    (Mitem) ? accum_mask + Bitem : accum_mask;
-                                red_SrcCount = red_SrcCount + 1;
-                                DPRINTF(Datapath, " vcpop: Source "
-                                    "%ld  Acc= %ld  \n", Bitem, accum_mask);
-                            }
-                            else if (vfirst) {
-                                int16_t Bitem = ((int16_t)((int16_t*)Bdata)[0] >> i) & 0x1;
-                                uint8_t Mitem = ((uint8_t*)Mdata)[i];
-
-                                first_elem = (Bitem == 0x0001);
-                                first_set_mask = ((vm == 1) || ((vm == 0) && (Mitem == 1)))
-                                    ? (first_elem) ? red_SrcCount :
-                                    first_set_mask : first_set_mask;
-
-                                if (first_elem)
-                                {
-                                    DPRINTF(Datapath, " vfirst: "
-                                        "first active element found at %ld"
-                                        " position \n", first_set_mask);
-                                    break;
-                                }
-                                red_SrcCount = red_SrcCount + 1;
-                            }
-                        }
-                        else if (is_mask_logical) {
-                            int Aitem = (int)((int*)Adata)[i];
-                            int Bitem = (int)((int*)Bdata)[i];
-                            uint16_t Ditem = computeLongMaskLogicalOp(Aitem, Bitem, insn);
-                            memcpy(Ddata + (i * DST_SIZE), (uint8_t*)&Ditem,
-                                DST_SIZE);
-                        } else if (int_reduction) {
-                            int16_t Bitem = (int16_t)((int16_t*)Bdata)[i] ;
-                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                            accumInt16 = computeInt16Reduction(accumInt16,Bitem,Mitem);
-                            red_SrcCount=red_SrcCount + 1;
-                        } else if (isVectorIntegerWidening){
-                            int32_t Aitem = (int32_t)((int32_t*)Adata)[i] ;
-                            int32_t Bitem = (int32_t)((int32_t*)Bdata)[i] ;
-                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                            int32_t Dstitem = (int32_t)((int32_t*)Dstdata)[i] ;
-                            numALU16_operations = numALU16_operations.value() + 1;
-                            int32_t Ditem = compute_widening_op<int32_t, uint32_t,
-                                int16_t, uint16_t>(Aitem, Bitem, Mitem, Dstitem, insn);
-                            memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
-                                DST_SIZE);
-                        } else {
-                            uint16_t Aitem = (uint16_t)((uint16_t*)Adata)[i];
-                            uint16_t Bitem = (uint16_t)((uint16_t*)Bdata)[i];
-                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                            uint16_t Dstitem =
-                                (uint16_t)((uint16_t*)Dstdata)[i];
-                            uint16_t Ditem = compute_int16_op(Aitem, Bitem,
-                                Mitem, Dstitem, insn);
-                            memcpy(Ddata + (i * DST_SIZE), (uint8_t*)&Ditem,
-                                DST_SIZE);
-                        }
-                    }
-                    else if (vsew == 8)
-                    {
-                        if (vcpop | vfirst)
-                        {
-                            if (vcpop)
-                            {
-                                int8_t Bitem = ((int8_t)((int8_t*)Bdata)[0] >> i) & 0x1;
-                                uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                                accum_mask = (vm == 1) ? accum_mask + Bitem :
-                                    (Mitem) ? accum_mask + Bitem : accum_mask;
-                                red_SrcCount = red_SrcCount + 1;
-                                DPRINTF(Datapath, " vcpop: Source "
-                                    "%ld  Acc= %ld  \n", Bitem, accum_mask);
-                            }
-                            else if (vfirst) {
-                                int8_t Bitem = ((int8_t)((int8_t*)Bdata)[0] >> i) & 0x1;
-                                uint8_t Mitem = ((uint8_t*)Mdata)[i];
-
-                                first_elem = (Bitem == 0x01);
-                                first_set_mask = ((vm == 1) || ((vm == 0) && (Mitem == 1)))
-                                    ? (first_elem) ? red_SrcCount :
-                                    first_set_mask : first_set_mask;
-
-                                if (first_elem)
-                                {
-                                    DPRINTF(Datapath, " vfirst: "
-                                        "first active element found at %ld"
-                                        " position \n", first_set_mask);
-                                    break;
-                                }
-                                red_SrcCount = red_SrcCount + 1;
-                            }
-                        }
-                        else if (is_mask_logical) {
-                            int Aitem = (int)((int*)Adata)[i];
-                            int Bitem = (int)((int*)Bdata)[i];
-                            long int Ditem = computeLongMaskLogicalOp(Aitem, Bitem, insn);
-                            memcpy(Ddata + (i * DST_SIZE), (uint8_t*)&Ditem,
-                                DST_SIZE);
-                        } else if (int_reduction) {
-                            int8_t Bitem = (int8_t)((int8_t*)Bdata)[i] ;
-                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                            accumInt8 = computeInt8Reduction(accumInt8,Bitem,Mitem);
-                            red_SrcCount=red_SrcCount + 1;
-                        } else if (isVectorIntegerWidening){
-                            int16_t Aitem = (int16_t)((int16_t*)Adata)[i] ;
-                            int16_t Bitem = (int16_t)((int16_t*)Bdata)[i] ;
-                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                            int16_t Dstitem = (int16_t)((int16_t*)Dstdata)[i] ;
-                            numALU8_operations = numALU8_operations.value() + 1;
-                            int16_t Ditem = compute_widening_op<int16_t, uint16_t,
-                                int8_t, uint8_t>(Aitem, Bitem, Mitem, Dstitem, insn);
-                            memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
-                                DST_SIZE);
-                        } else {
-                            int8_t Aitem = (int8_t)((int8_t*)Adata)[i];
-                            int8_t Bitem = (int8_t)((int8_t*)Bdata)[i];
-                            uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                            int8_t Dstitem =
-                                (int8_t)((int8_t*)Dstdata)[i];
-                            int8_t Ditem = compute_int8_op(Aitem, Bitem,
-                                Mitem, Dstitem, insn);
-                            memcpy(Ddata + (i * DST_SIZE), (uint8_t*)&Ditem,
-                                DST_SIZE);
-                        }
-                    }
-
-                    if (int_reduction && (red_SrcCount==srcCount))
-                    {
+                    if (fp_reduction && (red_SrcCount == srcCount)) {
                         uint8_t *ndata = new uint8_t[DST_SIZE];
                         if (vsew == 64) {
-                            memcpy(ndata, (uint8_t*)&accumLongInt, DST_SIZE);
-                            dataCallback(ndata, DST_SIZE , 0);
-                        } else if (vsew == 32) {
-                            memcpy(ndata, (uint8_t*)&accumInt, DST_SIZE);
-                            dataCallback(ndata, DST_SIZE , 0);
-                        } else if (vsew == 16) {
-                            memcpy(ndata, (uint8_t*)&accumInt16, DST_SIZE);
-                            dataCallback(ndata, DST_SIZE , 0);
-                        } else if (vsew == 8) {
-                            memcpy(ndata, (uint8_t*)&accumInt8, DST_SIZE);
-                            dataCallback(ndata, DST_SIZE , 0);
+                            memcpy(ndata, (uint8_t *)&accumDp, DST_SIZE);
+                            dataCallback(ndata, DST_SIZE, 0);
+                        } else {
+                            memcpy(ndata, (uint8_t *)&accumSp, DST_SIZE);
+                            dataCallback(ndata, DST_SIZE, 0);
                         }
                     }
-                }
-                else if (is_INT_to_FP)
-                {
-                    
-                    if (isNarrowing && (vsew == 64))
-                    {
+                } else if (is_INT) {
+                    if (vsew == 64) {
+                        if (vcpop | vfirst) {
+                            if (vcpop) {
+                                int64_t Bitem =
+                                        ((int64_t)((int64_t *)Bdata)[0] >> i) &
+                                        0x1;
+                                uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                                accum_mask = (vm == 1) ? accum_mask + Bitem :
+                                             (Mitem)   ? accum_mask + Bitem :
+                                                         accum_mask;
+                                red_SrcCount = red_SrcCount + 1;
+                                DPRINTF(Datapath,
+                                        " vcpop: Source "
+                                        "%ld  Acc= %ld  \n",
+                                        Bitem, accum_mask);
+                            } else if (vfirst) {
+                                int64_t Bitem =
+                                        ((int64_t)((int64_t *)Bdata)[0] >> i) &
+                                        0x1;
+                                uint8_t Mitem = ((uint8_t *)Mdata)[i];
+
+                                first_elem = (Bitem == 0x0000000000000001);
+                                first_set_mask =
+                                        ((vm == 1) ||
+                                                ((vm == 0) && (Mitem == 1))) ?
+                                                (first_elem) ? red_SrcCount :
+                                                               first_set_mask :
+                                                first_set_mask;
+
+                                if (first_elem) {
+                                    DPRINTF(Datapath,
+                                            " vfirst: "
+                                            "first active element found at %ld"
+                                            " position \n",
+                                            first_set_mask);
+                                    break;
+                                }
+                                red_SrcCount = red_SrcCount + 1;
+                            }
+                        } else if (is_mask_logical) {
+                            int Aitem = (int)((int *)Adata)[i];
+                            int Bitem = (int)((int *)Bdata)[i];
+                            long int Ditem = computeLongMaskLogicalOp(
+                                    Aitem, Bitem, insn);
+                            memcpy(Ddata + (i * DST_SIZE), (uint8_t *)&Ditem,
+                                    DST_SIZE);
+                        } else if (int_reduction) {
+                            long int Bitem = (long int)((long int *)Bdata)[i];
+                            uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                            accumLongInt = computeLongIntReduction(
+                                    accumLongInt, Bitem, Mitem);
+                            red_SrcCount = red_SrcCount + 1;
+                        } else if (isVectorIntegerWidening) {
+                            __int128_t Aitem =
+                                    (__int128_t)((__int128_t *)Adata)[i];
+                            __int128_t Bitem =
+                                    (__int128_t)((__int128_t *)Bdata)[i];
+                            uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                            __int128_t Dstitem =
+                                    (__int128_t)((__int128_t *)Dstdata)[i];
+                            numALU64_operations =
+                                    numALU64_operations.value() + 1;
+                            __int128_t Ditem = compute_widening_op<__int128_t,
+                                    __uint128_t, int64_t, uint64_t>(
+                                    Aitem, Bitem, Mitem, Dstitem, insn);
+                            memcpy(Ddata + (i * DST_SIZE), (uint8_t *)&Ditem,
+                                    DST_SIZE);
+                        } else {
+                            long int Aitem = (long int)((long int *)Adata)[i];
+                            long int Bitem = (long int)((long int *)Bdata)[i];
+                            uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                            long int Dstitem =
+                                    (long int)((long int *)Dstdata)[i];
+                            long int Ditem = compute_long_int_op(
+                                    Aitem, Bitem, Mitem, Dstitem, insn);
+                            memcpy(Ddata + (i * DST_SIZE), (uint8_t *)&Ditem,
+                                    DST_SIZE);
+                        }
+                    } else if (vsew == 32) {
+                        if (vcpop | vfirst) {
+                            if (vcpop) {
+                                int Bitem =
+                                        ((int)((int *)Bdata)[0] >> i) & 0x1;
+                                uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                                accum_mask = (vm == 1) ? accum_mask + Bitem :
+                                             (Mitem)   ? accum_mask + Bitem :
+                                                         accum_mask;
+                                red_SrcCount = red_SrcCount + 1;
+                                DPRINTF(Datapath,
+                                        " vcpop: Source %d"
+                                        " Acc= %d  \n",
+                                        Bitem, accum_mask);
+
+                            } else if (vfirst) {
+                                int Bitem =
+                                        ((int)((int *)Bdata)[0] >> i) & 0x1;
+                                uint8_t Mitem = ((uint8_t *)Mdata)[i];
+
+                                first_elem = (Bitem == 0x00000001);
+                                first_set_mask =
+                                        ((vm == 1) ||
+                                                ((vm == 0) && (Mitem == 1))) ?
+                                                (first_elem) ? red_SrcCount :
+                                                               first_set_mask :
+                                                first_set_mask;
+
+                                if (first_elem) {
+                                    DPRINTF(Datapath,
+                                            " vfirst: "
+                                            "first active element found at %d "
+                                            "position \n",
+                                            first_set_mask);
+                                    break;
+                                }
+
+                                red_SrcCount = red_SrcCount + 1;
+                            }
+                        } else if (is_mask_logical) {
+                            int Aitem = (int)((int *)Adata)[i];
+                            int Bitem = (int)((int *)Bdata)[i];
+                            int Ditem = computeIntMaskLogicalOp(
+                                    Aitem, Bitem, insn);
+                            memcpy(Ddata + (i * DST_SIZE), (uint8_t *)&Ditem,
+                                    DST_SIZE);
+                        } else if (int_reduction) {
+                            int Bitem = (int)((int *)Bdata)[i];
+                            uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                            accumInt = computeIntReduction(
+                                    accumInt, Bitem, Mitem);
+                            red_SrcCount = red_SrcCount + 1;
+                        } else if (isVectorIntegerWidening) {
+                            int64_t Aitem = (int64_t)((int64_t *)Adata)[i];
+                            int64_t Bitem = (int64_t)((int64_t *)Bdata)[i];
+                            uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                            int64_t Dstitem = (int64_t)((int64_t *)Dstdata)[i];
+                            numALU32_operations =
+                                    numALU32_operations.value() + 1;
+                            int64_t Ditem = compute_widening_op<int64_t,
+                                    uint64_t, int32_t, uint32_t>(
+                                    Aitem, Bitem, Mitem, Dstitem, insn);
+                            memcpy(Ddata + (i * DST_SIZE), (uint8_t *)&Ditem,
+                                    DST_SIZE);
+                        } else {
+                            int Aitem = (int)((int *)Adata)[i];
+                            int Bitem = (int)((int *)Bdata)[i];
+                            uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                            int Dstitem = (int)((int *)Dstdata)[i];
+                            int Ditem = compute_int_op(
+                                    Aitem, Bitem, Mitem, Dstitem, insn);
+                            memcpy(Ddata + (i * DST_SIZE), (uint8_t *)&Ditem,
+                                    DST_SIZE);
+                        }
+                    } else if (vsew == 16) {
+                        if (vcpop | vfirst) {
+                            if (vcpop) {
+                                int16_t Bitem =
+                                        ((int16_t)((int16_t *)Bdata)[0] >> i) &
+                                        0x1;
+                                uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                                accum_mask = (vm == 1) ? accum_mask + Bitem :
+                                             (Mitem)   ? accum_mask + Bitem :
+                                                         accum_mask;
+                                red_SrcCount = red_SrcCount + 1;
+                                DPRINTF(Datapath,
+                                        " vcpop: Source "
+                                        "%ld  Acc= %ld  \n",
+                                        Bitem, accum_mask);
+                            } else if (vfirst) {
+                                int16_t Bitem =
+                                        ((int16_t)((int16_t *)Bdata)[0] >> i) &
+                                        0x1;
+                                uint8_t Mitem = ((uint8_t *)Mdata)[i];
+
+                                first_elem = (Bitem == 0x0001);
+                                first_set_mask =
+                                        ((vm == 1) ||
+                                                ((vm == 0) && (Mitem == 1))) ?
+                                                (first_elem) ? red_SrcCount :
+                                                               first_set_mask :
+                                                first_set_mask;
+
+                                if (first_elem) {
+                                    DPRINTF(Datapath,
+                                            " vfirst: "
+                                            "first active element found at %ld"
+                                            " position \n",
+                                            first_set_mask);
+                                    break;
+                                }
+                                red_SrcCount = red_SrcCount + 1;
+                            }
+                        } else if (is_mask_logical) {
+                            int Aitem = (int)((int *)Adata)[i];
+                            int Bitem = (int)((int *)Bdata)[i];
+                            uint16_t Ditem = computeLongMaskLogicalOp(
+                                    Aitem, Bitem, insn);
+                            memcpy(Ddata + (i * DST_SIZE), (uint8_t *)&Ditem,
+                                    DST_SIZE);
+                        } else if (int_reduction) {
+                            int16_t Bitem = (int16_t)((int16_t *)Bdata)[i];
+                            uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                            accumInt16 = computeInt16Reduction(
+                                    accumInt16, Bitem, Mitem);
+                            red_SrcCount = red_SrcCount + 1;
+                        } else if (isVectorIntegerWidening) {
+                            int32_t Aitem = (int32_t)((int32_t *)Adata)[i];
+                            int32_t Bitem = (int32_t)((int32_t *)Bdata)[i];
+                            uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                            int32_t Dstitem = (int32_t)((int32_t *)Dstdata)[i];
+                            numALU16_operations =
+                                    numALU16_operations.value() + 1;
+                            int32_t Ditem = compute_widening_op<int32_t,
+                                    uint32_t, int16_t, uint16_t>(
+                                    Aitem, Bitem, Mitem, Dstitem, insn);
+                            memcpy(Ddata + (i * DST_SIZE), (uint8_t *)&Ditem,
+                                    DST_SIZE);
+                        } else {
+                            uint16_t Aitem = (uint16_t)((uint16_t *)Adata)[i];
+                            uint16_t Bitem = (uint16_t)((uint16_t *)Bdata)[i];
+                            uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                            uint16_t Dstitem =
+                                    (uint16_t)((uint16_t *)Dstdata)[i];
+                            uint16_t Ditem = compute_int16_op(
+                                    Aitem, Bitem, Mitem, Dstitem, insn);
+                            memcpy(Ddata + (i * DST_SIZE), (uint8_t *)&Ditem,
+                                    DST_SIZE);
+                        }
+                    } else if (vsew == 8) {
+                        if (vcpop | vfirst) {
+                            if (vcpop) {
+                                int8_t Bitem =
+                                        ((int8_t)((int8_t *)Bdata)[0] >> i) &
+                                        0x1;
+                                uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                                accum_mask = (vm == 1) ? accum_mask + Bitem :
+                                             (Mitem)   ? accum_mask + Bitem :
+                                                         accum_mask;
+                                red_SrcCount = red_SrcCount + 1;
+                                DPRINTF(Datapath,
+                                        " vcpop: Source "
+                                        "%ld  Acc= %ld  \n",
+                                        Bitem, accum_mask);
+                            } else if (vfirst) {
+                                int8_t Bitem =
+                                        ((int8_t)((int8_t *)Bdata)[0] >> i) &
+                                        0x1;
+                                uint8_t Mitem = ((uint8_t *)Mdata)[i];
+
+                                first_elem = (Bitem == 0x01);
+                                first_set_mask =
+                                        ((vm == 1) ||
+                                                ((vm == 0) && (Mitem == 1))) ?
+                                                (first_elem) ? red_SrcCount :
+                                                               first_set_mask :
+                                                first_set_mask;
+
+                                if (first_elem) {
+                                    DPRINTF(Datapath,
+                                            " vfirst: "
+                                            "first active element found at %ld"
+                                            " position \n",
+                                            first_set_mask);
+                                    break;
+                                }
+                                red_SrcCount = red_SrcCount + 1;
+                            }
+                        } else if (is_mask_logical) {
+                            int Aitem = (int)((int *)Adata)[i];
+                            int Bitem = (int)((int *)Bdata)[i];
+                            long int Ditem = computeLongMaskLogicalOp(
+                                    Aitem, Bitem, insn);
+                            memcpy(Ddata + (i * DST_SIZE), (uint8_t *)&Ditem,
+                                    DST_SIZE);
+                        } else if (int_reduction) {
+                            int8_t Bitem = (int8_t)((int8_t *)Bdata)[i];
+                            uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                            accumInt8 = computeInt8Reduction(
+                                    accumInt8, Bitem, Mitem);
+                            red_SrcCount = red_SrcCount + 1;
+                        } else if (isVectorIntegerWidening) {
+                            int16_t Aitem = (int16_t)((int16_t *)Adata)[i];
+                            int16_t Bitem = (int16_t)((int16_t *)Bdata)[i];
+                            uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                            int16_t Dstitem = (int16_t)((int16_t *)Dstdata)[i];
+                            numALU8_operations =
+                                    numALU8_operations.value() + 1;
+                            int16_t Ditem = compute_widening_op<int16_t,
+                                    uint16_t, int8_t, uint8_t>(
+                                    Aitem, Bitem, Mitem, Dstitem, insn);
+                            memcpy(Ddata + (i * DST_SIZE), (uint8_t *)&Ditem,
+                                    DST_SIZE);
+                        } else {
+                            int8_t Aitem = (int8_t)((int8_t *)Adata)[i];
+                            int8_t Bitem = (int8_t)((int8_t *)Bdata)[i];
+                            uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                            int8_t Dstitem = (int8_t)((int8_t *)Dstdata)[i];
+                            int8_t Ditem = compute_int8_op(
+                                    Aitem, Bitem, Mitem, Dstitem, insn);
+                            memcpy(Ddata + (i * DST_SIZE), (uint8_t *)&Ditem,
+                                    DST_SIZE);
+                        }
+                    }
+
+                    if (int_reduction && (red_SrcCount == srcCount)) {
+                        uint8_t *ndata = new uint8_t[DST_SIZE];
+                        if (vsew == 64) {
+                            memcpy(ndata, (uint8_t *)&accumLongInt, DST_SIZE);
+                            dataCallback(ndata, DST_SIZE, 0);
+                        } else if (vsew == 32) {
+                            memcpy(ndata, (uint8_t *)&accumInt, DST_SIZE);
+                            dataCallback(ndata, DST_SIZE, 0);
+                        } else if (vsew == 16) {
+                            memcpy(ndata, (uint8_t *)&accumInt16, DST_SIZE);
+                            dataCallback(ndata, DST_SIZE, 0);
+                        } else if (vsew == 8) {
+                            memcpy(ndata, (uint8_t *)&accumInt8, DST_SIZE);
+                            dataCallback(ndata, DST_SIZE, 0);
+                        }
+                    }
+                } else if (is_INT_to_FP) {
+                    if (isNarrowing && (vsew == 64)) {
                         assert(isNarrowing);
                     } else if (vsew == 64) {
-                        long int Bitem = (long int)((long int*)Bdata)[i];
-                        uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                        long int Dstitem = (long int)((long int*)Dstdata)[i];
-                        double Ditem = compute_cvt_f_x_64_op(Bitem, Mitem,
-                            Dstitem, insn);
-                        memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem, DST_SIZE);
-                    } else if(isWidening && (vsew == 32)){
-                        int Bitem = (int)((int*)Bdata)[i] ;
-                        uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                        int Dstitem = (int)((int*)Dstdata)[i] ;
-                        double Ditem = compute_cvt_f64_x32_op( Bitem, Mitem,
-                            Dstitem, insn);
-                        memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem, DST_SIZE);
+                        long int Bitem = (long int)((long int *)Bdata)[i];
+                        uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                        long int Dstitem = (long int)((long int *)Dstdata)[i];
+                        double Ditem = compute_cvt_f_x_64_op(
+                                Bitem, Mitem, Dstitem, insn);
+                        memcpy(Ddata + (i * DST_SIZE), (uint8_t *)&Ditem,
+                                DST_SIZE);
+                    } else if (isWidening && (vsew == 32)) {
+                        int Bitem = (int)((int *)Bdata)[i];
+                        uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                        int Dstitem = (int)((int *)Dstdata)[i];
+                        double Ditem = compute_cvt_f64_x32_op(
+                                Bitem, Mitem, Dstitem, insn);
+                        memcpy(Ddata + (i * DST_SIZE), (uint8_t *)&Ditem,
+                                DST_SIZE);
                     } else {
-                        int Bitem = (int)((int*)Bdata)[i] ;
-                        uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                        int Dstitem = (int)((int*)Dstdata)[i] ;
-                        float Ditem = compute_cvt_f_x_32_op( Bitem, Mitem,
-                            Dstitem, insn);
-                        memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem, DST_SIZE);
-                    } 
-                }
-                else if (is_FP_to_INT)
-                {
-                    if (vsew == 64)
-                    {
-                        double Bitem = (double)((double*)Bdata)[i] ;
-                        uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                        double Dstitem = (double)((double*)Dstdata)[i] ;
-                        long int Ditem = compute_cvt_x_f_64_op( Bitem, Mitem,
-                            Dstitem, insn);
-                        memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem,
-                            DST_SIZE);
+                        int Bitem = (int)((int *)Bdata)[i];
+                        uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                        int Dstitem = (int)((int *)Dstdata)[i];
+                        float Ditem = compute_cvt_f_x_32_op(
+                                Bitem, Mitem, Dstitem, insn);
+                        memcpy(Ddata + (i * DST_SIZE), (uint8_t *)&Ditem,
+                                DST_SIZE);
+                    }
+                } else if (is_FP_to_INT) {
+                    if (vsew == 64) {
+                        double Bitem = (double)((double *)Bdata)[i];
+                        uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                        double Dstitem = (double)((double *)Dstdata)[i];
+                        long int Ditem = compute_cvt_x_f_64_op(
+                                Bitem, Mitem, Dstitem, insn);
+                        memcpy(Ddata + (i * DST_SIZE), (uint8_t *)&Ditem,
+                                DST_SIZE);
                     } else {
-                        float Bitem = (float)((float*)Bdata)[i] ;
-                        uint8_t Mitem = ((uint8_t*)Mdata)[i];
-                        float Dstitem = (float)((float*)Dstdata)[i] ;
-                        int Ditem = compute_cvt_x_f_32_op( Bitem, Mitem,
-                            Dstitem, insn);
-                        memcpy(Ddata+(i*DST_SIZE), (uint8_t*)&Ditem, DST_SIZE);
+                        float Bitem = (float)((float *)Bdata)[i];
+                        uint8_t Mitem = ((uint8_t *)Mdata)[i];
+                        float Dstitem = (float)((float *)Dstdata)[i];
+                        int Ditem = compute_cvt_x_f_32_op(
+                                Bitem, Mitem, Dstitem, insn);
+                        memcpy(Ddata + (i * DST_SIZE), (uint8_t *)&Ditem,
+                                DST_SIZE);
                     }
                 }
             }
         }
-    //don't need these anymore
-    delete[] Adata;
-    delete[] Bdata;
-    delete[] Mdata;
-    delete[] Dstdata;
+        // don't need these anymore
+        delete[] Adata;
+        delete[] Bdata;
+        delete[] Mdata;
+        delete[] Dstdata;
 
-
-    if (!reduction)
-    {
-        if ((vcpop && (red_SrcCount==srcCount)))
-        {
-            DPRINTF(Datapath," vcpop Elements= %d  \n" , accum_mask);
-            //WB Data to Int Register  File
-            uint8_t *ndata = new uint8_t[DST_SIZE];
-            memcpy(ndata, (uint8_t*)&accum_mask, DST_SIZE);
-            dataCallback(ndata, DST_SIZE , 0);
-        }
-        else if ((vfirst & first_elem) | (vfirst & (red_SrcCount==srcCount)))
-        {
-            DPRINTF(Datapath," vfirst Elements= %d  \n" , first_set_mask);
-            //WB Data to Int Register  File
-            uint8_t *ndata = new uint8_t[DST_SIZE];
-            memcpy(ndata, (uint8_t*)&first_set_mask, DST_SIZE);
-            dataCallback(ndata, DST_SIZE , 0);
-        }
-        else if (!vcpop & !vfirst)
-        {
-            //WB Data to Vect Register  File
-            for (int i=0; i<simd_size; ++i) {
+        if (!reduction) {
+            if ((vcpop && (red_SrcCount == srcCount))) {
+                DPRINTF(Datapath, " vcpop Elements= %d  \n", accum_mask);
+                // WB Data to Int Register  File
                 uint8_t *ndata = new uint8_t[DST_SIZE];
-                memcpy(ndata, Ddata+(i*DST_SIZE), DST_SIZE);
-                curDstCount++;
-                bool _done = (  curDstCount == srcCount );
-                dataCallback(ndata, DST_SIZE,_done);
+                memcpy(ndata, (uint8_t *)&accum_mask, DST_SIZE);
+                dataCallback(ndata, DST_SIZE, 0);
+            } else if ((vfirst & first_elem) |
+                       (vfirst & (red_SrcCount == srcCount))) {
+                DPRINTF(Datapath, " vfirst Elements= %d  \n", first_set_mask);
+                // WB Data to Int Register  File
+                uint8_t *ndata = new uint8_t[DST_SIZE];
+                memcpy(ndata, (uint8_t *)&first_set_mask, DST_SIZE);
+                dataCallback(ndata, DST_SIZE, 0);
+            } else if (!vcpop & !vfirst) {
+                // WB Data to Vect Register  File
+                for (int i = 0; i < simd_size; ++i) {
+                    uint8_t *ndata = new uint8_t[DST_SIZE];
+                    memcpy(ndata, Ddata + (i * DST_SIZE), DST_SIZE);
+                    curDstCount++;
+                    bool _done = (curDstCount == srcCount);
+                    dataCallback(ndata, DST_SIZE, _done);
+                }
             }
+            delete[] Ddata;
         }
-        delete [] Ddata;
-    }
 
-    DPRINTF(Datapath," Leaving dataPath\n");
-
+        DPRINTF(Datapath, " Leaving dataPath\n");
     }));
 }
 
-}
+} // namespace RiscvISA
 
-
-}
+} // namespace gem5
