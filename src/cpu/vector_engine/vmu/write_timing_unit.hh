@@ -37,7 +37,6 @@
 
 #include "arch/riscv/insts/vector_static_inst.hh"
 #include "base/statistics.hh"
-// #include "cpu/minor/exec_context.hh"
 #include "cpu/vector_engine/vector_engine.hh"
 #include "params/MemUnitWriteTiming.hh"
 #include "sim/ticked_object.hh"
@@ -48,9 +47,6 @@ namespace RiscvISA
 {
 
 class VectorEngine;
-// class ExecContextPtr;
-// class ExecContext;
-
 class MemUnitWriteTiming : public TickedObject
 {
   public:
@@ -63,8 +59,10 @@ class MemUnitWriteTiming : public TickedObject
 
     void queueData(uint8_t *data);
     void queueAddrs(uint8_t *data);
-    void initialize(VectorEngine &vector_wrapper, uint64_t count,
-            uint64_t DST_SIZE, uint64_t mem_addr, uint8_t mop, uint64_t stride,
+
+    void initialize(VectorEngine &vector_wrapper, uint64_t vl,
+            uint64_t elem_width, uint8_t index_width, uint64_t mem_addr,
+            uint8_t mop, uint64_t stride, uint8_t nfields, uint8_t emul,
             bool location, ExecContextPtr &xc,
             std::function<void(bool)> on_item_store);
 
@@ -73,15 +71,17 @@ class MemUnitWriteTiming : public TickedObject
     const uint8_t channel;
     const uint64_t cacheLineSize;
     const uint64_t VRF_LineSize;
+    const uint64_t VLEN;
 
     volatile bool done;
     std::deque<uint8_t *> dataQ;
-    // Used by indexed Operations to hold the element index
     std::deque<uint8_t *> AddrsQ;
+
     std::function<bool(void)> writeFunction;
 
-    // modified by writeFunction closure over time
     uint64_t vecIndex;
+    uint64_t vecFieldIndex;
+
     VectorEngine *vectorwrapper;
 
   public:

@@ -36,7 +36,6 @@
 #include <queue>
 
 #include "base/statistics.hh"
-// #include "cpu/minor/exec_context.hh"
 #include "cpu/vector_engine/vector_engine.hh"
 #include "params/MemUnitReadTiming.hh"
 #include "sim/ticked_object.hh"
@@ -57,31 +56,32 @@ class MemUnitReadTiming : public TickedObject
     // overrides
     void evaluate() override;
     void regStats() override;
-    // Queuedata is used for indexed operations
+
+    // Note: For indexed instructions, addrs are queued in dataQ
     void queueData(uint8_t *data);
-    void initialize(VectorEngine &vector_wrapper, uint64_t count,
-            uint64_t DST_SIZE, uint64_t mem_addr, uint8_t mop, uint64_t stride,
+
+    void initialize(VectorEngine &vector_wrapper, uint64_t vl,
+            uint64_t elem_width, uint8_t index_width, uint64_t mem_addr,
+            uint8_t mop, uint64_t stride, uint8_t nfields, uint8_t emul,
             bool location, ExecContextPtr &xc,
             std::function<void(uint8_t *, uint8_t, bool)> on_item_load);
-    void setIndexWidth(uint8_t width);
-    uint8_t getIndexWidth();
 
   private:
     // set by params
     const uint8_t channel;
     const uint64_t cacheLineSize;
     const uint64_t VRF_LineSize;
+    const uint64_t VLEN;
 
     volatile bool done;
-    std::function<bool(void)> readFunction;
-    // Used by indexed Operations to hold the element index
     std::deque<uint8_t *> dataQ;
-    // modified by readFunction closure over time
-    uint64_t vecIndex;
-    VectorEngine *vectorwrapper;
 
-    // Width of index encoded by ei-x
-    uint8_t indexWidth;
+    std::function<bool(void)> readFunction;
+
+    uint64_t vecIndex;
+    uint64_t vecFieldIndex;
+
+    VectorEngine *vectorwrapper;
 
   public:
     // Stat for number of cache lines read requested

@@ -38,3 +38,4 @@ class MemUnitWriteTiming(TickedObject):
     channel = Param.Unsigned("Channel")
     cacheLineSize = Param.Unsigned("Cache Line Size")
     VRF_LineSize = Param.Unsigned("Reg Line Size")
+    VLEN = Param.Unsigned("VLEN")

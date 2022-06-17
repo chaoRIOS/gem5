@@ -231,19 +231,22 @@ system.cpu.ve_interface = VectorEngineInterface(
                 channel = (((options.num_clusters-1)*5)+5 if multiport else 0),
                 cacheLineSize = options.cache_line_size,
                 VRF_LineSize = options.VRF_line_size
-                               * (options.v_lanes/options.num_clusters)
+                               * (options.v_lanes/options.num_clusters),
+                VLEN = options.max_vl
             ),
             memWriter = MemUnitWriteTiming(
                 channel = (((options.num_clusters-1)*5)+6 if multiport else 0),
                 cacheLineSize = options.cache_line_size,
                 VRF_LineSize = options.VRF_line_size
-                               * (options.v_lanes/options.num_clusters)
+                               * (options.v_lanes/options.num_clusters),
+                VLEN = options.max_vl
             ),
             memReader_addr = MemUnitReadTiming(
                 channel = (((options.num_clusters-1)*5)+7 if multiport else 0),
                 cacheLineSize = options.cache_line_size,
                 VRF_LineSize = options.VRF_line_size
-                               * (options.v_lanes/options.num_clusters)
+                               * (options.v_lanes/options.num_clusters),
+                VLEN = options.max_vl
             )
         ),
         num_clusters = options.num_clusters,
@@ -254,31 +257,36 @@ system.cpu.ve_interface = VectorEngineInterface(
                 channel = ((lane_id*5)+0 if multiport else 0),
                 cacheLineSize = options.cache_line_size,
                 VRF_LineSize =  options.VRF_line_size
-                                * (options.v_lanes/options.num_clusters)
+                                * (options.v_lanes/options.num_clusters),
+                VLEN = options.max_vl
             ),
             srcBReader = MemUnitReadTiming(
                 channel = ((lane_id*5)+1 if multiport else 0),
                 cacheLineSize = options.cache_line_size,
                 VRF_LineSize = options.VRF_line_size
-                        * (options.v_lanes/options.num_clusters)
+                        * (options.v_lanes/options.num_clusters),
+                VLEN = options.max_vl
             ),
             srcMReader = MemUnitReadTiming(
                 channel = ((lane_id*5)+2 if multiport else 0),
                 cacheLineSize = options.cache_line_size,
                 VRF_LineSize =  options.VRF_line_size
-                                * (options.v_lanes/options.num_clusters)
+                                * (options.v_lanes/options.num_clusters),
+                VLEN = options.max_vl
             ),
             dstReader = MemUnitReadTiming(
                 channel = ((lane_id*5)+3 if multiport else 0),
                 cacheLineSize = options.cache_line_size,
                 VRF_LineSize =  options.VRF_line_size
-                                * (options.v_lanes/options.num_clusters)
+                                * (options.v_lanes/options.num_clusters),
+                VLEN = options.max_vl
             ),
             dstWriter = MemUnitWriteTiming(
                 channel = ((lane_id*5)+4 if multiport else 0),
                 cacheLineSize = options.cache_line_size,
                 VRF_LineSize =  options.VRF_line_size
-                                * (options.v_lanes/options.num_clusters)
+                                * (options.v_lanes/options.num_clusters),
+                VLEN = options.max_vl
             ),
             dataPath = Datapath(
                 VectorLanes = (options.v_lanes/options.num_clusters),

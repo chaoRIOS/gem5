@@ -47,7 +47,7 @@ MemUnitWriteTiming::MemUnitWriteTiming(
         const MemUnitWriteTimingParams &params) :
     TickedObject(TickedObjectParams(params)),
     channel(params.channel), cacheLineSize(params.cacheLineSize),
-    VRF_LineSize(params.VRF_LineSize), done(false)
+    VRF_LineSize(params.VRF_LineSize), VLEN(params.VLEN), done(false)
 {}
 
 MemUnitWriteTiming::~MemUnitWriteTiming() {}
@@ -97,22 +97,24 @@ MemUnitWriteTiming::queueAddrs(uint8_t *data)
 //  NOTE: delete[]s all data from dataQ if written to fn(), so the
 //    exec_context must memcpy the data!
 void
-MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t count,
-        uint64_t DST_SIZE, uint64_t mem_addr, uint8_t mop, uint64_t stride,
+MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
+        uint64_t elem_width, uint8_t index_width, uint64_t mem_addr,
+        uint8_t mop, uint64_t stride, uint8_t nfields, uint8_t emul,
         bool location, ExecContextPtr &xc,
         std::function<void(bool)> on_item_store)
 {
     assert(!running && !done);
-    assert(count > 0);
+    assert(vl > 0);
     assert(!dataQ.size());
     assert(!AddrsQ.size());
 
     DPRINTF(MemUnitWriteTiming, "writer initialize with %d %d-byte elems\n",
-            count, DST_SIZE);
+            vl, elem_width);
 
     vectorwrapper = &vector_wrapper;
 
-    uint64_t SIZE = DST_SIZE;
+    vecIndex = 0;
+    vecFieldIndex = 0;
 
     // This function tries to get up to 'get_up_to' elements from the front of
     // the input queue. if there are less elements, it returns all of them
@@ -121,7 +123,7 @@ MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t count,
 
     // NOTE: be careful with uint16_t overflow here (incase super large
     // vectors)
-    auto try_write = [SIZE, this](uint32_t get_up_to,
+    auto try_write = [elem_width, this](uint32_t get_up_to,
                              std::function<uint16_t(uint8_t *, uint32_t)> fn) {
         uint64_t can_get = this->dataQ.size();
         if (!can_get) {
@@ -132,9 +134,9 @@ MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t count,
             return false;
         }
         uint64_t got = get_up_to; // std::min((uint64_t)get_up_to, can_get);
-        uint8_t *buf = new uint8_t[got * SIZE];
+        uint8_t *buf = new uint8_t[got * elem_width];
         for (uint32_t i = 0; i < got; ++i) {
-            memcpy(buf + SIZE * i, this->dataQ[i], SIZE);
+            memcpy(buf + elem_width * i, this->dataQ[i], elem_width);
         }
         uint64_t actually_written;
         if ((actually_written = fn(buf, (uint32_t)got))) {
@@ -153,17 +155,11 @@ MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t count,
         }
     };
 
-    uint64_t vaddr = mem_addr;
-    int32_t vstride = stride;
-
-    // reset vecIndex
-    vecIndex = 0;
-
     // need 'this' for DPRINTF
-    auto fin = [on_item_store, count, this](uint64_t i, uint64_t items_ready) {
-        return [on_item_store, count, i, items_ready, this]() {
+    auto fin = [on_item_store, vl, this](uint64_t i, uint64_t items_ready) {
+        return [on_item_store, vl, i, items_ready, this]() {
             for (uint64_t j = 0; j < items_ready; ++j) {
-                bool _done = ((i + j + 1) == count);
+                bool _done = ((i + j + 1) == vl);
                 DPRINTF(MemUnitWriteTiming,
                         "calling on_item_store with"
                         " 'done'=%d\n",
@@ -173,8 +169,8 @@ MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t count,
         };
     };
 
-    writeFunction = [try_write, location, fin, xc, vaddr, vstride,
-                            on_item_store, SIZE, mop, count,
+    writeFunction = [try_write, location, fin, xc, mem_addr, stride,
+                            on_item_store, elem_width, mop, vl,
                             this](void) -> bool {
         // scratch and cache could use different line sizes
         uint64_t line_size;
@@ -206,18 +202,27 @@ MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t count,
         if (unit_strided || strided) // no indexed operation
         {
             // we can always write 1 element
-            addr = vaddr + SIZE * (vstride * i);
+            addr = mem_addr + (strided ? stride : elem_width) * i;
             line_addr = addr - (addr % line_size);
             consec_items = 1;
 
+            DPRINTF(MemUnitWriteTiming,
+                    "enqueue data as %d @ %#x, elem_width = %d, line_size = "
+                    "%d\n",
+                    consec_items, addr, elem_width, line_size);
+
             // now find any consecutive items that we can also write
-            for (uint64_t j = 1; j < (line_size / SIZE) && (i + j) < count;
-                    ++j) {
-                uint64_t next_addr = vaddr + SIZE * ((i + j) * vstride);
+            for (uint64_t j = 1;
+                    (j < (line_size / elem_width)) && ((i + j) < vl); ++j) {
+                uint64_t next_addr =
+                        mem_addr + (strided ? stride : elem_width) * (i + j);
                 uint64_t next_line_addr = next_addr - (next_addr % line_size);
-                if (next_addr - SIZE * j == addr &&
-                        line_addr == next_line_addr) {
+                if (stride == elem_width && line_addr == next_line_addr) {
                     ++consec_items;
+                    DPRINTF(MemUnitWriteTiming,
+                            "enqueue data as %d @ %#x, elem_width = %d, "
+                            "line_size = %d\n",
+                            consec_items, addr, elem_width, line_size);
                 } else {
                     break;
                 }
@@ -230,25 +235,25 @@ MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t count,
                 DPRINTF(MemUnitWriteTiming, "try_read AddrsQ Addrs empty\n");
                 return false;
             }
-            uint64_t got = std::min(line_size / SIZE, can_get);
-            uint8_t *buf = new uint8_t[got * SIZE];
+            uint64_t got = std::min(line_size / elem_width, can_get);
+            uint8_t *buf = new uint8_t[got * elem_width];
             for (uint8_t i = 0; i < got; ++i) {
-                memcpy(buf + SIZE * i, this->AddrsQ[i], SIZE);
+                memcpy(buf + elem_width * i, this->AddrsQ[i], elem_width);
             }
 
             uint64_t index_addr;
-            if (SIZE == 8) {
+            if (elem_width == 8) {
                 index_addr = (uint64_t)((uint64_t *)buf)[0];
-            } else if (SIZE == 4) {
+            } else if (elem_width == 4) {
                 index_addr = (uint64_t)((uint32_t *)buf)[0];
-            } else if (SIZE == 2) {
+            } else if (elem_width == 2) {
                 index_addr = (uint64_t)((uint16_t *)buf)[0];
-            } else if (SIZE == 1) {
+            } else if (elem_width == 1) {
                 index_addr = (uint64_t)((uint8_t *)buf)[0];
             } else {
-                panic("invalid mem req SIZE");
+                panic("invalid mem req elem_width");
             }
-            addr = vaddr + index_addr;
+            addr = mem_addr + index_addr;
             line_addr = addr - (addr % line_size);
             consec_items = 1;
             delete buf;
@@ -259,7 +264,7 @@ MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t count,
                 consec_items, addr);
 
         return try_write(consec_items,
-                [fin, location, xc, addr, SIZE, indexed, count, i, this](
+                [fin, location, xc, addr, elem_width, indexed, vl, i, this](
                         uint8_t *data, uint32_t items_ready) -> uint16_t {
                     DPRINTF(MemUnitWriteTiming,
                             "got %d items to write at %#x\n", items_ready,
@@ -268,10 +273,10 @@ MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t count,
                     if (location == 0) { // location = 0 = MEMORY
                         Cache_line_w_req++;
                         success = vectorwrapper->writeVectorMem(addr, data,
-                                SIZE * items_ready, xc->tcBase(),
+                                elem_width * items_ready, xc->tcBase(),
                                 this->channel, fin(i, items_ready));
                     } else {
-                        uint32_t size_write = SIZE * items_ready;
+                        uint32_t size_write = elem_width * items_ready;
                         DPRINTF(MemUnitWriteTiming,
                                 "size_write %d items to write at"
                                 " %#x\n",
@@ -288,7 +293,7 @@ MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t count,
                             }
                         }
                         this->vecIndex += items_ready;
-                        this->done = (this->vecIndex == count);
+                        this->done = (this->vecIndex == vl);
                         return items_ready;
                     }
                     return 0;

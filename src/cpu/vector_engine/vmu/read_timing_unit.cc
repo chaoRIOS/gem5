@@ -49,7 +49,7 @@ namespace RiscvISA
 MemUnitReadTiming::MemUnitReadTiming(const MemUnitReadTimingParams &params) :
     TickedObject(TickedObjectParams(params)), channel(params.channel),
     cacheLineSize(params.cacheLineSize), VRF_LineSize(params.VRF_LineSize),
-    done(false), indexWidth(0)
+    VLEN(params.VLEN), done(false)
 {}
 
 MemUnitReadTiming::~MemUnitReadTiming() {}
@@ -84,43 +84,39 @@ MemUnitReadTiming::queueData(uint8_t *data)
 }
 
 void
-MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t count,
-        uint64_t DST_SIZE, uint64_t mem_addr, uint8_t mop, uint64_t stride,
+MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
+        uint64_t elem_width, uint8_t index_width, uint64_t mem_addr,
+        uint8_t mop, uint64_t stride, uint8_t nfields, uint8_t emul,
         bool location, ExecContextPtr &xc,
         std::function<void(uint8_t *, uint8_t, bool)> on_item_load)
 {
     assert(!running && !done);
-    assert(count > 0);
+    assert(vl > 0);
     assert(!dataQ.size());
 
     vectorwrapper = &vector_wrapper;
 
-    uint64_t SIZE = DST_SIZE;
-
-    uint64_t vaddr = mem_addr;
-    int32_t vstride = stride;
-
-    // reset vecIndex
     vecIndex = 0;
+    vecFieldIndex = 0;
 
-    auto fin = [on_item_load, SIZE, count, this](
+    auto fin = [on_item_load, elem_width, vl, this](
                        uint64_t i, std::vector<uint64_t> line_offsets) {
-        return [on_item_load, SIZE, count, i, line_offsets, this](
+        return [on_item_load, elem_width, vl, i, line_offsets, this](
                        uint8_t *data, uint8_t size) {
             for (uint64_t j = 0; j < line_offsets.size(); ++j) {
-                bool _done = ((i + j + 1) == count);
-                uint8_t *ndata = new uint8_t[SIZE];
-                memcpy(ndata, data + line_offsets[j], SIZE);
+                bool _done = ((i + j + 1) == vl);
+                uint8_t *ndata = new uint8_t[elem_width];
+                memcpy(ndata, data + line_offsets[j], elem_width);
                 DPRINTF(MemUnitReadTiming,
-                        "calling on_item_load with size %d. 'done'=%d\n", SIZE,
-                        _done);
-                on_item_load(ndata, SIZE, _done);
+                        "calling on_item_load with size %d. 'done'=%d\n",
+                        elem_width, _done);
+                on_item_load(ndata, elem_width, _done);
             }
         };
     };
 
-    readFunction = [location, vaddr, vstride, SIZE, mop, count, on_item_load,
-                           xc, fin, this]() {
+    readFunction = [location, mem_addr, stride, elem_width, mop, vl,
+                           index_width, on_item_load, xc, fin, this]() {
         std::vector<uint64_t> line_offsets;
 
         // scratch and cache could use different line sizes
@@ -151,7 +147,7 @@ MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t count,
 
         if (unit_strided) {
             // we can always read the first item
-            addr = vaddr + SIZE * i;
+            addr = mem_addr + elem_width * i;
             line_addr = addr - (addr % line_size);
             line_offsets.push_back(addr % line_size);
             DPRINTF(MemUnitReadTiming, "line_offsets.push_back %x\n",
@@ -160,9 +156,9 @@ MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t count,
             items_in_line = 1;
 
             // try to read more items in the same cache-line
-            for (uint8_t j = 1; j < (line_size / SIZE) && (i + j) < count;
+            for (uint8_t j = 1; j < (line_size / elem_width) && (i + j) < vl;
                     ++j) {
-                uint64_t next_addr = vaddr + SIZE * (i + j);
+                uint64_t next_addr = mem_addr + elem_width * (i + j);
                 uint64_t next_line_addr = next_addr - (next_addr % line_size);
 
                 if (next_line_addr == line_addr) {
@@ -180,15 +176,15 @@ MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t count,
             // Note: strided instructions use rs2-byte stride
             // so the addr stride should be the product of
             // element index across rs2
-            addr = vaddr + (i * vstride);
+            addr = mem_addr + (i * stride);
             line_addr = addr - (addr % line_size);
             line_offsets.push_back(addr % line_size);
             items_in_line = 1;
 
             // try to read more items in the same cache-line
-            for (uint8_t j = 1; j < (line_size / SIZE) && (i + j) < count;
+            for (uint8_t j = 1; j < (line_size / elem_width) && (i + j) < vl;
                     ++j) {
-                uint64_t next_addr = vaddr + ((i + j) * vstride);
+                uint64_t next_addr = mem_addr + ((i + j) * stride);
                 uint64_t next_line_addr = next_addr - (next_addr % line_size);
 
                 if (next_line_addr == line_addr) {
@@ -206,26 +202,25 @@ MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t count,
                 DPRINTF(MemUnitReadTiming, "try_read dataQ Addrs empty\n");
                 return false;
             }
-            uint8_t INDEX_SIZE = getIndexWidth();
-            uint64_t got = std::min(line_size / SIZE, can_get);
-            uint8_t *buf = new uint8_t[got * INDEX_SIZE];
+            uint64_t got = std::min(line_size / elem_width, can_get);
+            uint8_t *buf = new uint8_t[got * index_width];
             for (uint8_t i = 0; i < got; ++i) {
-                memcpy(buf + INDEX_SIZE * i, this->dataQ[i], INDEX_SIZE);
+                memcpy(buf + index_width * i, this->dataQ[i], index_width);
             }
 
             uint64_t index_addr;
-            if (INDEX_SIZE == 8) {
+            if (index_width == 8) {
                 index_addr = (uint64_t)((uint64_t *)buf)[0];
-            } else if (INDEX_SIZE == 4) {
+            } else if (index_width == 4) {
                 index_addr = (uint64_t)((uint32_t *)buf)[0];
-            } else if (INDEX_SIZE == 2) {
+            } else if (index_width == 2) {
                 index_addr = (uint64_t)((uint16_t *)buf)[0];
-            } else if (INDEX_SIZE == 1) {
+            } else if (index_width == 1) {
                 index_addr = (uint64_t)((uint8_t *)buf)[0];
             } else {
-                panic("invalid mem req INDEX_SIZE");
+                panic("invalid mem req index_width");
             }
-            addr = vaddr + index_addr;
+            addr = mem_addr + index_addr;
             line_addr = addr - (addr % line_size);
             line_offsets.push_back(addr % line_size);
             items_in_line = 1;
@@ -240,20 +235,20 @@ MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t count,
 
             // try to read more items in the same cache-line
             for (uint8_t j = 1; j < got; j++) {
-                if (INDEX_SIZE == 8) {
+                if (index_width == 8) {
                     index_addr = (uint64_t)((uint64_t *)buf)[j];
-                } else if (INDEX_SIZE == 4) {
+                } else if (index_width == 4) {
                     index_addr = (uint64_t)((uint32_t *)buf)[j];
-                } else if (INDEX_SIZE == 2) {
+                } else if (index_width == 2) {
                     index_addr = (uint64_t)((uint16_t *)buf)[j];
-                } else if (INDEX_SIZE == 1) {
+                } else if (index_width == 1) {
                     index_addr = (uint64_t)((uint8_t *)buf)[j];
                 } else {
-                    panic("invalid mem req SIZE");
+                    panic("invalid mem req elem_width");
                     break;
                 }
 
-                uint64_t next_addr = vaddr + index_addr;
+                uint64_t next_addr = mem_addr + index_addr;
                 uint64_t next_line_addr = next_addr - (next_addr % line_size);
 
                 DPRINTF(MemUnitReadTiming, "next_addr  %#x  \n", next_addr);
@@ -296,7 +291,7 @@ MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t count,
                 }
             }
             this->vecIndex += items_in_line;
-            this->done = (this->vecIndex == count);
+            this->done = (this->vecIndex == vl);
             return true;
         }
         return false;
@@ -307,20 +302,6 @@ MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t count,
     } else {
         start();
     }
-}
-
-void
-MemUnitReadTiming::setIndexWidth(uint8_t width)
-{
-    DPRINTF(MemUnitReadTiming, "setIndexWidth %d\n", width);
-    indexWidth = width;
-}
-
-uint8_t
-MemUnitReadTiming::getIndexWidth()
-{
-    DPRINTF(MemUnitReadTiming, "getIndexWidth %d\n", indexWidth);
-    return indexWidth;
 }
 
 } // namespace RiscvISA
