@@ -80,8 +80,8 @@ MemUnitWriteTiming::queueData(uint8_t *data)
 {
     assert(running && !done);
     dataQ.push_back(data);
-    DPRINTF(MemUnitWriteTiming, "writer pushing back %#x upto %d\n", *data,
-            dataQ.size());
+    DPRINTF(MemUnitWriteTiming, "writer pushing back %#x upto %d\n",
+            dataQ.back(), dataQ.size());
 }
 
 void
@@ -170,7 +170,7 @@ MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
     };
 
     writeFunction = [try_write, location, fin, xc, mem_addr, stride,
-                            on_item_store, elem_width, mop, vl,
+                            on_item_store, elem_width, index_width, mop, vl,
                             this](void) -> bool {
         // scratch and cache could use different line sizes
         uint64_t line_size;
@@ -242,16 +242,16 @@ MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
             }
 
             uint64_t index_addr;
-            if (elem_width == 8) {
+            if (index_width == 8) {
                 index_addr = (uint64_t)((uint64_t *)buf)[0];
-            } else if (elem_width == 4) {
+            } else if (index_width == 4) {
                 index_addr = (uint64_t)((uint32_t *)buf)[0];
-            } else if (elem_width == 2) {
+            } else if (index_width == 2) {
                 index_addr = (uint64_t)((uint16_t *)buf)[0];
-            } else if (elem_width == 1) {
+            } else if (index_width == 1) {
                 index_addr = (uint64_t)((uint8_t *)buf)[0];
             } else {
-                panic("invalid mem req elem_width");
+                panic("invalid mem req index_width");
             }
             addr = mem_addr + index_addr;
             line_addr = addr - (addr % line_size);

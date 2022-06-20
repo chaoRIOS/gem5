@@ -228,8 +228,8 @@ VectorMemUnit::issue(VectorEngine &vector_wrapper,
                       0;
 
     memWriter->initialize(vector_wrapper, vl, elem_width, index_width,
-            mem_addr_dest, mop, stride, nfields, emul, is_load ? 1 : 0, xc,
-            [done_callback, this](bool done) {
+            mem_addr_dest, is_load ? 0 : mop, stride, nfields, emul,
+            is_load ? 1 : 0, xc, [done_callback, this](bool done) {
                 if (done) {
                     this->occupied = false;
                     done_callback(NoFault);
@@ -237,7 +237,7 @@ VectorMemUnit::issue(VectorEngine &vector_wrapper,
             });
     if (indexed) {
         memReader_addr->initialize(vector_wrapper, vl, index_width, 0,
-                mem_addr_index, mop, stride, nfields, emul, 1, xc,
+                mem_addr_index, 0, stride, nfields, emul, 1, xc,
                 [is_load, index_width, this](
                         uint8_t *data, uint8_t size, bool done) {
                     uint8_t *ndata = new uint8_t[index_width];
@@ -254,7 +254,8 @@ VectorMemUnit::issue(VectorEngine &vector_wrapper,
     }
 
     memReader->initialize(vector_wrapper, vl, elem_width, index_width,
-            mem_addr_data, mop, stride, nfields, emul, is_load ? 0 : 1, xc,
+            mem_addr_data, is_load ? mop : 0, stride, nfields, emul,
+            is_load ? 0 : 1, xc,
             [is_load, mvl_elem, vl, elem_width, this](
                     uint8_t *data, uint8_t size, bool done) {
                 uint8_t *ndata = new uint8_t[elem_width];
