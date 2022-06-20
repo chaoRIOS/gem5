@@ -74,7 +74,7 @@ class VectorConfig : public SimObject
         return max_vector_length / 8;
     }
 
-    uint64_t get_vtype_lmul(uint64_t vtype);
+    float get_vtype_lmul(uint64_t vtype);
     uint64_t get_vtype_sew(uint64_t vtype);
     uint64_t get_vtype_ediv(uint64_t vtype);
 

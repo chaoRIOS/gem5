@@ -119,6 +119,7 @@ VectorRegister::VectorRegister(const VectorRegisterParams &params) :
     // in this moment 4-byte word is smallest addressable unit
     bytesPerBankAccess = sizeof(uint8_t);
     data = new uint8_t[size];
+    memset(data, 0, sizeof(uint8_t) * size);
 
     for (uint8_t i = 0; i < numPorts; ++i) {
         ports.push_back(new VectorRegisterPort(name() + ".port", *this));
@@ -170,7 +171,8 @@ VectorRegister::handleTimingReq(PacketPtr pkt, VectorRegisterPort *port)
                 "Have been read %u bytes from addr 0x%lx (Physical Reg %d)\n",
                 pkt->getSize(), pkt->getAddr(), phys_reg);
         DPRINTF(VectorRegister, "Reading vec reg %d (%d) as %#x\n", phys_reg,
-                phys_reg, *(uint64_t *)(data + start_addr));
+                phys_reg,
+                *(uint64_t *)(data + start_addr) & mask(pkt->getSize() * 8));
 #endif
     } else {
         numWritess_64bit_elements =
@@ -185,7 +187,8 @@ VectorRegister::handleTimingReq(PacketPtr pkt, VectorRegisterPort *port)
                 "Have been written %u bytes to addr 0x%lx (Physical Reg %d)\n",
                 pkt->getSize(), pkt->getAddr(), phys_reg);
         DPRINTF(VectorRegister, "Setting vec reg %d (%d) to %#x\n", phys_reg,
-                phys_reg, *(uint64_t *)(data + start_addr));
+                phys_reg,
+                *(uint64_t *)(data + start_addr) & mask(pkt->getSize() * 8));
 #endif
     }
 

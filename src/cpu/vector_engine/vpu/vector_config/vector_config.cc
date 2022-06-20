@@ -90,7 +90,7 @@ VectorConfig::handleVectorConfig(RiscvISA::VectorStaticInst* inst,
     uint64_t vtype = 0;
 
     uint64_t sew = 0;
-    uint64_t lmul = 0;
+    float lmul = 0;
     uint64_t vlmax = 0;
 
     uint64_t avl = 0;
@@ -234,7 +234,7 @@ VectorConfig::get_max_vector_length_elem(uint64_t vtype)
 {
     uint32_t mvl_elem = 0;
     uint32_t sew = get_vtype_sew(vtype);
-    uint32_t lmul = get_vtype_lmul(vtype);
+    float lmul = get_vtype_lmul(vtype);
     mvl_elem = lmul * max_vector_length / sew;
     return mvl_elem;
 }
@@ -244,7 +244,7 @@ VectorConfig::get_max_vector_length_bits(uint64_t vtype)
 {
     uint32_t mvl_bits = 0;
     // uint32_t sew  =  get_vtype_sew(vtype);
-    uint32_t lmul = get_vtype_lmul(vtype);
+    float lmul = get_vtype_lmul(vtype);
     mvl_bits = lmul * max_vector_length;
     return mvl_bits;
 }
@@ -257,24 +257,35 @@ VectorConfig::get_mvl_lmul1_bits()
     return mvl_bits;
 }
 
-uint64_t
+float
 VectorConfig::get_vtype_lmul(uint64_t vtype)
 {
     uint8_t vlmul = vt(vtype, 0, 2);
-    uint64_t LMUL;
+    float LMUL;
 
     switch (vlmul) {
     case 0:
-        LMUL = 1;
+        LMUL = 1.0;
         break;
     case 1:
-        LMUL = 2;
+        LMUL = 2.0;
         break;
     case 2:
-        LMUL = 4;
+        LMUL = 4.0;
         break;
     case 3:
-        LMUL = 8;
+        LMUL = 8.0;
+        break;
+    // case 4:
+    // reserved
+    case 5:
+        LMUL = 1 / 8;
+        break;
+    case 6:
+        LMUL = 1 / 4;
+        break;
+    case 7:
+        LMUL = 1 / 2;
         break;
     default:
         panic("LMUL not implemented\n");

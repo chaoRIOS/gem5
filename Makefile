@@ -11,21 +11,21 @@ CPU_PROFILE_DUMP_PATH=perf.pdf~
 
 # load/store
 
-# 'rv64uv-p-vle',
+# 'rv64uv-p-vle', #done
 # 'rv64uv-p-vle8ff',
 # 'rv64uv-p-vle16ff',
 # 'rv64uv-p-vle32ff',
 # 'rv64uv-p-vle64ff',
 # 'rv64uv-p-vlre',
-# 'rv64uv-p-vlse',
+# 'rv64uv-p-vlse', #done
 # 'rv64uv-p-vlseg',
 # 'rv64uv-p-vlsseg',
 # 'rv64uv-p-vlxseg',
 # 'rv64uv-p-vlxei',
 
-# 'rv64uv-p-vse',
+# 'rv64uv-p-vse', #done
 # 'rv64uv-p-vsre',
-# 'rv64uv-p-vsse',
+# 'rv64uv-p-vsse', #done
 # 'rv64uv-p-vsseg',
 # 'rv64uv-p-vssseg',
 # 'rv64uv-p-vsxseg',

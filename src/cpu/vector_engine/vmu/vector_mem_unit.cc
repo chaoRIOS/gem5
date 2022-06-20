@@ -98,9 +98,13 @@ VectorMemUnit::issue(VectorEngine &vector_wrapper,
 
     // Get vector config
 
-    // vsew in bit
-    uint64_t vsew = vectorwrapper->vector_config->get_vtype_sew(vtype);
-    uint64_t emul = vectorwrapper->vector_config->get_vtype_lmul(vtype);
+    // sew in bit
+    uint64_t sew = vectorwrapper->vector_config->get_vtype_sew(vtype);
+    float lmul = vectorwrapper->vector_config->get_vtype_lmul(vtype);
+
+    // eew and emul
+    uint64_t eew = 0;
+    float emul = 0;
 
     // VLEN
     uint64_t vlen = vectorwrapper->vector_config->get_mvl_lmul1_bits();
@@ -116,7 +120,7 @@ VectorMemUnit::issue(VectorEngine &vector_wrapper,
     if (mvl_elem < vl) {
         panic("Vector register group %d * %d = %d bits is insufficient "
               "for vl(%d) * sew(%d)",
-                emul, vlen, mvl_bits, vl, vsew);
+                emul, vlen, mvl_bits, vl, sew);
     }
 
     // Get instruction infomation
@@ -130,8 +134,8 @@ VectorMemUnit::issue(VectorEngine &vector_wrapper,
     bool indexed = indexed_unordered || indexed_ordered;
 
     // extended mop
-    uint8_t lumop = insn.lumop();
-    uint8_t sumop = insn.sumop();
+    // uint8_t lumop = insn.lumop();
+    // uint8_t sumop = insn.sumop();
     // bool whole_register = (mop == 0) && ((lumop == 0x8) || (sumop == 0x8));
 
     // elem_width in byte
@@ -156,29 +160,34 @@ VectorMemUnit::issue(VectorEngine &vector_wrapper,
             index_width = 0;
             break;
         }
-        elem_width = vsew / 8;
-        assert(elem_width != 0);
+        eew = sew / lmul;
     } else {
         switch (insn.func3()) {
         case 0:
-            elem_width = 1;
+            eew = 8;
             break;
         case 5:
-            elem_width = 2;
+            eew = 16;
             break;
         case 6:
-            elem_width = 4;
+            eew = 32;
             break;
         case 7:
-            elem_width = 8;
+            eew = 64;
             break;
         default:
-            elem_width = 0;
+            eew = 0;
             break;
         }
-        assert(elem_width == vsew / 8);
-        assert(elem_width != 0);
     }
+
+    elem_width = eew / 8;
+    assert(elem_width != 0);
+
+    emul = lmul * (float)eew / (float)sew;
+
+    assert(emul <= 8);
+    assert(emul >= 1 / 8);
 
     // stride in byte
     uint64_t stride = (strided) ? src2 : elem_width;
@@ -219,8 +228,8 @@ VectorMemUnit::issue(VectorEngine &vector_wrapper,
                       0;
 
     memWriter->initialize(vector_wrapper, vl, elem_width, index_width,
-            is_load ? mem_addr_dest : mem_addr_data, mop, stride, nfields,
-            emul, is_load ? 1 : 0, xc, [done_callback, this](bool done) {
+            mem_addr_dest, mop, stride, nfields, emul, is_load ? 1 : 0, xc,
+            [done_callback, this](bool done) {
                 if (done) {
                     this->occupied = false;
                     done_callback(NoFault);
@@ -245,8 +254,7 @@ VectorMemUnit::issue(VectorEngine &vector_wrapper,
     }
 
     memReader->initialize(vector_wrapper, vl, elem_width, index_width,
-            is_load ? mem_addr_data : mem_addr_dest, mop, stride, nfields,
-            emul, is_load ? 0 : 1, xc,
+            mem_addr_data, mop, stride, nfields, emul, is_load ? 0 : 1, xc,
             [is_load, mvl_elem, vl, elem_width, this](
                     uint8_t *data, uint8_t size, bool done) {
                 uint8_t *ndata = new uint8_t[elem_width];

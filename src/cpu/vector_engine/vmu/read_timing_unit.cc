@@ -86,7 +86,7 @@ MemUnitReadTiming::queueData(uint8_t *data)
 void
 MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
         uint64_t elem_width, uint8_t index_width, uint64_t mem_addr,
-        uint8_t mop, uint64_t stride, uint8_t nfields, uint8_t emul,
+        uint8_t mop, uint64_t stride, uint8_t nfields, float emul,
         bool location, ExecContextPtr &xc,
         std::function<void(uint8_t *, uint8_t, bool)> on_item_load)
 {
