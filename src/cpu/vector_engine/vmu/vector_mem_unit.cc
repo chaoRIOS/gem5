@@ -134,9 +134,9 @@ VectorMemUnit::issue(VectorEngine &vector_wrapper,
     bool indexed = indexed_unordered || indexed_ordered;
 
     // extended mop
-    // uint8_t lumop = insn.lumop();
-    // uint8_t sumop = insn.sumop();
-    // bool whole_register = (mop == 0) && ((lumop == 0x8) || (sumop == 0x8));
+    uint8_t lumop = insn.lumop();
+    uint8_t sumop = insn.sumop();
+    bool whole_register = (mop == 0) && ((lumop == 0x8) || (sumop == 0x8));
 
     // elem_width in byte
     uint8_t elem_width = 0;
@@ -196,6 +196,14 @@ VectorMemUnit::issue(VectorEngine &vector_wrapper,
     uint8_t nf = insn.nf();
     uint8_t nfields = nf + 1;
 
+    // whole_register instructions
+    uint64_t evl = 0;
+    if (whole_register) {
+        evl = nfields * vlen / eew;
+    } else {
+        evl = vl;
+    }
+
     // logging
     std::stringstream mem_mop;
     if (indexed_ordered) {
@@ -227,7 +235,7 @@ VectorMemUnit::issue(VectorEngine &vector_wrapper,
             indexed ? (uint64_t)dyn_insn->get_renamed_src2() * mvl_bits / 8 :
                       0;
 
-    memWriter->initialize(vector_wrapper, vl, elem_width, index_width,
+    memWriter->initialize(vector_wrapper, evl, elem_width, index_width,
             mem_addr_dest, is_load ? 0 : mop, stride, nfields, emul,
             is_load ? 1 : 0, xc, [done_callback, this](bool done) {
                 if (done) {
@@ -236,7 +244,7 @@ VectorMemUnit::issue(VectorEngine &vector_wrapper,
                 }
             });
     if (indexed) {
-        memReader_addr->initialize(vector_wrapper, vl, index_width, 0,
+        memReader_addr->initialize(vector_wrapper, evl, index_width, 0,
                 mem_addr_index, 0, stride, nfields, emul, 1, xc,
                 [is_load, index_width, this](
                         uint8_t *data, uint8_t size, bool done) {
@@ -253,10 +261,10 @@ VectorMemUnit::issue(VectorEngine &vector_wrapper,
                 });
     }
 
-    memReader->initialize(vector_wrapper, vl, elem_width, index_width,
+    memReader->initialize(vector_wrapper, evl, elem_width, index_width,
             mem_addr_data, is_load ? mop : 0, stride, nfields, emul,
             is_load ? 0 : 1, xc,
-            [is_load, mvl_elem, vl, elem_width, this](
+            [is_load, mvl_elem, evl, elem_width, this](
                     uint8_t *data, uint8_t size, bool done) {
                 uint8_t *ndata = new uint8_t[elem_width];
                 memcpy(ndata, data, elem_width);

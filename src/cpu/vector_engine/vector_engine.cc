@@ -143,13 +143,13 @@ VectorEngine::requestGrant(RiscvISA::VectorStaticInst *insn)
      */
     bool mask_dst = insn->isMaskDst();
 
-    bool enough_physical_regs =
-            ((last_lmul == 1) || mask_dst) ?
-                    vector_rename->frl_elements() >= 1 :
-            (last_lmul == 2) ? vector_rename->frl_elements() >= 2 :
-            (last_lmul == 4) ? vector_rename->frl_elements() >= 4 :
-            (last_lmul == 8) ? vector_rename->frl_elements() >= 8 :
-                               0;
+    bool enough_physical_regs = 1;
+    // ((last_lmul == 1) || mask_dst) ?
+    //         vector_rename->frl_elements() >= 1 :
+    // (last_lmul == 2) ? vector_rename->frl_elements() >= 2 :
+    // (last_lmul == 4) ? vector_rename->frl_elements() >= 4 :
+    // (last_lmul == 8) ? vector_rename->frl_elements() >= 8 :
+    //                    0;
     DPRINTF(VectorInst,
             "rob_entry_available %d, queue_slots_available %d, "
             "enough_physical_regs %d\n",
@@ -412,44 +412,55 @@ VectorEngine::renameVectorInst(
         // TODO: maked memory operations are not implemented
         if (insn.isLoad()) {
             /* Physical  source 2 used to hold the index values */
-            Pvs2 = (indexed) ? vector_rename->get_preg_rat(vs2) : 1024;
+            // Pvs2 = (indexed) ? vector_rename->get_preg_rat(vs2) : 1024;
+            Pvs2 = (indexed) ? vs2 : 1024;
             vector_dyn_insn->set_renamed_src2(Pvs2);
             /* Physical  Mask */
-            PMask = masked_op ? vector_rename->get_preg_rat(0) : 1024;
+            // PMask = masked_op ? vector_rename->get_preg_rat(0) : 1024;
+            PMask = masked_op ? 0 : 1024;
             vector_dyn_insn->set_renamed_mask(PMask);
             /* Physical Destination */
-            PDst = vector_rename->get_frl();
+            // PDst = vector_rename->get_frl();
+            PDst = vd;
             vector_dyn_insn->set_renamed_dst(PDst);
             /* Physical Old Destination */
-            POldDst = vector_rename->get_preg_rat(vd);
+            // POldDst = vector_rename->get_preg_rat(vd);
+            POldDst = vd;
             vector_dyn_insn->set_renamed_old_dst(POldDst);
             /* Setting the New Destination in the RAT structure */
-            vector_rename->set_preg_rat(vd, PDst);
+            // vector_rename->set_preg_rat(vd, PDst);
             /* Setting to 0 the new physical destinatio valid bit*/
             vector_reg_validbit->set_preg_valid_bit(PDst, 0);
         } else if (insn.isStore()) {
             /* Physical  source 2 used to hold the index values */
-            Pvs2 = (indexed) ? vector_rename->get_preg_rat(vs2) : 1024;
+            // Pvs2 = (indexed) ? vector_rename->get_preg_rat(vs2) : 1024;
+            Pvs2 = (indexed) ? vs2 : 1024;
             vector_dyn_insn->set_renamed_src2(Pvs2);
             /* Physical  Mask */
-            PMask = masked_op ? vector_rename->get_preg_rat(0) : 1024;
+            // PMask = masked_op ? vector_rename->get_preg_rat(0) : 1024;
+            PMask = masked_op ? 0 : 1024;
             vector_dyn_insn->set_renamed_mask(PMask);
             /* Physical  source 3 used to hold the data to store in memory */
-            Pvs3 = vector_rename->get_preg_rat(vs3);
+            // Pvs3 = vector_rename->get_preg_rat(vs3);
+            Pvs3 = vs3;
             vector_dyn_insn->set_renamed_src3(Pvs3);
         }
     } else if (insn.isVectorInstArith()) {
         /* Physical  Mask */
-        PMask = masked_op ? vector_rename->get_preg_rat(0) : 1024;
+        // PMask = masked_op ? vector_rename->get_preg_rat(0) : 1024;
+        PMask = masked_op ? 0 : 1024;
         vector_dyn_insn->set_renamed_mask(PMask);
         /* Physical Destination */
-        PDst = (dst_write_ena) ? vector_rename->get_frl() : 1024;
+        // PDst = (dst_write_ena) ? vector_rename->get_frl() : 1024;
+        PDst = (dst_write_ena) ? vd : 1024;
         vector_dyn_insn->set_renamed_dst(PDst);
         /* Physical Old Destination */
-        POldDst = (dst_write_ena) ? vector_rename->get_preg_rat(vd) : 1024;
+        // POldDst = (dst_write_ena) ? vector_rename->get_preg_rat(vd) : 1024;
+        POldDst = (dst_write_ena) ? vd : 1024;
         vector_dyn_insn->set_renamed_old_dst(POldDst);
         /* Physical source 2 */
-        Pvs2 = vector_rename->get_preg_rat(vs2);
+        // Pvs2 = vector_rename->get_preg_rat(vs2);
+        Pvs2 = vs2;
         vector_dyn_insn->set_renamed_src2(Pvs2);
         /* When the instruction use an scalar value as source 1, the physical
          * source 1 is disable When the instruction uses only 1 source
@@ -457,35 +468,39 @@ VectorEngine::renameVectorInst(
          */
         if (!(vx_op || vf_op || vi_op) && !insn.arith1Src()) {
             /* Physical source 1 */
-            Pvs1 = vector_rename->get_preg_rat(vs1);
+            // Pvs1 = vector_rename->get_preg_rat(vs1);
+            Pvs1 = vs1;
             vector_dyn_insn->set_renamed_src1(Pvs1);
         }
         /* dst_write_ena is set when the instruction has a vector destination
          * register */
         if (dst_write_ena) {
             /* Setting the New Destination in the RAT structure */
-            vector_rename->set_preg_rat(vd, PDst);
+            // vector_rename->set_preg_rat(vd, PDst);
             /* Setting to 0 the new physical destinatio valid bit*/
             vector_reg_validbit->set_preg_valid_bit(PDst, 0);
         }
     } else if (insn.isVectorRegisterMove()) {
         /* Physical Destination */
-        PDst = vector_rename->get_frl();
+        // PDst = vector_rename->get_frl();
+        PDst = vd;
         vector_dyn_insn->set_renamed_dst(PDst);
         /* Physical Old Destination */
-        POldDst = vector_rename->get_preg_rat(vd);
+        // POldDst = vector_rename->get_preg_rat(vd);
+        POldDst = vd;
         vector_dyn_insn->set_renamed_old_dst(POldDst);
         /* When the instruction use an scalar value as source 1, the physical
          * source 1 is disable When the instruction uses only 1 source
          * (insn.arith1Src()), the  source 1 is disable
          */
         /* Physical source 2 */
-        Pvs2 = vector_rename->get_preg_rat(vs2);
+        // Pvs2 = vector_rename->get_preg_rat(vs2);
+        Pvs2 = vs2;
         vector_dyn_insn->set_renamed_src1(Pvs2);
         /* dst_write_ena is set when the instruction has a vector destination
          * register */
         /* Setting the New Destination in the RAT structure */
-        vector_rename->set_preg_rat(vd, PDst);
+        // vector_rename->set_preg_rat(vd, PDst);
         /* Setting to 0 the new physical destinatio valid bit*/
         vector_reg_validbit->set_preg_valid_bit(PDst, 0);
 

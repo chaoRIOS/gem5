@@ -108,7 +108,7 @@ ReorderBuffer::evaluate()
         if (rob[head]->valid_old_dst) {
             DPRINTF(ReorderBuffer, "Freeing up old_dst %d \n",
                     rob[head]->old_dst);
-            vectorwrapper->vector_rename->set_frl(rob[head]->old_dst);
+            // vectorwrapper->vector_rename->set_frl(rob[head]->old_dst);
         }
         if (head == ROB_Size - 1) {
             head = 0;

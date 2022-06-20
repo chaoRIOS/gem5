@@ -68,7 +68,7 @@ ps.add_option('--cpu_clk',          type="string", default='2GHz',
                                     help="Speed of all CPUs")
 
 # VECTOR REGISTER OPTIONS
-ps.add_option('--renamed_regs',     type="int", default=40,
+ps.add_option('--renamed_regs',     type="int", default=32,
                                     help="Number of Vector Physical Registers")
 ps.add_option('--VRF_line_size',    type="int", default=8,
                                     help="Vector Register Slice line size in Bytes (per lane)")
