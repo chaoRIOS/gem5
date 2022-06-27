@@ -81,7 +81,7 @@ MemUnitWriteTiming::queueData(uint8_t *data)
     assert(running && !done);
     dataQ.push_back(data);
     DPRINTF(MemUnitWriteTiming, "writer pushing back %#x upto %d\n",
-            dataQ.back(), dataQ.size());
+            *dataQ.back(), dataQ.size());
 }
 
 void
@@ -97,22 +97,25 @@ MemUnitWriteTiming::queueAddrs(uint8_t *data)
 //  NOTE: delete[]s all data from dataQ if written to fn(), so the
 //    exec_context must memcpy the data!
 void
-MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
+MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t _evl,
         uint64_t elem_width, uint8_t index_width, uint64_t mem_addr,
         uint8_t mop, uint64_t stride, uint8_t nfields, float emul,
         bool location, ExecContextPtr &xc,
-        std::function<void(bool)> on_item_store)
+        std::function<void(bool)> on_item_store, bool is_whole_register,
+        bool is_segment, bool is_fault_only_first)
 {
     assert(!running && !done);
-    assert(vl > 0);
+    assert(_evl > 0);
     assert(!dataQ.size());
     assert(!AddrsQ.size());
 
     DPRINTF(MemUnitWriteTiming, "writer initialize with %d %d-byte elems\n",
-            vl, elem_width);
+            _evl, elem_width);
 
     vectorwrapper = &vector_wrapper;
 
+    base_addr = mem_addr;
+    evl = _evl;
     vecIndex = 0;
     vecFieldIndex = 0;
 
@@ -156,10 +159,11 @@ MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
     };
 
     // need 'this' for DPRINTF
-    auto fin = [on_item_store, vl, this](uint64_t i, uint64_t items_ready) {
-        return [on_item_store, vl, i, items_ready, this]() {
+    auto fin = [on_item_store, this](
+                       uint64_t i, uint64_t items_ready, bool cross_line) {
+        return [on_item_store, i, items_ready, cross_line, this]() {
             for (uint64_t j = 0; j < items_ready; ++j) {
-                bool _done = ((i + j + 1) == vl);
+                bool _done = ((i + j + 1) == this->evl) && !cross_line;
                 DPRINTF(MemUnitWriteTiming,
                         "calling on_item_store with"
                         " 'done'=%d\n",
@@ -169,9 +173,8 @@ MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
         };
     };
 
-    writeFunction = [try_write, location, fin, xc, mem_addr, stride,
-                            on_item_store, elem_width, index_width, mop, vl,
-                            this](void) -> bool {
+    writeFunction = [try_write, location, fin, xc, stride, on_item_store,
+                            elem_width, index_width, mop, this](void) -> bool {
         // scratch and cache could use different line sizes
         uint64_t line_size;
         switch ((int)location) {
@@ -199,34 +202,46 @@ MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
         uint64_t i = this->vecIndex;
         uint64_t consec_items;
 
+        bool cross_line = ((this->evl * elem_width) > line_size);
+
+        DPRINTF(MemUnitWriteTiming,
+                "Getting base_addr %#010x, cross_line: %s\n", this->base_addr,
+                cross_line ? "Ture" : "False");
+
         if (unit_strided || strided) // no indexed operation
         {
             // we can always write 1 element
-            addr = mem_addr + (strided ? stride : elem_width) * i;
+            addr = this->base_addr + (strided ? stride : elem_width) * i;
             line_addr = addr - (addr % line_size);
             consec_items = 1;
 
-            DPRINTF(MemUnitWriteTiming,
-                    "enqueue data as %d @ %#x, elem_width = %d, line_size = "
-                    "%d\n",
-                    consec_items, addr, elem_width, line_size);
-
             // now find any consecutive items that we can also write
             for (uint64_t j = 1;
-                    (j < (line_size / elem_width)) && ((i + j) < vl); ++j) {
-                uint64_t next_addr =
-                        mem_addr + (strided ? stride : elem_width) * (i + j);
+                    (j < (line_size / elem_width)) && ((i + j) < this->evl);
+                    ++j) {
+                uint64_t next_addr = this->base_addr +
+                                     (strided ? stride : elem_width) * (i + j);
                 uint64_t next_line_addr = next_addr - (next_addr % line_size);
                 if (stride == elem_width && line_addr == next_line_addr) {
                     ++consec_items;
-                    DPRINTF(MemUnitWriteTiming,
-                            "enqueue data as %d @ %#x, elem_width = %d, "
-                            "line_size = %d\n",
-                            consec_items, addr, elem_width, line_size);
+                    // DPRINTF(MemUnitWriteTiming,
+                    //         "enqueue data as %d @ %#x, elem_width = %d,
+                    //         " "line_size = %d\n", consec_items, addr,
+                    //         elem_width, line_size);
                 } else {
                     break;
                 }
             }
+
+            if (consec_items < this->evl) {
+                cross_line = true;
+            }
+
+            DPRINTF(MemUnitWriteTiming,
+                    "enqueue %d consecutive data @ %#x, elem_width = %d, "
+                    "line_size = "
+                    "%d\n",
+                    consec_items, addr, elem_width, line_size);
         } else if (indexed_ordered) {
             //
         } else if (indexed_unordered) {
@@ -253,7 +268,7 @@ MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
             } else {
                 panic("invalid mem req index_width");
             }
-            addr = mem_addr + index_addr;
+            addr = this->base_addr + index_addr;
             line_addr = addr - (addr % line_size);
             consec_items = 1;
             delete buf;
@@ -264,7 +279,8 @@ MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
                 consec_items, addr);
 
         return try_write(consec_items,
-                [fin, location, xc, addr, elem_width, indexed, vl, i, this](
+                [fin, location, xc, addr, elem_width, indexed, i, cross_line,
+                        line_size, this](
                         uint8_t *data, uint32_t items_ready) -> uint16_t {
                     DPRINTF(MemUnitWriteTiming,
                             "got %d items to write at %#x\n", items_ready,
@@ -274,7 +290,8 @@ MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
                         Cache_line_w_req++;
                         success = vectorwrapper->writeVectorMem(addr, data,
                                 elem_width * items_ready, xc->tcBase(),
-                                this->channel, fin(i, items_ready));
+                                this->channel,
+                                fin(i, items_ready, cross_line));
                     } else {
                         uint32_t size_write = elem_width * items_ready;
                         DPRINTF(MemUnitWriteTiming,
@@ -283,7 +300,7 @@ MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
                                 size_write, addr);
                         success = vectorwrapper->writeVectorReg(addr, data,
                                 size_write, this->channel,
-                                fin(i, items_ready));
+                                fin(i, items_ready, cross_line));
                     }
 
                     if (success) {
@@ -292,9 +309,22 @@ MemUnitWriteTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
                                 this->AddrsQ.pop_front();
                             }
                         }
-                        this->vecIndex += items_ready;
-                        this->done = (this->vecIndex == vl);
-                        return items_ready;
+
+                        if (cross_line) {
+                            this->base_addr = addr + line_size;
+                            this->vecIndex = 0;
+                            this->evl = this->evl - items_ready;
+                            DPRINTF(MemUnitWriteTiming,
+                                    "Cross line, new base_addr %#010x, "
+                                    "new evl %d\n",
+                                    this->base_addr, this->evl);
+                            return items_ready;
+
+                        } else {
+                            this->vecIndex += items_ready;
+                            this->done = (this->vecIndex == this->evl);
+                            return items_ready;
+                        }
                     }
                     return 0;
                 });

@@ -186,9 +186,17 @@ VectorRegister::handleTimingReq(PacketPtr pkt, VectorRegisterPort *port)
         DPRINTF(VectorRegister,
                 "Have been written %u bytes to addr 0x%lx (Physical Reg %d)\n",
                 pkt->getSize(), pkt->getAddr(), phys_reg);
-        DPRINTF(VectorRegister, "Setting vec reg %d (%d) to %#x\n", phys_reg,
-                phys_reg,
-                *(uint64_t *)(data + start_addr) & mask(pkt->getSize() * 8));
+        int size = pkt->getSize();
+
+        do {
+            DPRINTF(VectorRegister, "Setting vec reg %d (%d) to %#x\n",
+                    phys_reg, phys_reg,
+                    *(uint64_t *)(data + start_addr +
+                                  (pkt->getSize() - size)) &
+                            mask(std::min(size, 8) * 8));
+            size -= 8;
+        } while (size > 0);
+
 #endif
     }
 

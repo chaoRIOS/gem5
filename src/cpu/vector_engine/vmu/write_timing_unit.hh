@@ -60,11 +60,13 @@ class MemUnitWriteTiming : public TickedObject
     void queueData(uint8_t *data);
     void queueAddrs(uint8_t *data);
 
-    void initialize(VectorEngine &vector_wrapper, uint64_t vl,
+    void initialize(VectorEngine &vector_wrapper, uint64_t _evl,
             uint64_t elem_width, uint8_t index_width, uint64_t mem_addr,
             uint8_t mop, uint64_t stride, uint8_t nfields, float emul,
             bool location, ExecContextPtr &xc,
-            std::function<void(bool)> on_item_store);
+            std::function<void(bool)> on_item_store,
+            bool is_whole_register = false, bool is_segment = false,
+            bool is_fault_only_first = false);
 
   private:
     // set by params
@@ -79,6 +81,8 @@ class MemUnitWriteTiming : public TickedObject
 
     std::function<bool(void)> writeFunction;
 
+    uint64_t base_addr;
+    uint64_t evl;
     uint64_t vecIndex;
     uint64_t vecFieldIndex;
 

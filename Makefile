@@ -31,7 +31,7 @@ CPU_PROFILE_DUMP_PATH=perf.pdf~
 # 'rv64uv-p-vsxseg',
 # 'rv64uv-p-vsxei', #done
 
-WORKLOAD_PATH=/opt/cputest/rvv-test64/rv64uv-p-vlse
+WORKLOAD_PATH=/opt/cputest/rvv-test64/rv64uv-p-vlre
 # WORKLOAD_PATH=isa/rv64ui-p-add
 # WORKLOAD_PATH=$$HOME/work/talon-rvv/my_rvv.elf
 # WORKLOAD_PATH=$$HOME/work/rvv-intrinsic-doc/examples/profile.out
@@ -45,8 +45,8 @@ perf:
 perf_dump:
 	pprof $(GEM5_RUN_PATH) $(CPU_PROFILE_PATH) --pdf > $(CPU_PROFILE_DUMP_PATH)
 
-scalar_flag=Exec,CpuVectorIssue,Registers#,MinorScoreboard,MinorExecute,Decode,Fetch#,MinorTrace,MinorCPU#,MMU,TLB,TLBVerbose,RiscvMisc
-vector_flag=VecRegs,VectorEngineInfo,VectorEngine,VectorLane,VectorInst,VectorEngineInterface,VectorRename,VectorMemUnit,InstQueue,Datapath,MemUnitReadTiming,MemUnitWriteTiming,InstQueueInst,InstQueueRenInst,VectorRegister
+scalar_flag=Exec,CpuVectorIssue,Registers,PacketQueue#,MinorScoreboard,MinorExecute,Decode,Fetch#,MinorTrace,MinorCPU#,MMU,TLB,TLBVerbose,RiscvMisc
+vector_flag=VecRegs,VectorRegister,VectorEngineInfo,VectorEngine,VectorLane,VectorInst,VectorEngineInterface,VectorRename,VectorMemUnit,InstQueue,Datapath,MemUnitReadTiming,MemUnitWriteTiming,InstQueueInst,InstQueueRenInst,VectorRegister
 
 flag=$(scalar_flag),$(vector_flag)
 debug:

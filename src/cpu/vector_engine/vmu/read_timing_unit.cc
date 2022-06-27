@@ -84,27 +84,30 @@ MemUnitReadTiming::queueData(uint8_t *data)
 }
 
 void
-MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
+MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t _evl,
         uint64_t elem_width, uint8_t index_width, uint64_t mem_addr,
         uint8_t mop, uint64_t stride, uint8_t nfields, float emul,
         bool location, ExecContextPtr &xc,
-        std::function<void(uint8_t *, uint8_t, bool)> on_item_load)
+        std::function<void(uint8_t *, uint8_t, bool)> on_item_load,
+        bool is_whole_register, bool is_segment, bool is_fault_only_first)
 {
     assert(!running && !done);
-    assert(vl > 0);
+    assert(_evl > 0);
     assert(!dataQ.size());
 
     vectorwrapper = &vector_wrapper;
 
+    base_addr = mem_addr;
+    evl = _evl;
     vecIndex = 0;
     vecFieldIndex = 0;
 
-    auto fin = [on_item_load, elem_width, vl, this](
+    auto fin = [on_item_load, elem_width, this](
                        uint64_t i, std::vector<uint64_t> line_offsets) {
-        return [on_item_load, elem_width, vl, i, line_offsets, this](
+        return [on_item_load, elem_width, i, line_offsets, this](
                        uint8_t *data, uint8_t size) {
             for (uint64_t j = 0; j < line_offsets.size(); ++j) {
-                bool _done = ((i + j + 1) == vl);
+                bool _done = ((i + j + 1) == this->evl);
                 uint8_t *ndata = new uint8_t[elem_width];
                 memcpy(ndata, data + line_offsets[j], elem_width);
                 DPRINTF(MemUnitReadTiming,
@@ -115,8 +118,8 @@ MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
         };
     };
 
-    readFunction = [location, mem_addr, stride, elem_width, mop, vl,
-                           index_width, on_item_load, xc, fin, this]() {
+    readFunction = [location, stride, elem_width, mop, index_width,
+                           on_item_load, xc, fin, this]() {
         std::vector<uint64_t> line_offsets;
 
         // scratch and cache could use different line sizes
@@ -133,7 +136,14 @@ MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
             break;
         }
 
+        bool cross_line = ((this->evl * elem_width) > line_size);
+
+        DPRINTF(MemUnitReadTiming,
+                "Getting base_addr %#010x, cross_line: %s\n", this->base_addr,
+                cross_line ? "Ture" : "False");
+
         // Note: VRF reader is also passed with mop=0
+        // Note: whole_register instructions are also unit_strided-like
         bool unit_strided = (mop == 0);
         bool indexed_unordered = (mop == 1);
         bool strided = (mop == 2);
@@ -147,7 +157,7 @@ MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
 
         if (unit_strided) {
             // we can always read the first item
-            addr = mem_addr + elem_width * i;
+            addr = this->base_addr + elem_width * i;
             line_addr = addr - (addr % line_size);
             line_offsets.push_back(addr % line_size);
             DPRINTF(MemUnitReadTiming, "line_offsets.push_back %x\n",
@@ -156,9 +166,9 @@ MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
             items_in_line = 1;
 
             // try to read more items in the same cache-line
-            for (uint8_t j = 1; j < (line_size / elem_width) && (i + j) < vl;
-                    ++j) {
-                uint64_t next_addr = mem_addr + elem_width * (i + j);
+            for (uint8_t j = 1;
+                    j < (line_size / elem_width) && (i + j) < this->evl; ++j) {
+                uint64_t next_addr = this->base_addr + elem_width * (i + j);
                 uint64_t next_line_addr = next_addr - (next_addr % line_size);
 
                 if (next_line_addr == line_addr) {
@@ -170,21 +180,25 @@ MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
                     break;
                 }
             }
+
+            if (items_in_line < this->evl) {
+                cross_line = true;
+            }
         } else if (strided) {
             // we can always read the first item
 
             // Note: strided instructions use rs2-byte stride
             // so the addr stride should be the product of
             // element index across rs2
-            addr = mem_addr + (i * stride);
+            addr = this->base_addr + (i * stride);
             line_addr = addr - (addr % line_size);
             line_offsets.push_back(addr % line_size);
             items_in_line = 1;
 
             // try to read more items in the same cache-line
-            for (uint8_t j = 1; j < (line_size / elem_width) && (i + j) < vl;
-                    ++j) {
-                uint64_t next_addr = mem_addr + ((i + j) * stride);
+            for (uint8_t j = 1;
+                    j < (line_size / elem_width) && (i + j) < this->evl; ++j) {
+                uint64_t next_addr = this->base_addr + ((i + j) * stride);
                 uint64_t next_line_addr = next_addr - (next_addr % line_size);
 
                 if (next_line_addr == line_addr) {
@@ -193,6 +207,10 @@ MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
                 } else {
                     break;
                 }
+            }
+
+            if (items_in_line < this->evl) {
+                cross_line = true;
             }
         } else if (indexed_ordered) {
             //
@@ -220,7 +238,7 @@ MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
             } else {
                 panic("invalid mem req index_width");
             }
-            addr = mem_addr + index_addr;
+            addr = this->base_addr + index_addr;
             line_addr = addr - (addr % line_size);
             line_offsets.push_back(addr % line_size);
             items_in_line = 1;
@@ -248,7 +266,7 @@ MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
                     break;
                 }
 
-                uint64_t next_addr = mem_addr + index_addr;
+                uint64_t next_addr = this->base_addr + index_addr;
                 uint64_t next_line_addr = next_addr - (next_addr % line_size);
 
                 DPRINTF(MemUnitReadTiming, "next_addr  %#x  \n", next_addr);
@@ -266,14 +284,18 @@ MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
                 DPRINTF(MemUnitReadTiming, "items_in_line %d\n",
                         items_in_line);
             }
+
+            if (items_in_line < this->evl) {
+                cross_line = true;
+            }
             delete buf;
         } // end indexed operation
 
         // try to read the line
         DPRINTF(MemUnitReadTiming,
                 "reading line_addr %#x with %d items for "
-                "addr %#x\n",
-                line_addr, items_in_line, addr);
+                "addr %#x, %d elements left\n",
+                line_addr, items_in_line, addr, this->evl - items_in_line);
 
         bool success;
         if (location == 0) { // location = 0 = MEMORY
@@ -290,9 +312,20 @@ MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t vl,
                     this->dataQ.pop_front();
                 }
             }
-            this->vecIndex += items_in_line;
-            this->done = (this->vecIndex == vl);
-            return true;
+            if (cross_line) {
+                this->base_addr = addr + line_size;
+                this->vecIndex = 0;
+                this->evl = this->evl - items_in_line;
+                DPRINTF(MemUnitReadTiming,
+                        "Cross line, new base_addr %#010x, new evl %d\n",
+                        this->base_addr, this->evl);
+                return false;
+
+            } else {
+                this->vecIndex += items_in_line;
+                this->done = (this->vecIndex == this->evl);
+                return true;
+            }
         }
         return false;
     };

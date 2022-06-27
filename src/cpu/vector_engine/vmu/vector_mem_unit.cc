@@ -196,6 +196,15 @@ VectorMemUnit::issue(VectorEngine &vector_wrapper,
     uint8_t nf = insn.nf();
     uint8_t nfields = nf + 1;
 
+    bool segment = (nf) && (!lumop || !sumop);
+
+    // The product EMUL * NFIELDS represents the number of underlying vector
+    // registers that will be touched by a segmented load or store
+    // instruction. This constraint makes this total no larger than 1/4 of the
+    // architectural register le, and the same as for regular operations with
+    // EMUL=8
+    assert(emul * nfields <= 8);
+
     // whole_register instructions
     uint64_t evl = 0;
     if (whole_register) {
@@ -235,14 +244,16 @@ VectorMemUnit::issue(VectorEngine &vector_wrapper,
             indexed ? (uint64_t)dyn_insn->get_renamed_src2() * mvl_bits / 8 :
                       0;
 
-    memWriter->initialize(vector_wrapper, evl, elem_width, index_width,
-            mem_addr_dest, is_load ? 0 : mop, stride, nfields, emul,
-            is_load ? 1 : 0, xc, [done_callback, this](bool done) {
+    memWriter->initialize(
+            vector_wrapper, evl, elem_width, index_width, mem_addr_dest,
+            is_load ? 0 : mop, stride, nfields, emul, is_load ? 1 : 0, xc,
+            [done_callback, dyn_insn, this](bool done) {
                 if (done) {
                     this->occupied = false;
                     done_callback(NoFault);
                 }
-            });
+            },
+            whole_register, segment);
     if (indexed) {
         memReader_addr->initialize(vector_wrapper, evl, index_width, 0,
                 mem_addr_index, 0, stride, nfields, emul, 1, xc,
@@ -261,24 +272,20 @@ VectorMemUnit::issue(VectorEngine &vector_wrapper,
                 });
     }
 
-    memReader->initialize(vector_wrapper, evl, elem_width, index_width,
-            mem_addr_data, is_load ? mop : 0, stride, nfields, emul,
-            is_load ? 0 : 1, xc,
+    memReader->initialize(
+            vector_wrapper, evl, elem_width, index_width, mem_addr_data,
+            is_load ? mop : 0, stride, nfields, emul, is_load ? 0 : 1, xc,
             [is_load, mvl_elem, evl, elem_width, this](
                     uint8_t *data, uint8_t size, bool done) {
                 uint8_t *ndata = new uint8_t[elem_width];
                 memcpy(ndata, data, elem_width);
                 DPRINTF(VectorMemUnit, "queue Data 0x%x \n",
                         *(uint64_t *)ndata & mask(elem_width * 8));
-                if (is_load) {
-                    this->memWriter->queueData(ndata);
-                } else {
-                    this->memWriter->queueData(ndata);
-                }
-                delete[] data;
-
-                // @TODO: Tailing policy
-            });
+                this->memWriter->queueData(ndata);
+                    delete[] data;
+                    // @TODO: Tailing policy
+            },
+            whole_register, segment);
 }
 
 } // namespace RiscvISA
