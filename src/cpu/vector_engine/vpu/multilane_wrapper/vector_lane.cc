@@ -415,18 +415,11 @@ VectorLane::issue(VectorEngine& vector_wrapper,
                 uint8_t* ndata = new uint8_t[DST_SIZE];
                 memcpy(ndata, Ddata + (i * DST_SIZE), DST_SIZE);
                 this->AdataQ.push_back(ndata);
-                if (DATA_SIZE == 8) {
-                    DPRINTF(VectorLane,
-                            "queue Data srcAReader "
-                            "0x%x , queue_size = %d \n",
-                            *(uint64_t*)ndata, this->AdataQ.size());
-                }
-                if (DATA_SIZE == 4) {
-                    DPRINTF(VectorLane,
-                            "queue Data srcAReader "
-                            "0x%x , queue_size = %d \n",
-                            *(uint32_t*)ndata, this->AdataQ.size());
-                }
+
+                DPRINTF(VectorLane,
+                        "queue Data srcAReader 0x%x , queue_size = %d \n",
+                        *(uint64_t*)ndata & mask(DATA_SIZE * 8),
+                        this->AdataQ.size());
             }
             delete[] Ddata;
         } else if (!insn.arith1Src()) {
@@ -439,18 +432,12 @@ VectorLane::issue(VectorEngine& vector_wrapper,
                         uint8_t* ndata = new uint8_t[DATA_SIZE];
                         memcpy(ndata, data, DATA_SIZE);
                         this->AdataQ.push_back(ndata);
-                        if (DATA_SIZE == 8) {
-                            DPRINTF(VectorLane,
-                                    "queue Data srcAReader "
-                                    "0x%x , queue_size = %d \n",
-                                    *(uint64_t*)ndata, this->AdataQ.size());
-                        }
-                        if (DATA_SIZE == 4) {
-                            DPRINTF(VectorLane,
-                                    "queue Data srcAReader "
-                                    "0x%x , queue_size = %d \n",
-                                    *(uint32_t*)ndata, this->AdataQ.size());
-                        }
+
+                        DPRINTF(VectorLane,
+                                "queue Data srcAReader 0x%x , queue_size = %d "
+                                "\n",
+                                *(uint64_t*)ndata & mask(DATA_SIZE * 8),
+                                this->AdataQ.size());
                         ++this->Aread;
                         delete data;
                         assert(!done || (this->Aread == src1_count));
@@ -478,18 +465,12 @@ VectorLane::issue(VectorEngine& vector_wrapper,
                         uint8_t* ndata = new uint8_t[DATA_SIZE_B];
                         memcpy(ndata, data, DATA_SIZE_B);
                         this->BdataQ.push_back(ndata);
-                        if (DATA_SIZE_B == 8) {
-                            DPRINTF(VectorLane,
-                                    "queue Data srcBReader "
-                                    "0x%x , queue_size = %d \n",
-                                    *(uint64_t*)ndata, this->BdataQ.size());
-                        }
-                        if (DATA_SIZE_B == 4) {
-                            DPRINTF(VectorLane,
-                                    "queue Data srcBReader "
-                                    "0x%x , queue_size = %d \n",
-                                    *(uint32_t*)ndata, this->BdataQ.size());
-                        }
+
+                        DPRINTF(VectorLane,
+                                "queue Data srcBReader 0x%x , queue_size = %d "
+                                "\n",
+                                *(uint64_t*)ndata & mask(DATA_SIZE_B * 8),
+                                this->AdataQ.size());
                         ++this->Bread;
                         delete data;
                         assert(!done || (this->Bread == vl_count));
@@ -507,8 +488,10 @@ VectorLane::issue(VectorEngine& vector_wrapper,
                         memcpy(ndata, data, 1);
                         this->MdataQ.push_back(ndata);
                         DPRINTF(VectorLane,
-                                "queue MaskReader 0x%x , queue_size = %d \n",
-                                *(uint8_t*)ndata, this->MdataQ.size());
+                                "queue MaskReader 0x%x , queue_size = %d "
+                                "\n",
+                                *(uint64_t*)ndata & mask(1 * 8),
+                                this->AdataQ.size());
                         ++this->Mread;
                         delete data;
                         assert(!done || (this->Mread == vl_count));
@@ -526,18 +509,13 @@ VectorLane::issue(VectorEngine& vector_wrapper,
                         uint8_t* ndata = new uint8_t[DST_SIZE];
                         memcpy(ndata, data, DST_SIZE);
                         this->DstdataQ.push_back(ndata);
-                        if (DST_SIZE == 8) {
-                            DPRINTF(VectorLane,
-                                    "queue Data dstReader "
-                                    "0x%x , queue_size = %d \n",
-                                    *(uint64_t*)ndata, this->DstdataQ.size());
-                        }
-                        if (DST_SIZE == 4) {
-                            DPRINTF(VectorLane,
-                                    "queue Data dstReader "
-                                    "0x%x , queue_size = %d \n",
-                                    *(uint32_t*)ndata, this->DstdataQ.size());
-                        }
+
+                        DPRINTF(VectorLane,
+                                "queue Data dstReader 0x%x , queue_size = %d "
+                                "\n",
+                                *(uint64_t*)ndata & mask(DST_SIZE * 8),
+                                this->AdataQ.size());
+
                         ++this->Dstread;
                         delete data;
                         assert(!done || (this->Dstread == vl_count));

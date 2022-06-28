@@ -156,6 +156,7 @@ VectorRegister::handleTimingReq(PacketPtr pkt, VectorRegisterPort *port)
     uint64_t phys_reg_size = mvl / 8;
     // Corresponding physical register
     uint64_t phys_reg = pkt->getAddr() / phys_reg_size;
+    uint64_t phys_reg_offset = pkt->getAddr() % phys_reg_size;
 #endif
 
     if (pkt->isRead()) {
@@ -189,8 +190,11 @@ VectorRegister::handleTimingReq(PacketPtr pkt, VectorRegisterPort *port)
         int size = pkt->getSize();
 
         do {
-            DPRINTF(VectorRegister, "Setting vec reg %d (%d) to %#x\n",
+            DPRINTF(VectorRegister, "Setting vec reg %d (%d) [%d:%d] to %#x\n",
                     phys_reg, phys_reg,
+                    std::min(size, 8) + pkt->getSize() - size +
+                            phys_reg_offset,
+                    pkt->getSize() - size + phys_reg_offset,
                     *(uint64_t *)(data + start_addr +
                                   (pkt->getSize() - size)) &
                             mask(std::min(size, 8) * 8));

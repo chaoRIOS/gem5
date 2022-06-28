@@ -31,11 +31,12 @@ CPU_PROFILE_DUMP_PATH=perf.pdf~
 # 'rv64uv-p-vsxseg',
 # 'rv64uv-p-vsxei', #done
 
-WORKLOAD_PATH=/opt/cputest/rvv-test64/rv64uv-p-vlre
+WORKLOAD_PATH=$(HOME)/work/riscv-tests-vector/isa/
+WORKLOAD_NAME=rv64uv-p-vsre
 # WORKLOAD_PATH=isa/rv64ui-p-add
 # WORKLOAD_PATH=$$HOME/work/talon-rvv/my_rvv.elf
 # WORKLOAD_PATH=$$HOME/work/rvv-intrinsic-doc/examples/profile.out
-workload=$(WORKLOAD_PATH)
+workload=$(WORKLOAD_PATH)$(WORKLOAD_NAME)
 run:
 	$(GEM5_RUN_PATH) $(CONFIG_PATH) --cmd=$(workload)
 

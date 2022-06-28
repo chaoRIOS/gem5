@@ -262,6 +262,8 @@ InstQueue::evaluate()
         uint64_t src_ready = 0;
         bool ambiguous_dependency = 0;
 
+        uint8_t nfields = 0;
+
         QueueEntry* Mem_Instruction = Memory_Queue.front();
         uint64_t queue_slot = 0;
         int queue_size = (OoO_queues) ? Memory_Queue.size() : 1;
@@ -274,6 +276,7 @@ InstQueue::evaluate()
             src2 = Mem_Instruction->dyn_insn->get_renamed_src2();
             mop = Mem_Instruction->insn.mop();
             indexed_op = (mop == 1) || (mop == 3);
+            nfields = Mem_Instruction->insn.nf() + 1;
 
             // If the instruction is indexed we stop looking for the next
             // instructions, check dependencies for indexed is too expensive
@@ -297,13 +300,15 @@ InstQueue::evaluate()
 
             /* TODO : bug aqui ... debo evaluar bien los casos de indexed
              * strided y unitstride ahora soportados*/
-            src_ready =
+            src_ready = 1;
+            for (int n = 0; n < nfields; n++){
+                src_ready &=
                     (isStore && !indexed_op) ?
                             vectorwrapper->vector_reg_validbit
-                                    ->get_preg_valid_bit(src3) :
+                                    ->get_preg_valid_bit(src3 + n) :
                     (isStore && indexed_op) ?
                             vectorwrapper->vector_reg_validbit
-                                            ->get_preg_valid_bit(src3) &&
+                                            ->get_preg_valid_bit(src3 + n) &&
                                     vectorwrapper->vector_reg_validbit
                                             ->get_preg_valid_bit(src2) :
                     (isLoad && !indexed_op) ?
@@ -312,6 +317,8 @@ InstQueue::evaluate()
                             vectorwrapper->vector_reg_validbit
                                     ->get_preg_valid_bit(src2) :
                             0;
+            }
+
 
             if (src_ready) {
                 queue_slot = i;

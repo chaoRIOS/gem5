@@ -201,7 +201,7 @@ VectorMemUnit::issue(VectorEngine &vector_wrapper,
     // The product EMUL * NFIELDS represents the number of underlying vector
     // registers that will be touched by a segmented load or store
     // instruction. This constraint makes this total no larger than 1/4 of the
-    // architectural register le, and the same as for regular operations with
+    // architectural register file, and the same as for regular operations with
     // EMUL=8
     assert(emul * nfields <= 8);
 
