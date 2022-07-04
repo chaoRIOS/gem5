@@ -86,7 +86,7 @@ ps.add_option('--rob_size',         type="int", default=64,
 # VECTOR EXECUNIT OPTIONS
 ps.add_option('--vector_clk',       type="string", default='1GHz',
                                     help="Speed of Vector Accelerator")
-ps.add_option('--v_lanes',          type="int", default=1,
+ps.add_option('--v_lanes',          type="int", default=8,
                                     help="Number of Lanes")
 ps.add_option('--max_vl',           type="int", default=128,
                                     help="Maximum Vector Lenght in bits")

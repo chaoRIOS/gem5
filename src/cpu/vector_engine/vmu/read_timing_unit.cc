@@ -139,8 +139,10 @@ MemUnitReadTiming::initialize(VectorEngine &vector_wrapper, uint64_t _evl,
         bool cross_line = ((this->evl * elem_width) > line_size);
 
         DPRINTF(MemUnitReadTiming,
-                "Getting base_addr %#010x, cross_line: %s\n", this->base_addr,
-                cross_line ? "Ture" : "False");
+                "Getting base_addr %#010x, cross_line: %s, evl = %d, "
+                "elem_width = %d, line_size = %d\n",
+                this->base_addr, cross_line ? "Ture" : "False", this->evl,
+                elem_width, line_size);
 
         // Note: VRF reader is also passed with mop=0
         // Note: whole_register instructions are also unit_strided-like
